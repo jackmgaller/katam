@@ -606,7 +606,7 @@ static const u8 gUnk_08386659[] = { 1, 2, 2 };
 
 extern const u8 gUnk_08D62511[];
 
-void sub_08138B44(void) {
+void CreateMainMenu(void) {
     u32 bgCnt[3];
     u16 i;
     struct Task *t;
@@ -656,7 +656,7 @@ void sub_08138B44(void) {
     m4aSongNumStartOrChange(MUS_MENU);
 }
 
-void sub_08138D64(u8 a1) {
+void CreateMainMenuFromSubGame(u8 a1) {
     u8 i;
     u32 bgCnt[3];
     struct Task *t;
@@ -702,7 +702,7 @@ void sub_08138D64(u8 a1) {
     var->unk9CC = MainMenuInitPalette;
 }
 
-void sub_08138F68(void) {
+void CreateMainMenuFromCollectionRoom(void) {
     u8 i;
     u32 bgCnt[3];
     struct Task *t;
@@ -4733,7 +4733,7 @@ static void MainMenuDisplayCurScreenSprites(struct Unk_08138D64 *a1) {
     }
 }
 
-void sub_08141E30(void) {
+void UpdateCurSaveFileCompletion(void) {
     gUnk_0203ACB0[gSaveID > 2 ? 0 : gSaveID] = GetSaveFileCompletion(gSaveID > 2 ? 0 : gSaveID);
 }
 

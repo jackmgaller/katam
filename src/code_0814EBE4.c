@@ -57,7 +57,7 @@ void sub_0814EBE4(void) {
 
 static void sub_0814ECA4(struct Unk_0814EBE4 *a1) {
     m4aMPlayAllStop();
-    sub_08141E30();
+    UpdateCurSaveFileCompletion();
     if (gCurrentPlayerId == gUnk_0203AD24
         && gUnk_0203ACB0[gSaveID > 2 ? 0 : gSaveID] == 100
         && gAIKirbyState < AI_KIRBY_STATE_UNK2) {

@@ -411,5 +411,5 @@ static void sub_0814A7CC(struct TitleStruct* arg0) {
     CpuFill16(RGB_WHITE, gObjPalette, OBJ_PLTT_SIZE);
     gMainFlags |= MAIN_FLAG_BG_PALETTE_SYNC_ENABLE | MAIN_FLAG_OBJ_PALETTE_SYNC_ENABLE;
     TaskDestroy(gCurTask);
-    sub_08138B44();
+    CreateMainMenu();
 }

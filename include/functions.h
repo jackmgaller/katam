@@ -191,8 +191,8 @@ void sub_0811BF24(struct Object2*);
 
 void sub_08123FD4(void);
 
-void sub_08138B44(void);
-void sub_08138D64(u8);
+void CreateMainMenu(void);
+void CreateMainMenuFromSubGame(u8);
 
 void sub_08145B64(u16);
 
