@@ -1038,7 +1038,7 @@ gUnk_08351648:: @ 08351648
     .byte 0, 0
     .2byte 0, 0, 0, 0x02DF, 0
     .4byte 16
-    .4byte sub_0811BA10
+    .4byte VertSlidingDoorSetFunc
     .4byte gUnk_08357C44
 
     @ 0x72 OBJ_BOSS_CHALLENGE_DOOR
