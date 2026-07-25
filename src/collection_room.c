@@ -956,7 +956,7 @@ static void sub_08143DA8(struct Unk_081434F8 *a1) {
     a1->unk38 = sub_0814565C;
 }
 
-static void sub_08143E6C(struct Unk_081434F8 *a1) { // see sub_0813FF6C
+static void sub_08143E6C(struct Unk_081434F8 *a1) { // see LinkErrorStart
     const struct TiledBg_082D7850 *ptr;
     const u16 *tilemap;
     u16 height;
@@ -1896,7 +1896,7 @@ static void sub_0814590C(struct Unk_081434F8 *a1) {
     DmaFill16(3, RGB_WHITE, gObjPalette, sizeof(gObjPalette));
     gMainFlags |= MAIN_FLAG_BG_PALETTE_SYNC_ENABLE | MAIN_FLAG_OBJ_PALETTE_SYNC_ENABLE;
     TaskDestroy(gCurTask);
-    sub_08138F68();
+    CreateMainMenuFromCollectionRoom();
 }
 
 static void sub_08145974(struct Unk_081434F8 *a1) {

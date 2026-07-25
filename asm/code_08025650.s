@@ -971,7 +971,7 @@ sub_08025DC8: @ 0x08025DC8
 	ldr r0, [r0]
 	bl TaskDestroy
 	movs r0, #3
-	bl sub_08138D64
+	bl CreateMainMenuFromSubGame
 	pop {r0}
 	bx r0
 	.align 2, 0
@@ -985,7 +985,7 @@ sub_08025DE4: @ 0x08025DE4
 	ldr r0, [r0]
 	bl TaskDestroy
 	movs r0, #3
-	bl sub_08138D64
+	bl CreateMainMenuFromSubGame
 	pop {r0}
 	bx r0
 	.align 2, 0

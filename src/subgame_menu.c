@@ -636,7 +636,7 @@ static void SubGameMenuLaunch(struct SubGameMenu *r5) {
     gBldRegs.bldY = 0x1F;
     TaskDestroy(gCurTask);
     if (r5->unk148) {
-        sub_08138D64(r4);
+        CreateMainMenuFromSubGame(r4);
     } else {
         switch (r4) {
         case 0:

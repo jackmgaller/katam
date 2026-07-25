@@ -4976,7 +4976,7 @@ static void sub_0812E51C(void) {
             sub_08031CC8();
             sub_081589E8();
         }
-        sub_08138D64(1);
+        CreateMainMenuFromSubGame(1);
     }
 }
 
@@ -8472,7 +8472,7 @@ static void sub_081330AC(void) {
             sub_08031CC8();
             sub_081589E8();
         }
-        sub_08138D64(2);
+        CreateMainMenuFromSubGame(2);
     }
 }
 
@@ -11129,7 +11129,7 @@ static void sub_0813754C(void) {
             sub_08031CC8();
             sub_081589E8();
         }
-        sub_08138D64(0);
+        CreateMainMenuFromSubGame(0);
     }
 }
 
