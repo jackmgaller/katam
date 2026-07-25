@@ -1220,7 +1220,7 @@ gUnk_08351648:: @ 08351648
     .byte 0, 0
     .2byte 0, 0, 0, 0x02E3, 0
     .4byte 25
-    .4byte sub_081224B8
+    .4byte EightDirCannonSetFunc
     .4byte gUnk_08357E84
 
     @ 0x8C OBJ_HUB_MIRROR
