@@ -26,11 +26,11 @@ static void sub_08102414(struct DarkMindForm1 *);
 static void sub_081027C0(struct DarkMindForm1 *);
 static void DarkMindForm1Teleport1(struct DarkMindForm1 *);
 static void DarkMindForm1Teleport2(struct DarkMindForm1 *);
-static void sub_08102D9C(struct DarkMindForm1 *);
+static void DarkMindForm1TeleportArrive(struct DarkMindForm1 *);
 static void sub_08102F3C(struct DarkMindForm1 *);
 static void sub_08102FD0(struct DarkMindForm1 *);
 static void sub_081030A8(struct DarkMindForm1 *);
-static void DarkMindForm1ChooseAttack(struct DarkMindForm1 *);
+static void DarkMindForm1AttackWindup(struct DarkMindForm1 *);
 static void DarkMindForm1StartRandomStars(struct DarkMindForm1 *);
 static void DarkMindForm1RandomStars(struct DarkMindForm1 *);
 static void sub_08103A00(struct DarkMindForm1 *);
@@ -46,8 +46,8 @@ static void sub_08104424(struct DarkMindForm1 *);
 static void sub_081044D0(struct DarkMindForm1 *);
 static void DarkMindForm1StartStarDrop(struct DarkMindForm1 *);
 static void DarkMindForm1StarDrop(struct DarkMindForm1 *);
-static void sub_08104704(struct DarkMindForm1 *);
-static void sub_081047D0(struct DarkMindForm1 *);
+static void DarkMindForm1StartTeleportStar(struct DarkMindForm1 *);
+static void DarkMindForm1TeleportStar(struct DarkMindForm1 *);
 static void sub_081049E8(struct DarkMindForm1 *);
 static void sub_08104AA8(struct DarkMindForm1 *);
 static void sub_08104C80(struct DarkMindForm1 *);
@@ -61,7 +61,7 @@ static void DarkMindCreateMirrors(struct DarkMindForm1 *);
 static void sub_08105CE0(struct Object2 *);
 static void DarkMindSpawnRandomStars(struct DarkMindForm1 *);
 static void DarkMindShootStar(struct DarkMindForm1 *, s16, s16, u8);
-static void sub_081062B4(struct DarkMindForm1 *);
+static void DarkMindDropStar(struct DarkMindForm1 *);
 static void sub_081065B0(struct Object2 *);
 static void DarkMindLaunchStar(struct DarkMindForm1 *, s16, s16);
 static void sub_081068F8(struct DarkMindForm1 *);
@@ -733,7 +733,9 @@ static void sub_081003EC(struct DarkMindForm1 *r5)
 }
 
 
-static void sub_08100538(struct DarkMindForm1 *r4)
+// Picks the next attack with a weighted roll. The odds depend on the subtype,
+// and shift again once the boss drops below half health.
+static void DarkMindForm1ChooseAttack(struct DarkMindForm1 *r4)
 {
     u8 r1;
     s8 r3;
@@ -883,11 +885,11 @@ static void sub_081007A8(struct DarkMindForm1 *r3)
         if (Rand16() & 1)
             sub_08101968(r3);
         else
-            sub_08100538(r3);
+            DarkMindForm1ChooseAttack(r3);
         break;
     case 3:
         if (Rand16() & 7)
-            sub_08100538(r3);
+            DarkMindForm1ChooseAttack(r3);
         else
         {
             r3->unkD5 = 0;
@@ -927,7 +929,7 @@ static void sub_08100858(struct DarkMindForm1 *r3)
                 sub_08101A40(r3);
         }
         else
-            sub_08100538(r3);
+            DarkMindForm1ChooseAttack(r3);
         break;
     case 2:
     case 3:
@@ -945,7 +947,7 @@ static void sub_08100858(struct DarkMindForm1 *r3)
             sub_081030A8(r3);
         }
         else if (r2 < (r0 = r5 + r0))
-            sub_08100538(r3);
+            DarkMindForm1ChooseAttack(r3);
         else if (r2 < ++r0)
         {
             if (r4->unkD5 == 2)
@@ -1013,7 +1015,7 @@ static void sub_081009A4(struct DarkMindForm1 *r4)
             Macro_081009A4(r4);
             break;
         case 3:
-            sub_08100538(r4);
+            DarkMindForm1ChooseAttack(r4);
             break;
         case 4:
             r4->unk0.unk85 = 0;
@@ -1040,7 +1042,7 @@ static void sub_081009A4(struct DarkMindForm1 *r4)
             sub_081030A8(r4);
         }
         else if (rand < ((s32)r3_ + r0))
-            sub_08100538(r4);
+            DarkMindForm1ChooseAttack(r4);
         else
             Macro_081009A4(r4);
         break;
@@ -1048,7 +1050,7 @@ static void sub_081009A4(struct DarkMindForm1 *r4)
         if (Rand16() & 7)
         {
             if (Rand16() & 1)
-                sub_08100538(r4);
+                DarkMindForm1ChooseAttack(r4);
             else
             {
                 r4->unk0.unk85 = 0;
@@ -1099,7 +1101,7 @@ static void sub_08100BD0(struct DarkMindForm1 *r4)
             Macro_081009A4(r4);
             break;
         case 3:
-            sub_08100538(r4);
+            DarkMindForm1ChooseAttack(r4);
             break;
         case 4:
             r4->unk0.unk85 = 0;
@@ -1122,7 +1124,7 @@ static void sub_08100BD0(struct DarkMindForm1 *r4)
         }
         else if (r0 = r6 + r3_, rand < r0)
         {
-            sub_08100538(r4);
+            DarkMindForm1ChooseAttack(r4);
         }
         else if (rand == 7)
         {
@@ -1141,7 +1143,7 @@ static void sub_08100BD0(struct DarkMindForm1 *r4)
         if (RandLessThan3())
         {
             if (RandLessThan3())
-                sub_08100538(r4);
+                DarkMindForm1ChooseAttack(r4);
             else
             {
                 r4->unk0.unk85 = 0;
@@ -1993,7 +1995,7 @@ static void DarkMindForm1Teleport1(struct DarkMindForm1 *r4)
 
     if (r4->unkD5 != 6)
         r4->unkD5 = 1;
-    if (r4->unk0.unk78 == sub_08102D9C)
+    if (r4->unk0.unk78 == DarkMindForm1TeleportArrive)
         r5 = TRUE;
     ObjectSetFunc(r4, 1, sub_08109A00);
     r4->unk0.base.xspeed = 0;
@@ -2024,7 +2026,7 @@ static void DarkMindForm1Teleport2(struct DarkMindForm1 *r6)
 {
     struct DarkMindForm1 *r5 = r6;
 
-    ObjectSetFunc(r6, 2, sub_08102D9C);
+    ObjectSetFunc(r6, 2, DarkMindForm1TeleportArrive);
     r6->unk0.base.flags |= 0x40;
     r6->unk0.base.flags |= 0x100;
     r6->unk0.base.flags &= ~2;
@@ -2114,7 +2116,7 @@ static void DarkMindForm1Teleport2(struct DarkMindForm1 *r6)
     }
 }
 
-static void sub_08102D9C(struct DarkMindForm1 *r4)
+static void DarkMindForm1TeleportArrive(struct DarkMindForm1 *r4)
 {
     struct DarkMindForm1 *r6 = r4;
 
@@ -2127,7 +2129,7 @@ static void sub_08102D9C(struct DarkMindForm1 *r4)
             {
                 if (r4->unkDA == 11)
                 {
-                    sub_081062B4(r4);
+                    DarkMindDropStar(r4);
                     switch (r4->unkD4)
                     {
                     case 4:
@@ -2150,7 +2152,7 @@ static void sub_08102D9C(struct DarkMindForm1 *r4)
                 }
                 else if (r4->unkDA == 10)
                 {
-                    sub_081062B4(r4);
+                    DarkMindDropStar(r4);
                     switch (r4->unkD4)
                     {
                     case 2:
@@ -2312,7 +2314,7 @@ static void DarkMindForm1Attack(struct DarkMindForm1 *r4)
 {
     struct DarkMindForm1 *r6 = r4;
 
-    ObjectSetFunc(r4, 7, DarkMindForm1ChooseAttack);
+    ObjectSetFunc(r4, 7, DarkMindForm1AttackWindup);
     r4->unk0.base.xspeed = 0;
     r4->unk0.base.yspeed = 0;
     r4->unk0.base.flags |= 0x40;
@@ -2339,7 +2341,7 @@ static void DarkMindForm1Attack(struct DarkMindForm1 *r4)
     }
 }
 
-static void DarkMindForm1ChooseAttack(struct DarkMindForm1 *r4)
+static void DarkMindForm1AttackWindup(struct DarkMindForm1 *r4)
 {
     if (r4->unk0.base.unk1 == 15)
     {
@@ -2386,7 +2388,7 @@ static void DarkMindForm1ChooseAttack(struct DarkMindForm1 *r4)
                 DarkMindForm1StartStarDrop(r4);
                 break;
             case 10: case 11:
-                sub_08104704(r4);
+                DarkMindForm1StartTeleportStar(r4);
                 break;
             }
             break;
@@ -3005,10 +3007,10 @@ static void DarkMindForm1StarDrop(struct DarkMindForm1 *r5)
     }
 }
 
-static void sub_08104704(struct DarkMindForm1 *r5)
+static void DarkMindForm1StartTeleportStar(struct DarkMindForm1 *r5)
 {
     r5->unkD5 = 5;
-    ObjectSetFunc(r5, 8, sub_081047D0);
+    ObjectSetFunc(r5, 8, DarkMindForm1TeleportStar);
     r5->unk0.base.xspeed = 0;
     r5->unk0.base.yspeed = 0;
     r5->unk0.base.flags |= 0x40;
@@ -3019,7 +3021,10 @@ static void sub_08104704(struct DarkMindForm1 *r5)
     PlaySfx(&r5->unk0.base, SE_DARK_MIND_SHOOT_STAR);
 }
 
-static void sub_081047D0(struct DarkMindForm1 *r4)
+// Attacks 10 and 11. The star is dropped by DarkMindForm1TeleportArrive as the
+// boss warps between preset spots in the arena, so all this does is hold still
+// for a moment afterwards.
+static void DarkMindForm1TeleportStar(struct DarkMindForm1 *r4)
 {
     r4->unk0.base.flags |= 4;
     switch (r4->unk0.unk9E)
@@ -3112,7 +3117,7 @@ static void sub_081049E8(struct DarkMindForm1 *r5)
     if (abs(r5->unk0.base.x - r5->unk0.kirby3->base.base.base.x) > 0x3000
         && abs(r5->unk0.base.y - r5->unk0.kirby3->base.base.base.y) < 0x4000)
         r5->unk0.unk83 = 9;
-    sub_081062B4(r5);
+    DarkMindDropStar(r5);
 }
 
 static void sub_08104AA8(struct DarkMindForm1 *r4)
@@ -3878,7 +3883,7 @@ static void DarkMindShootStar(struct DarkMindForm1 *r7, s16 sl, s16 r6, u8 sp00)
     if (sp00 == 2) r4->unk0.unk85 = 1;
 }
 
-static void sub_081062B4(struct DarkMindForm1 *r2)
+static void DarkMindDropStar(struct DarkMindForm1 *r2)
 {
     u32 r3;
     struct DarkMindForm1 *r7 = r2;
