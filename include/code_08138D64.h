@@ -6,7 +6,7 @@
 #include "code_0802E57C.h"
 #include "multi_08030C94.h"
 
-struct Unk_08138D64 {
+struct MainMenu {
     u8 unk0;
     u8 unk1;
     u8 unk2;
@@ -66,12 +66,12 @@ struct Unk_08138D64 {
     u8 unk9C8[2];
     u8 unk9CA;
     u8 unk9CB;
-    void (*unk9CC)(struct Unk_08138D64 *);
-    void (*unk9D0)(struct Unk_08138D64 *);
+    void (*unk9CC)(struct MainMenu *);
+    void (*unk9D0)(struct MainMenu *);
     u32 unk9D4;
     s16 unk9D8;
     u16 unk9DA[0x100];
-    void (*unkBDC)(struct Unk_08138D64 *);
+    void (*unkBDC)(struct MainMenu *);
     s16 unkBE0;
     u8 unkBE2;
     u8 unkBE3;

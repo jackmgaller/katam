@@ -15,7 +15,7 @@
 #include "constants/languages.h"
 #include "treasures.h"
 
-struct Unk_08385CD4 {
+struct MenuSpriteAnim {
     u16 animId;
     u16 variant;
     u16 numTiles;
@@ -23,168 +23,168 @@ struct Unk_08385CD4 {
 
 static s8 GetSaveFileCompletion(u8);
 static void MainMenuOnDestroy(struct Task *);
-static void FileSelectFreeSprites(struct Unk_08138D64 *);
-static void MainMenuFreeSprites(struct Unk_08138D64 *);
-static void EraseFileFreeSprites(struct Unk_08138D64 *);
-static void LinkConnectFreeSprites(struct Unk_08138D64 *);
-static void LinkFileSelectFreeSprites(struct Unk_08138D64 *);
-static void SubGameSelectFreeSprites(struct Unk_08138D64 *);
-static bool32 GetCompletionBarAnim(struct Unk_08385CD4 *, s8);
-static bool32 LinkConnectDisplayJoinPopups(struct Unk_08138D64 *, u8);
-static void MainMenuAmbienceHold1(struct Unk_08138D64 *);
-static void MainMenuAmbienceFadeTo2(struct Unk_08138D64 *);
-static void MainMenuAmbienceHold2(struct Unk_08138D64 *);
-static void MainMenuAmbienceFadeTo1(struct Unk_08138D64 *);
-static void MainMenuStepAmbiencePalette(struct Unk_08138D64 *);
-static void MainMenuInitBgLayers(struct Unk_08138D64 *);
-static void FileSelectStart(struct Unk_08138D64 *);
-static void FileSelectSlideInBanner(struct Unk_08138D64 *);
-static void FileSelectEndSlideInBanner(struct Unk_08138D64 *);
-static void FileSelectSlideInFiles(struct Unk_08138D64 *);
-static void FileSelectEndSlideInFiles(struct Unk_08138D64 *);
-static void FileSelectSpreadFiles(struct Unk_08138D64 *);
-static void MainMenuStart(struct Unk_08138D64 *);
-static void MainMenuStartFromLinkConnect(struct Unk_08138D64 *);
-static void MainMenuFadeInFromLinkConnect(struct Unk_08138D64 *);
-static void MainMenuStartFromCollectionRoom(struct Unk_08138D64 *);
-static void MainMenuFadeInFromCollectionRoom(struct Unk_08138D64 *);
-static void MainMenuEndFadeInFromCollectionRoom(struct Unk_08138D64 *);
-static void MainMenuWaitInput(struct Unk_08138D64 *);
-static void MainMenuOpenPlayerCountMenu(struct Unk_08138D64 *);
-static void MainMenuPlayerCountWaitInput(struct Unk_08138D64 *);
-static void MainMenuClosePlayerCountMenu(struct Unk_08138D64 *);
-static void MainMenuStartFadeOutToCollectionRoom(struct Unk_08138D64 *);
-static void MainMenuFadeOutToCollectionRoom(struct Unk_08138D64 *);
-static void EraseFileStart(struct Unk_08138D64 *);
-static void EraseFileSlideInFile(struct Unk_08138D64 *);
-static void EraseFileAsk(struct Unk_08138D64 *);
-static void EraseFileAskAgain(struct Unk_08138D64 *);
-static void EraseFileWaitInput(struct Unk_08138D64 *);
-static void EraseFileStartShred(struct Unk_08138D64 *);
-static void EraseFileShred(struct Unk_08138D64 *);
-static void EraseFileEndShred(struct Unk_08138D64 *);
-static void LinkConnectFadeIn(struct Unk_08138D64 *);
-static void LinkConnectEndFadeIn(struct Unk_08138D64 *);
-static void LinkConnectStartWait1Player(struct Unk_08138D64 *);
-static void LinkConnectWait1Player(struct Unk_08138D64 *);
-static void LinkConnectStartGrowTo2Players(struct Unk_08138D64 *);
-static void LinkConnectGrowTo2Players(struct Unk_08138D64 *);
-static void LinkConnectWait2Players(struct Unk_08138D64 *);
-static void LinkConnectStartShrinkTo1Player(struct Unk_08138D64 *);
-static void LinkConnectShrinkTo1Player(struct Unk_08138D64 *);
-static void LinkConnectStartGrowTo3Players(struct Unk_08138D64 *);
-static void LinkConnectGrowTo3Players(struct Unk_08138D64 *);
-static void LinkConnectWait3Players(struct Unk_08138D64 *);
-static void LinkConnectStartShrinkTo2Players(struct Unk_08138D64 *);
-static void LinkConnectShrinkTo2Players(struct Unk_08138D64 *);
-static void LinkConnectStartGrowTo4Players(struct Unk_08138D64 *);
-static void LinkConnectGrowTo4Players(struct Unk_08138D64 *);
-static void LinkConnectWait4Players(struct Unk_08138D64 *);
-static void LinkConnectStartShrinkTo3Players(struct Unk_08138D64 *);
-static void LinkConnectShrinkTo3Players(struct Unk_08138D64 *);
-static void LinkErrorStart(struct Unk_08138D64 *);
-static void LinkConnectStartFadeOut(struct Unk_08138D64 *);
-static void LinkConnectFadeOut(struct Unk_08138D64 *);
-static void SubGameSelectStart(struct Unk_08138D64 *);
-static void SubGameSelectReopen(struct Unk_08138D64 *);
-static void SubGameSelectFadeIn(struct Unk_08138D64 *);
-static void SubGameSelectEndFadeIn(struct Unk_08138D64 *);
-static void SubGameSelectWaitInput(struct Unk_08138D64 *);
-static void SubGameSelectOpenPlayerCountMenu(struct Unk_08138D64 *);
-static void SubGameSelectPlayerCountWaitInput(struct Unk_08138D64 *);
-static void SubGameSelectClosePlayerCountMenu(struct Unk_08138D64 *);
+static void FileSelectFreeSprites(struct MainMenu *);
+static void MainMenuFreeSprites(struct MainMenu *);
+static void EraseFileFreeSprites(struct MainMenu *);
+static void LinkConnectFreeSprites(struct MainMenu *);
+static void LinkFileSelectFreeSprites(struct MainMenu *);
+static void SubGameSelectFreeSprites(struct MainMenu *);
+static bool32 GetCompletionBarAnim(struct MenuSpriteAnim *, s8);
+static bool32 LinkConnectDisplayJoinPopups(struct MainMenu *, u8);
+static void MainMenuAmbienceHold1(struct MainMenu *);
+static void MainMenuAmbienceFadeTo2(struct MainMenu *);
+static void MainMenuAmbienceHold2(struct MainMenu *);
+static void MainMenuAmbienceFadeTo1(struct MainMenu *);
+static void MainMenuStepAmbiencePalette(struct MainMenu *);
+static void MainMenuInitBgLayers(struct MainMenu *);
+static void FileSelectStart(struct MainMenu *);
+static void FileSelectSlideInBanner(struct MainMenu *);
+static void FileSelectEndSlideInBanner(struct MainMenu *);
+static void FileSelectSlideInFiles(struct MainMenu *);
+static void FileSelectEndSlideInFiles(struct MainMenu *);
+static void FileSelectSpreadFiles(struct MainMenu *);
+static void MainMenuStart(struct MainMenu *);
+static void MainMenuStartFromLinkConnect(struct MainMenu *);
+static void MainMenuFadeInFromLinkConnect(struct MainMenu *);
+static void MainMenuStartFromCollectionRoom(struct MainMenu *);
+static void MainMenuFadeInFromCollectionRoom(struct MainMenu *);
+static void MainMenuEndFadeInFromCollectionRoom(struct MainMenu *);
+static void MainMenuWaitInput(struct MainMenu *);
+static void MainMenuOpenPlayerCountMenu(struct MainMenu *);
+static void MainMenuPlayerCountWaitInput(struct MainMenu *);
+static void MainMenuClosePlayerCountMenu(struct MainMenu *);
+static void MainMenuStartFadeOutToCollectionRoom(struct MainMenu *);
+static void MainMenuFadeOutToCollectionRoom(struct MainMenu *);
+static void EraseFileStart(struct MainMenu *);
+static void EraseFileSlideInFile(struct MainMenu *);
+static void EraseFileAsk(struct MainMenu *);
+static void EraseFileAskAgain(struct MainMenu *);
+static void EraseFileWaitInput(struct MainMenu *);
+static void EraseFileStartShred(struct MainMenu *);
+static void EraseFileShred(struct MainMenu *);
+static void EraseFileEndShred(struct MainMenu *);
+static void LinkConnectFadeIn(struct MainMenu *);
+static void LinkConnectEndFadeIn(struct MainMenu *);
+static void LinkConnectStartWait1Player(struct MainMenu *);
+static void LinkConnectWait1Player(struct MainMenu *);
+static void LinkConnectStartGrowTo2Players(struct MainMenu *);
+static void LinkConnectGrowTo2Players(struct MainMenu *);
+static void LinkConnectWait2Players(struct MainMenu *);
+static void LinkConnectStartShrinkTo1Player(struct MainMenu *);
+static void LinkConnectShrinkTo1Player(struct MainMenu *);
+static void LinkConnectStartGrowTo3Players(struct MainMenu *);
+static void LinkConnectGrowTo3Players(struct MainMenu *);
+static void LinkConnectWait3Players(struct MainMenu *);
+static void LinkConnectStartShrinkTo2Players(struct MainMenu *);
+static void LinkConnectShrinkTo2Players(struct MainMenu *);
+static void LinkConnectStartGrowTo4Players(struct MainMenu *);
+static void LinkConnectGrowTo4Players(struct MainMenu *);
+static void LinkConnectWait4Players(struct MainMenu *);
+static void LinkConnectStartShrinkTo3Players(struct MainMenu *);
+static void LinkConnectShrinkTo3Players(struct MainMenu *);
+static void LinkErrorStart(struct MainMenu *);
+static void LinkConnectStartFadeOut(struct MainMenu *);
+static void LinkConnectFadeOut(struct MainMenu *);
+static void SubGameSelectStart(struct MainMenu *);
+static void SubGameSelectReopen(struct MainMenu *);
+static void SubGameSelectFadeIn(struct MainMenu *);
+static void SubGameSelectEndFadeIn(struct MainMenu *);
+static void SubGameSelectWaitInput(struct MainMenu *);
+static void SubGameSelectOpenPlayerCountMenu(struct MainMenu *);
+static void SubGameSelectPlayerCountWaitInput(struct MainMenu *);
+static void SubGameSelectClosePlayerCountMenu(struct MainMenu *);
 static void MainMenuMain(void);
-static void MainMenuInitPalette(struct Unk_08138D64 *);
-static void MainMenuInitBgTileset(struct Unk_08138D64 *);
-static void MainMenuInitHeaderSprites(struct Unk_08138D64 *);
-static void FileSelectStartWaitInput(struct Unk_08138D64 *);
-static void FileSelectStartSlideOut(struct Unk_08138D64 *);
-static void FileSelectStartFadeOut(struct Unk_08138D64 *);
-static void FileSelectStopMusic(struct Unk_08138D64 *);
-static void FileSelectWaitMusicStop(struct Unk_08138D64 *);
-static void FileSelectDestroyAnim(struct Unk_08138D64 *);
-static void FileSelectWaitToTitle1(struct Unk_08138D64 *);
-static void FileSelectWaitToTitle2(struct Unk_08138D64 *);
-static void FileSelectReturnToTitle(struct Unk_08138D64 *);
-static void MainMenuWaitStart(struct Unk_08138D64 *);
-static void MainMenuStartSlideInBanner(struct Unk_08138D64 *);
-static void MainMenuStartSlideInItems(struct Unk_08138D64 *);
-static void MainMenuStartSpreadItems(struct Unk_08138D64 *);
-static void MainMenuEndFadeInFromLinkConnect(struct Unk_08138D64 *);
-static void MainMenuStartMainGame(struct Unk_08138D64 *);
-static void MainMenuMainGameFreeMenuGfx(struct Unk_08138D64 *);
-static void MainMenuMainGameWaitFree(struct Unk_08138D64 *);
-static void MainMenuMainGameStartAnim(struct Unk_08138D64 *);
-static void MainMenuMainGameWaitAnim(struct Unk_08138D64 *);
-static void MainMenuMainGameStartFadeOut(struct Unk_08138D64 *);
-static void MainMenuMainGameFadeOut(struct Unk_08138D64 *);
-static void MainMenuMainGameWaitMusicStop(struct Unk_08138D64 *);
-static void MainMenuMainGameDestroyAnim(struct Unk_08138D64 *);
-static void MainMenuMainGameWait(struct Unk_08138D64 *);
-static void MainMenuMainGameStopMusic(struct Unk_08138D64 *);
-static void MainMenuLaunchMainGame(struct Unk_08138D64 *);
-static void MainMenuStartFadeOutToLinkConnect(struct Unk_08138D64 *);
-static void MainMenuEndFadeOutToLinkConnect(struct Unk_08138D64 *);
-static void MainMenuStartSlideOut(struct Unk_08138D64 *);
-static void MainMenuEndSlideOut(struct Unk_08138D64 *);
-static void MainMenuWaitAfterSlideOut(struct Unk_08138D64 *);
-static void MainMenuCollectionRoomDestroyAnim(struct Unk_08138D64 *);
-static void MainMenuCollectionRoomWait1(struct Unk_08138D64 *);
-static void MainMenuCollectionRoomWait2(struct Unk_08138D64 *);
-static void MainMenuEnterCollectionRoom(struct Unk_08138D64 *);
-static void EraseFileStartSlideInBanner(struct Unk_08138D64 *);
-static void EraseFileSlideInBanner(struct Unk_08138D64 *);
-static void EraseFileClearSave(struct Unk_08138D64 *);
-static void EraseFileWaitAfterErase(struct Unk_08138D64 *);
-static void EraseFileStartSlideOut(struct Unk_08138D64 *);
-static void EraseFileEnd(struct Unk_08138D64 *);
-static void LinkConnectWaitStart(struct Unk_08138D64 *);
-static void LinkConnectInitSprites(struct Unk_08138D64 *);
-static void LinkErrorWaitInput(struct Unk_08138D64 *);
-static void LinkErrorStartFadeOut(struct Unk_08138D64 *);
-static void LinkErrorFadeOut(struct Unk_08138D64 *);
-static void LinkConnectDestroyAnim(struct Unk_08138D64 *);
-static void LinkConnectFadeOutWait1(struct Unk_08138D64 *);
-static void LinkConnectFadeOutWait2(struct Unk_08138D64 *);
-static void LinkFileSelectStartWait(struct Unk_08138D64 *);
-static void LinkFileSelectWait(struct Unk_08138D64 *);
-static void LinkFileSelectStartSlideIn(struct Unk_08138D64 *);
-static void LinkFileSelectEndSlideIn(struct Unk_08138D64 *);
-static void LinkFileSelectStartSlideOut(struct Unk_08138D64 *);
-static void LinkFileSelectFreeGfx(struct Unk_08138D64 *);
-static void LinkFileSelectWaitFree(struct Unk_08138D64 *);
-static void LinkFileSelectWaitGameStart(struct Unk_08138D64 *);
-static void LinkFileSelectStartFadeOut(struct Unk_08138D64 *);
-static void LinkFileSelectFadeOut(struct Unk_08138D64 *);
-static void LinkFileSelectWaitFadeOut(struct Unk_08138D64 *);
-static void LinkFileSelectDestroyAnim(struct Unk_08138D64 *);
-static void LinkFileSelectWait1(struct Unk_08138D64 *);
-static void LinkFileSelectWait2(struct Unk_08138D64 *);
-static void LinkFileSelectLaunchGame(struct Unk_08138D64 *);
-static void SubGameSelectWaitStart(struct Unk_08138D64 *);
-static void SubGameSelectStartSlideInBanner(struct Unk_08138D64 *);
-static void SubGameSelectStartSlideInItems(struct Unk_08138D64 *);
-static void SubGameSelectStartSpreadItems(struct Unk_08138D64 *);
-static void SubGameSelectStartSlideOut(struct Unk_08138D64 *);
-static void SubGameSelectEnd(struct Unk_08138D64 *);
-static void SubGameSelectStartFadeOut(struct Unk_08138D64 *);
-static void SubGameSelectDestroyAnim(struct Unk_08138D64 *);
-static void SubGameSelectFadeOutWait1(struct Unk_08138D64 *);
-static void SubGameSelectFadeOutWait2(struct Unk_08138D64 *);
-static void MainMenuStartIdleTimeout(struct Unk_08138D64 *);
-static void MainMenuIdleTimeoutFadeOut(struct Unk_08138D64 *);
-static void MainMenuIdleTimeoutStopMusic(struct Unk_08138D64 *);
-static void MainMenuIdleTimeoutWaitMusicStop(struct Unk_08138D64 *);
-static void MainMenuIdleTimeoutDestroyAnim(struct Unk_08138D64 *);
-static void MainMenuIdleTimeoutWait1(struct Unk_08138D64 *);
-static void MainMenuIdleTimeoutWait2(struct Unk_08138D64 *);
-static void MainMenuIdleTimeoutReturnToTitle(struct Unk_08138D64 *);
+static void MainMenuInitPalette(struct MainMenu *);
+static void MainMenuInitBgTileset(struct MainMenu *);
+static void MainMenuInitHeaderSprites(struct MainMenu *);
+static void FileSelectStartWaitInput(struct MainMenu *);
+static void FileSelectStartSlideOut(struct MainMenu *);
+static void FileSelectStartFadeOut(struct MainMenu *);
+static void FileSelectStopMusic(struct MainMenu *);
+static void FileSelectWaitMusicStop(struct MainMenu *);
+static void FileSelectDestroyAnim(struct MainMenu *);
+static void FileSelectWaitToTitle1(struct MainMenu *);
+static void FileSelectWaitToTitle2(struct MainMenu *);
+static void FileSelectReturnToTitle(struct MainMenu *);
+static void MainMenuWaitStart(struct MainMenu *);
+static void MainMenuStartSlideInBanner(struct MainMenu *);
+static void MainMenuStartSlideInItems(struct MainMenu *);
+static void MainMenuStartSpreadItems(struct MainMenu *);
+static void MainMenuEndFadeInFromLinkConnect(struct MainMenu *);
+static void MainMenuStartMainGame(struct MainMenu *);
+static void MainMenuMainGameFreeMenuGfx(struct MainMenu *);
+static void MainMenuMainGameWaitFree(struct MainMenu *);
+static void MainMenuMainGameStartAnim(struct MainMenu *);
+static void MainMenuMainGameWaitAnim(struct MainMenu *);
+static void MainMenuMainGameStartFadeOut(struct MainMenu *);
+static void MainMenuMainGameFadeOut(struct MainMenu *);
+static void MainMenuMainGameWaitMusicStop(struct MainMenu *);
+static void MainMenuMainGameDestroyAnim(struct MainMenu *);
+static void MainMenuMainGameWait(struct MainMenu *);
+static void MainMenuMainGameStopMusic(struct MainMenu *);
+static void MainMenuLaunchMainGame(struct MainMenu *);
+static void MainMenuStartFadeOutToLinkConnect(struct MainMenu *);
+static void MainMenuEndFadeOutToLinkConnect(struct MainMenu *);
+static void MainMenuStartSlideOut(struct MainMenu *);
+static void MainMenuEndSlideOut(struct MainMenu *);
+static void MainMenuWaitAfterSlideOut(struct MainMenu *);
+static void MainMenuCollectionRoomDestroyAnim(struct MainMenu *);
+static void MainMenuCollectionRoomWait1(struct MainMenu *);
+static void MainMenuCollectionRoomWait2(struct MainMenu *);
+static void MainMenuEnterCollectionRoom(struct MainMenu *);
+static void EraseFileStartSlideInBanner(struct MainMenu *);
+static void EraseFileSlideInBanner(struct MainMenu *);
+static void EraseFileClearSave(struct MainMenu *);
+static void EraseFileWaitAfterErase(struct MainMenu *);
+static void EraseFileStartSlideOut(struct MainMenu *);
+static void EraseFileEnd(struct MainMenu *);
+static void LinkConnectWaitStart(struct MainMenu *);
+static void LinkConnectInitSprites(struct MainMenu *);
+static void LinkErrorWaitInput(struct MainMenu *);
+static void LinkErrorStartFadeOut(struct MainMenu *);
+static void LinkErrorFadeOut(struct MainMenu *);
+static void LinkConnectDestroyAnim(struct MainMenu *);
+static void LinkConnectFadeOutWait1(struct MainMenu *);
+static void LinkConnectFadeOutWait2(struct MainMenu *);
+static void LinkFileSelectStartWait(struct MainMenu *);
+static void LinkFileSelectWait(struct MainMenu *);
+static void LinkFileSelectStartSlideIn(struct MainMenu *);
+static void LinkFileSelectEndSlideIn(struct MainMenu *);
+static void LinkFileSelectStartSlideOut(struct MainMenu *);
+static void LinkFileSelectFreeGfx(struct MainMenu *);
+static void LinkFileSelectWaitFree(struct MainMenu *);
+static void LinkFileSelectWaitGameStart(struct MainMenu *);
+static void LinkFileSelectStartFadeOut(struct MainMenu *);
+static void LinkFileSelectFadeOut(struct MainMenu *);
+static void LinkFileSelectWaitFadeOut(struct MainMenu *);
+static void LinkFileSelectDestroyAnim(struct MainMenu *);
+static void LinkFileSelectWait1(struct MainMenu *);
+static void LinkFileSelectWait2(struct MainMenu *);
+static void LinkFileSelectLaunchGame(struct MainMenu *);
+static void SubGameSelectWaitStart(struct MainMenu *);
+static void SubGameSelectStartSlideInBanner(struct MainMenu *);
+static void SubGameSelectStartSlideInItems(struct MainMenu *);
+static void SubGameSelectStartSpreadItems(struct MainMenu *);
+static void SubGameSelectStartSlideOut(struct MainMenu *);
+static void SubGameSelectEnd(struct MainMenu *);
+static void SubGameSelectStartFadeOut(struct MainMenu *);
+static void SubGameSelectDestroyAnim(struct MainMenu *);
+static void SubGameSelectFadeOutWait1(struct MainMenu *);
+static void SubGameSelectFadeOutWait2(struct MainMenu *);
+static void MainMenuStartIdleTimeout(struct MainMenu *);
+static void MainMenuIdleTimeoutFadeOut(struct MainMenu *);
+static void MainMenuIdleTimeoutStopMusic(struct MainMenu *);
+static void MainMenuIdleTimeoutWaitMusicStop(struct MainMenu *);
+static void MainMenuIdleTimeoutDestroyAnim(struct MainMenu *);
+static void MainMenuIdleTimeoutWait1(struct MainMenu *);
+static void MainMenuIdleTimeoutWait2(struct MainMenu *);
+static void MainMenuIdleTimeoutReturnToTitle(struct MainMenu *);
 static void MainMenuClearBgTiles(u8);
 static void MainMenuClearBgTilemap(u8);
 static bool32 HasCompletionBar(s8);
 static void LinkConnectCyclePalette(void);
 
-static const u16 gUnk_08385BF8[] = {
+static const u16 sAmbienceStepDurations[] = {
     0x14, 0x14,
     0x3C, 0x14,
      0xF,  0xF,
@@ -194,7 +194,7 @@ static const u16 gUnk_08385BF8[] = {
     0x1E, 0x32,
 };
 
-static const u16 gUnk_08385C14[NUM_LANGUAGES][0x10] = {
+static const u16 sMenuBgIds[NUM_LANGUAGES][0x10] = {
     [LANGUAGE_JAPANESE] = { 0xF0, 0x10F, 0x110, 0x111, 0x112, 0x113, 0x114, 0x133, 0x134, 0x135, 0x136, 0x137, 0x138, 0x143, 0x144, 0x29E },
     [LANGUAGE_ENGLISH]  = { 0xEC,  0xF7,  0xF8,  0xF9,  0xFA,  0xFB,  0xFC, 0x11B, 0x11C, 0x11D, 0x11E, 0x11F, 0x120, 0x13B, 0x13C, 0x2A1 },
     [LANGUAGE_GERMAN]   = { 0xEB,  0xF1,  0xF2,  0xF3,  0xF4,  0xF5,  0xF6, 0x115, 0x116, 0x117, 0x118, 0x119, 0x11A, 0x139, 0x13A, 0x2A4 },
@@ -203,7 +203,7 @@ static const u16 gUnk_08385C14[NUM_LANGUAGES][0x10] = {
     [LANGUAGE_ITALIAN]  = { 0xEF, 0x109, 0x10A, 0x10B, 0x10C, 0x10D, 0x10E, 0x12D, 0x12E, 0x12F, 0x130, 0x131, 0x132, 0x141, 0x142, 0x2AD },
 };
 
-static const struct Unk_08385CD4 gUnk_08385CD4[NUM_LANGUAGES][42] = {
+static const struct MenuSpriteAnim sMenuSpriteAnims[NUM_LANGUAGES][42] = {
     [LANGUAGE_JAPANESE] = {
         { 0x34F,  0x3, 0x39 },
         { 0x34F,  0x4, 0x39 },
@@ -470,7 +470,7 @@ static const struct Unk_08385CD4 gUnk_08385CD4[NUM_LANGUAGES][42] = {
     },
 };
 
-static const struct Unk_08385CD4 gUnk_083864B4[] = {
+static const struct MenuSpriteAnim sDigitAnims[] = {
     { 0x355, 0x3, 0x1 },
     { 0x355, 0x4, 0x1 },
     { 0x355, 0x5, 0x1 },
@@ -483,11 +483,11 @@ static const struct Unk_08385CD4 gUnk_083864B4[] = {
     { 0x355, 0xC, 0x1 },
 };
 
-static const s16 gUnk_08386504[] = {
+static const s16 sFileSelectCursorY[] = {
     0x10, 0x28, 0x40,
 };
 
-static const s16 gUnk_0838650A[] = {
+static const s16 sMainMenuCursorY[] = {
     0x10, 0x25, 0x3A, 0x4F,
 };
 
@@ -495,11 +495,11 @@ static const u8 gUnk_08386512[] = {
     0x13, 0x15, 0x17, 0x19,
 };
 
-static const u32 gUnk_08386518[3] = {
+static const u32 sBgPriorities[3] = {
     0, 1, 2,
 };
 
-static const struct Unk_08385CD4 gUnk_08386524[5] = {
+static const struct MenuSpriteAnim sFileSelectPalLoadAnims[5] = {
     { 0x355,  0x0, 0x0 },
     { 0x355,  0xD, 0x6 },
     { 0x355, 0x17, 0x0 },
@@ -507,7 +507,7 @@ static const struct Unk_08385CD4 gUnk_08386524[5] = {
     { 0x355, 0x19, 0x0 },
 };
 
-static const u8 gUnk_0838654C[5] = {
+static const u8 sFileSelectPalLoadIds[5] = {
     3, 4, 5, 6, 7,
 };
 
@@ -515,25 +515,25 @@ static const u8 gUnk_08386551[3] = {
     0x10, 0x15, 0x1A,
 };
 
-static const u16 gUnk_08386554[3] = {
+static const u16 sFileSelectNameY[3] = {
     0x1B, 0x23, 0x2B,
 };
 
-static const u16 gUnk_0838655A[3] = {
+static const u16 sFileSelectDigitY[3] = {
     0x23, 0x2B, 0x33,
 };
 
-static const u16 gUnk_08386560[3] = {
+static const u16 sFileSelectBarY[3] = {
     0x27, 0x2F, 0x37,
 };
 
-static const struct Unk_08385CD4 gUnk_08386568[3] = {
+static const struct MenuSpriteAnim sMainMenuPalLoadAnims[3] = {
     { 0x35C, 0x0, 0x0 },
     { 0x35C, 0x1, 0x0 },
     { 0x35C, 0x2, 0x0 },
 };
 
-static const u8 gUnk_08386580[3] = {
+static const u8 sMainMenuPalLoadIds[3] = {
     3, 4, 6,
 };
 
@@ -541,38 +541,38 @@ static const u8 gUnk_08386583[4] = {
     0x10, 0x12, 0x14, 0x16,
 };
 
-static const u16 gUnk_08386588[4] = {
+static const u16 sMainMenuItemY[4] = {
     0x1B, 0x23, 0x2B, 0x33,
 };
 
-static const u16 gUnk_08386590[3][2] = {
+static const u16 sEraseFilePalLoadAnims[3][2] = {
     { 0x355,  0xD },
     { 0x355, 0x17 },
     { 0x355, 0x18 },
 };
 
-static const s16 gUnk_0838659C[4][4] = {
+static const s16 sLink2PlayerLayout[4][4] = {
     { 0x78, 0x3C, 0x46, 0x4E },
     { 0x78, 0x3C, 0xAA, 0x4E },
     { 0x78, 0x3C, 0xAA, 0x4E },
     { 0x78, 0x3C, 0xAA, 0x4E },
 };
 
-static const s16 gUnk_083865BC[4][4] = {
+static const s16 sLink3PlayerLayout[4][4] = {
     { 0x46, 0x4E, 0x2A, 0x60 },
     { 0xAA, 0x4E, 0x78, 0x60 },
     { 0xAA, 0x4E, 0xC6, 0x60 },
     { 0xAA, 0x4E, 0xC6, 0x60 },
 };
 
-static const s16 gUnk_083865DC[4][4] = {
+static const s16 sLink4PlayerLayout[4][4] = {
     { 0x2A, 0x60, 0x1E, 0x6B },
     { 0x78, 0x60, 0x5A, 0x6B },
     { 0xC6, 0x60, 0x96, 0x6B },
     { 0xC6, 0x60, 0xD2, 0x6B },
 };
 
-static const u16 gUnk_083865FC[] = {
+static const u16 sAmbiencePalIds[] = {
     0xE3, 0xE4,
     0xE5, 0xE6,
     0xE7, 0xE8,
@@ -582,7 +582,7 @@ static const u16 gUnk_083865FC[] = {
     0xE5, 0xE4,
 };
 
-static const s8 gUnk_08386618[] = {
+static const s8 sAmbienceColorDeltas[] = {
     -1, -1, -1, -1,
     -1, -1, -1, -1,
     -1, -1, -1, -1,
@@ -602,7 +602,7 @@ static const s8 gUnk_08386618[] = {
      0
 };
 
-static const u8 gUnk_08386659[] = { 1, 2, 2 };
+static const u8 sEraseFileShredSteps[] = { 1, 2, 2 };
 
 extern const u8 gUnk_08D62511[];
 
@@ -610,9 +610,9 @@ void CreateMainMenu(void) {
     u32 bgCnt[3];
     u16 i;
     struct Task *t;
-    struct Unk_08138D64 *tmp, *var;
+    struct MainMenu *tmp, *var;
 
-    memcpy(bgCnt, gUnk_08386518, sizeof(gUnk_08386518));
+    memcpy(bgCnt, sBgPriorities, sizeof(sBgPriorities));
     gVramHeapMaxTileSlots = 0x400;
     gVramHeapStartAddr = 0x6010000;
     gDispCnt = DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP;
@@ -627,10 +627,10 @@ void CreateMainMenu(void) {
     gBldRegs.bldY = 0x10;
     for (i = 0; i < 10; ++i)
         gKeysContinuedRepeatIntervals[i] = 6;
-    t = TaskCreate(MainMenuMain, sizeof(struct Unk_08138D64), 0x1000, TASK_USE_IWRAM, MainMenuOnDestroy);
+    t = TaskCreate(MainMenuMain, sizeof(struct MainMenu), 0x1000, TASK_USE_IWRAM, MainMenuOnDestroy);
     tmp = TaskGetStructPtr(t);
     var = tmp;
-    CpuFill16(0, var, sizeof(struct Unk_08138D64));
+    CpuFill16(0, var, sizeof(struct MainMenu));
     var->unk9CC = MainMenuInitPalette;
     var->unkBDC = MainMenuAmbienceHold1;
     var->unk0 = 0;
@@ -660,7 +660,7 @@ void CreateMainMenuFromSubGame(u8 a1) {
     u8 i;
     u32 bgCnt[3];
     struct Task *t;
-    struct Unk_08138D64 *tmp, *var;
+    struct MainMenu *tmp, *var;
 
     gVramHeapMaxTileSlots = 0x400;
     gVramHeapStartAddr = 0x6010000;
@@ -668,7 +668,7 @@ void CreateMainMenuFromSubGame(u8 a1) {
     gBldRegs.bldCnt = BLDCNT_TGT1_ALL | BLDCNT_EFFECT_LIGHTEN;
     gBldRegs.bldAlpha = 0;
     gBldRegs.bldY = 0x10;
-    memcpy(bgCnt, gUnk_08386518, sizeof(gUnk_08386518));
+    memcpy(bgCnt, sBgPriorities, sizeof(sBgPriorities));
     for (i = 0; i < 3; ++i)
         gBgCntRegs[i] = bgCnt[i] | ((0x1F - i) << 8) | (i << 2);
     for (i = 0; i < 4; ++i) {
@@ -678,10 +678,10 @@ void CreateMainMenuFromSubGame(u8 a1) {
     for (i = 0; i < 10; ++i)
         gKeysContinuedRepeatIntervals[i] = 6;
     m4aSongNumStartOrChange(MUS_MENU);
-    t = TaskCreate(MainMenuMain, sizeof(struct Unk_08138D64), 0x1000, TASK_USE_IWRAM, MainMenuOnDestroy);
+    t = TaskCreate(MainMenuMain, sizeof(struct MainMenu), 0x1000, TASK_USE_IWRAM, MainMenuOnDestroy);
     tmp = TaskGetStructPtr(t);
     var = tmp;
-    CpuFill16(0, var, sizeof(struct Unk_08138D64));
+    CpuFill16(0, var, sizeof(struct MainMenu));
     var->unkBDC = MainMenuAmbienceHold1;
     var->unkB = 0;
     var->unkA = 0;
@@ -706,7 +706,7 @@ void CreateMainMenuFromCollectionRoom(void) {
     u8 i;
     u32 bgCnt[3];
     struct Task *t;
-    struct Unk_08138D64 *tmp, *var;
+    struct MainMenu *tmp, *var;
 
     gVramHeapMaxTileSlots = 0x400;
     gVramHeapStartAddr = 0x6010000;
@@ -714,7 +714,7 @@ void CreateMainMenuFromCollectionRoom(void) {
     gBldRegs.bldCnt = BLDCNT_TGT1_ALL | BLDCNT_EFFECT_LIGHTEN;
     gBldRegs.bldAlpha = 0;
     gBldRegs.bldY = 0x10;
-    memcpy(bgCnt, gUnk_08386518, sizeof(gUnk_08386518));
+    memcpy(bgCnt, sBgPriorities, sizeof(sBgPriorities));
     for (i = 0; i < 3; ++i)
         gBgCntRegs[i] = bgCnt[i] | ((0x1F - i) << 8) | (i << 2);
     for (i = 0; i < 4; ++i) {
@@ -724,10 +724,10 @@ void CreateMainMenuFromCollectionRoom(void) {
     m4aSongNumStartOrChange(MUS_MENU);
     for (i = 0; i < 10; ++i)
         gKeysContinuedRepeatIntervals[i] = 6;
-    t = TaskCreate(MainMenuMain, sizeof(struct Unk_08138D64), 0x1000, TASK_USE_IWRAM, MainMenuOnDestroy);
+    t = TaskCreate(MainMenuMain, sizeof(struct MainMenu), 0x1000, TASK_USE_IWRAM, MainMenuOnDestroy);
     tmp = TaskGetStructPtr(t);
     var = tmp;
-    CpuFill16(0, var, sizeof(struct Unk_08138D64));
+    CpuFill16(0, var, sizeof(struct MainMenu));
     var->unkBDC = MainMenuAmbienceHold1;
     var->unkB = 0;
     var->unkA = 0;
@@ -770,7 +770,7 @@ static s8 GetSaveFileCompletion(u8 a1 __attribute__((unused))) {
 
 static void MainMenuOnDestroy(struct Task *t) {
     u8 i;
-    struct Unk_08138D64 *var = TaskGetStructPtr(t);
+    struct MainMenu *var = TaskGetStructPtr(t);
 
     if (var->unk28C.tilesVram) {
         VramFree(var->unk28C.tilesVram);
@@ -790,18 +790,18 @@ static void MainMenuOnDestroy(struct Task *t) {
         gKeysContinuedRepeatIntervals[i] = 8;
 }
 
-static void MainMenuCreateHeaderSprites(struct Unk_08138D64 *a1) {
+static void MainMenuCreateHeaderSprites(struct MainMenu *a1) {
     struct Sprite *sprite;
 
     sprite = &a1->unkC;
-    SpriteInitNoPointer2(sprite, VramMalloc(gUnk_08385CD4[gLanguage][0].numTiles), 0x780,
-        gUnk_08385CD4[gLanguage][0].animId, gUnk_08385CD4[gLanguage][0].variant,
+    SpriteInitNoPointer2(sprite, VramMalloc(sMenuSpriteAnims[gLanguage][0].numTiles), 0x780,
+        sMenuSpriteAnims[gLanguage][0].animId, sMenuSpriteAnims[gLanguage][0].variant,
         0, 0xFF, 0x10, 0, -0x9C, 0, 0);
     sprite = &a1->unk28C;
     SpriteInitNoPointer2(&a1->unk28C, VramMalloc(0x10), 0x280, 0x355, 2, 0, 0xFF, 0x10, 1, -0x20, 0x10, 0);
 }
 
-static void FileSelectCreateSprites(struct Unk_08138D64 *a1) {
+static void FileSelectCreateSprites(struct MainMenu *a1) {
     u8 i;
     struct Sprite *sprite;
     u8 sp00[3];
@@ -809,7 +809,7 @@ static void FileSelectCreateSprites(struct Unk_08138D64 *a1) {
     u8 sp08[3];
     u32 sp0C[3];
     union {
-        struct Unk_08385CD4 pat1[5];
+        struct MenuSpriteAnim pat1[5];
         struct {
             u8 unk0[3];
             u16 unk4[3];
@@ -817,7 +817,7 @@ static void FileSelectCreateSprites(struct Unk_08138D64 *a1) {
         u16 pat3[3];
     } sp18;
     u8 sp40[5];
-    struct Unk_08385CD4 sp48;
+    struct MenuSpriteAnim sp48;
 
     for (i = 0; i < 3; ++i) {
         if (a1->unkA == i) {
@@ -832,49 +832,49 @@ static void FileSelectCreateSprites(struct Unk_08138D64 *a1) {
             sp0C[i] = 0x40000;
         }
     }
-    memcpy(sp18.pat1, gUnk_08386524, sizeof(gUnk_08386524));
-    memcpy(sp40, gUnk_0838654C, sizeof(gUnk_0838654C));
+    memcpy(sp18.pat1, sFileSelectPalLoadAnims, sizeof(sFileSelectPalLoadAnims));
+    memcpy(sp40, sFileSelectPalLoadIds, sizeof(sFileSelectPalLoadIds));
     for (i = 0; i < 5; ++i) {
         sprite = &a1->unk2B4;
         SpriteInitNoPointer2(sprite, 0, 0x3FC0, sp18.pat1[i].animId, sp18.pat1[i].variant,
             0, 0xFF, 0x10, sp40[i], -0x40, -0x40, 0);
     }
     memcpy(sp18.pat2.unk0, gUnk_08386551, sizeof(gUnk_08386551));
-    memcpy(sp18.pat2.unk4, gUnk_08386554, sizeof(gUnk_08386554));
+    memcpy(sp18.pat2.unk4, sFileSelectNameY, sizeof(sFileSelectNameY));
     for (i = 0; i < 3; ++i) {
         sprite = &a1->unk34[i];
-        SpriteInitNoPointer2(sprite, VramMalloc(gUnk_08385CD4[gLanguage][i+6].numTiles), sp18.pat2.unk0[i] * 0x40, gUnk_08385CD4[gLanguage][i+6].animId,
-            gUnk_08385CD4[gLanguage][i+6].variant, 0, 0xFF, 0x10, sp00[i], 0xF0, sp18.pat2.unk4[i], sp0C[i]);
+        SpriteInitNoPointer2(sprite, VramMalloc(sMenuSpriteAnims[gLanguage][i+6].numTiles), sp18.pat2.unk0[i] * 0x40, sMenuSpriteAnims[gLanguage][i+6].animId,
+            sMenuSpriteAnims[gLanguage][i+6].variant, 0, 0xFF, 0x10, sp00[i], 0xF0, sp18.pat2.unk4[i], sp0C[i]);
     }
-    memcpy(sp18.pat3, gUnk_0838655A, sizeof(gUnk_0838655A));
+    memcpy(sp18.pat3, sFileSelectDigitY, sizeof(sFileSelectDigitY));
     for (i = 0; i < 3; ++i) {
         if (a1->unk7[i] <= 0) {
             sprite = &a1->unk124[i][2];
-            SpriteInitNoPointer2(sprite, VramMalloc(gUnk_083864B4[0].numTiles), (5 * i + 0xF) * 0x40, gUnk_083864B4[0].animId, gUnk_083864B4[0].variant,
+            SpriteInitNoPointer2(sprite, VramMalloc(sDigitAnims[0].numTiles), (5 * i + 0xF) * 0x40, sDigitAnims[0].animId, sDigitAnims[0].variant,
                 0, 0xFF, 0x10, sp04[i], 0x1A8, sp18.pat3[i], sp0C[i]);
             continue;
         }
         if (a1->unk7[i] == 100) {
             sprite = &a1->unk124[i][0];
-            SpriteInitNoPointer2(sprite, VramMalloc(gUnk_083864B4[1].numTiles), (5 * i + 0xF) * 0x40, gUnk_083864B4[1].animId, gUnk_083864B4[1].variant,
+            SpriteInitNoPointer2(sprite, VramMalloc(sDigitAnims[1].numTiles), (5 * i + 0xF) * 0x40, sDigitAnims[1].animId, sDigitAnims[1].variant,
                 0, 0xFF, 0x10, sp04[i], 0x198, sp18.pat3[i], sp0C[i]);
         }
         if (a1->unk7[i] >= 10) {
             u8 tens = a1->unk7[i] / 10 % 10;
 
             sprite = &a1->unk124[i][1];
-            SpriteInitNoPointer2(sprite, VramMalloc(gUnk_083864B4[tens].numTiles), (5 * i + 0xF) * 0x40, gUnk_083864B4[tens].animId, gUnk_083864B4[tens].variant,
+            SpriteInitNoPointer2(sprite, VramMalloc(sDigitAnims[tens].numTiles), (5 * i + 0xF) * 0x40, sDigitAnims[tens].animId, sDigitAnims[tens].variant,
                 0, 0xFF, 0x10, sp04[i], 0x1A0, sp18.pat3[tens], sp0C[i]);
         }
         {
             u8 ones = a1->unk7[i] % 10;
 
             sprite = &a1->unk124[i][2];
-            SpriteInitNoPointer2(sprite, VramMalloc(gUnk_083864B4[ones].numTiles), (5 * i + 0xF) * 0x40, gUnk_083864B4[ones].animId, gUnk_083864B4[ones].variant,
+            SpriteInitNoPointer2(sprite, VramMalloc(sDigitAnims[ones].numTiles), (5 * i + 0xF) * 0x40, sDigitAnims[ones].animId, sDigitAnims[ones].variant,
                 0, 0xFF, 0x10, sp04[i], 0x1A8, sp18.pat3[ones], sp0C[i]);
         }
     }
-    memcpy(sp18.pat3, gUnk_08386560, sizeof(gUnk_08386560));
+    memcpy(sp18.pat3, sFileSelectBarY, sizeof(sFileSelectBarY));
     for (i = 0; i < 3; ++i) {
         if (HasCompletionBar(a1->unk7[i])) {
             GetCompletionBarAnim(&sp48, a1->unk7[i]);
@@ -885,13 +885,13 @@ static void FileSelectCreateSprites(struct Unk_08138D64 *a1) {
     }
 }
 
-static void MainMenuCreateSprites(struct Unk_08138D64 *a1) {
+static void MainMenuCreateSprites(struct MainMenu *a1) {
     struct Sprite *sprite;
     u8 i;
     u8 sp00[4];
     u32 sp04[4];
     union {
-        struct Unk_08385CD4 pat1[3];
+        struct MenuSpriteAnim pat1[3];
         struct {
             u8 unk0[4];
             u16 unk4[4];
@@ -908,26 +908,26 @@ static void MainMenuCreateSprites(struct Unk_08138D64 *a1) {
             sp04[i] = 0x40000;
         }
     }
-    memcpy(sp14.pat1, gUnk_08386568, sizeof(gUnk_08386568));
-    memcpy(sp2C, gUnk_08386580, sizeof(gUnk_08386580));
+    memcpy(sp14.pat1, sMainMenuPalLoadAnims, sizeof(sMainMenuPalLoadAnims));
+    memcpy(sp2C, sMainMenuPalLoadIds, sizeof(sMainMenuPalLoadIds));
     for (i = 0; i < 3; ++i) {
         sprite = &a1->unk2B4;
         SpriteInitNoPointer2(sprite, VramMalloc(sp14.pat1[i].numTiles), 0x3FC0, sp14.pat1[i].animId, sp14.pat1[i].variant,
             0, 0xFF, 0x10, sp2C[i], -0x40, -0x40, 0);
     }
     memcpy(sp14.pat2.unk0, gUnk_08386583, sizeof(gUnk_08386583));
-    memcpy(sp14.pat2.unk4, gUnk_08386588, sizeof(gUnk_08386588));
+    memcpy(sp14.pat2.unk4, sMainMenuItemY, sizeof(sMainMenuItemY));
     for (i = 0; i < 4; ++i) {
         sprite = &a1->unk2DC[i];
-        SpriteInitNoPointer2(sprite, VramMalloc(gUnk_08385CD4[gLanguage][i+0x13].numTiles), sp14.pat2.unk0[i] * 0x40, gUnk_08385CD4[gLanguage][i+0x13].animId,
-            gUnk_08385CD4[gLanguage][i+0x13].variant, 0, 0xFF, 0x10, sp00[i], 0xF0, sp14.pat2.unk4[i], sp04[i]);
+        SpriteInitNoPointer2(sprite, VramMalloc(sMenuSpriteAnims[gLanguage][i+0x13].numTiles), sp14.pat2.unk0[i] * 0x40, sMenuSpriteAnims[gLanguage][i+0x13].animId,
+            sMenuSpriteAnims[gLanguage][i+0x13].variant, 0, 0xFF, 0x10, sp00[i], 0xF0, sp14.pat2.unk4[i], sp04[i]);
     }
     sprite = &a1->unk37C;
-    SpriteInitNoPointer2(sprite, VramMalloc(gUnk_08385CD4[gLanguage][0x17].numTiles), 0x200, gUnk_08385CD4[gLanguage][0x17].animId,
-        gUnk_08385CD4[gLanguage][0x17].variant, 0, 0xFF, 0x10, 5, 0x80, -0x40, 0);
+    SpriteInitNoPointer2(sprite, VramMalloc(sMenuSpriteAnims[gLanguage][0x17].numTiles), 0x200, sMenuSpriteAnims[gLanguage][0x17].animId,
+        sMenuSpriteAnims[gLanguage][0x17].variant, 0, 0xFF, 0x10, 5, 0x80, -0x40, 0);
 }
 
-static void EraseFileCreateSprites(struct Unk_08138D64 *a1) {
+static void EraseFileCreateSprites(struct MainMenu *a1) {
     u8 i;
     u8 r6;
     struct Sprite *sprite;
@@ -937,23 +937,23 @@ static void EraseFileCreateSprites(struct Unk_08138D64 *a1) {
     SpriteInitNoPointer2(sprite, VramMalloc(0), 0x3FC0, 0x35C, 3, 0, 0xFF, 0x10, 6, -0x40, -0x40, 0);
     SpriteInitNoPointer2(sprite, VramMalloc(0), 0x3FC0, 0x355, 1, 0, 0xFF, 0x10, 3, -0x40, -0x40, 0);
     sprite = &a1->unk3A8;
-    SpriteInitNoPointer2(sprite, VramMalloc(gUnk_08385CD4[gLanguage][0x18].numTiles), 0x200, gUnk_08385CD4[gLanguage][0x18].animId,
-        gUnk_08385CD4[gLanguage][0x18].variant, 0, 0xFF, 0x10, 5, 0x78, 0x5C, 0);
+    SpriteInitNoPointer2(sprite, VramMalloc(sMenuSpriteAnims[gLanguage][0x18].numTiles), 0x200, sMenuSpriteAnims[gLanguage][0x18].animId,
+        sMenuSpriteAnims[gLanguage][0x18].variant, 0, 0xFF, 0x10, 5, 0x78, 0x5C, 0);
     sprite = &a1->unk3D0;
-    SpriteInitNoPointer2(sprite, VramMalloc(gUnk_08385CD4[gLanguage][0x1A].numTiles), 0x1C0, gUnk_08385CD4[gLanguage][0x1A].animId,
-        gUnk_08385CD4[gLanguage][0x1A].variant, 0, 0xFF, 0x10, 7, 0x74, 0x56, 0);
+    SpriteInitNoPointer2(sprite, VramMalloc(sMenuSpriteAnims[gLanguage][0x1A].numTiles), 0x1C0, sMenuSpriteAnims[gLanguage][0x1A].animId,
+        sMenuSpriteAnims[gLanguage][0x1A].variant, 0, 0xFF, 0x10, 7, 0x74, 0x56, 0);
     {
         union {
-            struct Unk_08385CD4 pat1[3];
+            struct MenuSpriteAnim pat1[3];
             u16 pat2[3][2];
         } sp00 = {
             .pat1 = {
-                { gUnk_08385CD4[gLanguage][6].animId, gUnk_08385CD4[gLanguage][6].variant, gUnk_08385CD4[gLanguage][6].numTiles },
-                { gUnk_08385CD4[gLanguage][7].animId, gUnk_08385CD4[gLanguage][7].variant, gUnk_08385CD4[gLanguage][7].numTiles },
-                { gUnk_08385CD4[gLanguage][8].animId, gUnk_08385CD4[gLanguage][8].variant, gUnk_08385CD4[gLanguage][8].numTiles },
+                { sMenuSpriteAnims[gLanguage][6].animId, sMenuSpriteAnims[gLanguage][6].variant, sMenuSpriteAnims[gLanguage][6].numTiles },
+                { sMenuSpriteAnims[gLanguage][7].animId, sMenuSpriteAnims[gLanguage][7].variant, sMenuSpriteAnims[gLanguage][7].numTiles },
+                { sMenuSpriteAnims[gLanguage][8].animId, sMenuSpriteAnims[gLanguage][8].variant, sMenuSpriteAnims[gLanguage][8].numTiles },
             },
         };
-        struct Unk_08385CD4 sp30;
+        struct MenuSpriteAnim sp30;
 
         sprite = a1->unk34 + r6;
         SpriteInitNoPointer2(sprite, VramMalloc(sp00.pat1[r6].numTiles), 0x540, sp00.pat1[r6].animId, sp00.pat1[r6].variant, 0, 0xFF, 0x10, 2, 0xF0, 0x1B, 0);
@@ -962,24 +962,24 @@ static void EraseFileCreateSprites(struct Unk_08138D64 *a1) {
         a1->unk124[r6][0].palId = 2;
         if (a1->unk7[r6] == 100) {
             sprite = &a1->unk124[r6][0];
-            SpriteInitNoPointer2(sprite, VramMalloc(gUnk_083864B4[1].numTiles), 0x500, gUnk_083864B4[1].animId, gUnk_083864B4[1].variant,
+            SpriteInitNoPointer2(sprite, VramMalloc(sDigitAnims[1].numTiles), 0x500, sDigitAnims[1].animId, sDigitAnims[1].variant,
                 0, 0xFF, 0x10, 2, 0x198, 0x23, 0);
         }
         if (a1->unk7[r6] >= 10) {
             u8 tens = a1->unk7[r6] / 10 % 10;
     
             sprite = &a1->unk124[r6][1];
-            SpriteInitNoPointer2(sprite, VramMalloc(gUnk_083864B4[tens].numTiles), 0x500, gUnk_083864B4[tens].animId, gUnk_083864B4[tens].variant,
+            SpriteInitNoPointer2(sprite, VramMalloc(sDigitAnims[tens].numTiles), 0x500, sDigitAnims[tens].animId, sDigitAnims[tens].variant,
                 0, 0xFF, 0x10, 2, 0x1A0, 0x23, 0);
         }
         {
             u8 ones = a1->unk7[r6] % 10;
     
             sprite = &a1->unk124[r6][2];
-            SpriteInitNoPointer2(sprite, VramMalloc(gUnk_083864B4[ones].numTiles), 0x500, gUnk_083864B4[ones].animId, gUnk_083864B4[ones].variant,
+            SpriteInitNoPointer2(sprite, VramMalloc(sDigitAnims[ones].numTiles), 0x500, sDigitAnims[ones].animId, sDigitAnims[ones].variant,
                 0, 0xFF, 0x10, 2, 0x1A8, 0x23, 0);
         }
-        memcpy(sp00.pat2, gUnk_08386590, sizeof(gUnk_08386590));
+        memcpy(sp00.pat2, sEraseFilePalLoadAnims, sizeof(sEraseFilePalLoadAnims));
         sprite = &a1->unk2B4;
         SpriteInitNoPointer2(sprite, 0, 0x3FC0, sp00.pat2[r6][0], sp00.pat2[r6][1], 0, 0xFF, 0x10, 4, -0x40, -0x40, 0);
         if (HasCompletionBar(a1->unk7[r6])) {
@@ -994,7 +994,7 @@ static void EraseFileCreateSprites(struct Unk_08138D64 *a1) {
     }
 }
 
-static void LinkConnectCreateGbaSprites(struct Unk_08138D64 *a1) {
+static void LinkConnectCreateGbaSprites(struct MainMenu *a1) {
     struct Sprite *sprite;
 
     sprite = &a1->unk478;
@@ -1017,7 +1017,7 @@ static void LinkConnectCreateGbaSprites(struct Unk_08138D64 *a1) {
     sprite->unk8 |= 0x80000;
 }
 
-static void LinkConnectCreateTextSprites(struct Unk_08138D64 *a1) {
+static void LinkConnectCreateTextSprites(struct MainMenu *a1) {
     struct Sprite *sprite;
     u8 i, j;
     u32 vram[2];
@@ -1036,27 +1036,27 @@ static void LinkConnectCreateTextSprites(struct Unk_08138D64 *a1) {
     sprite->unk8 |= 0x80000;
     for (i = 0; i < 4; ++i) {
         sprite = &a1->unk630[i];
-        SpriteInitNoPointer2(sprite, VramMalloc(gUnk_08385CD4[gLanguage][i + 0x1B].numTiles), 0x3C0,
-            gUnk_08385CD4[gLanguage][i + 0x1B].animId, gUnk_08385CD4[gLanguage][i + 0x1B].variant, 0, 0xFF, 0x10, 4, a1->unk4C8.x, a1->unk4C8.y + 0x10, 0);
+        SpriteInitNoPointer2(sprite, VramMalloc(sMenuSpriteAnims[gLanguage][i + 0x1B].numTiles), 0x3C0,
+            sMenuSpriteAnims[gLanguage][i + 0x1B].animId, sMenuSpriteAnims[gLanguage][i + 0x1B].variant, 0, 0xFF, 0x10, 4, a1->unk4C8.x, a1->unk4C8.y + 0x10, 0);
         sprite->unk8 |= 0x80000;
     }
     sprite = &a1->unk608;
-    SpriteInitNoPointer2(sprite, VramMalloc(gUnk_08385CD4[gLanguage][0x1F].numTiles), 0x3C0,
-        gUnk_08385CD4[gLanguage][0x1F].animId, gUnk_08385CD4[gLanguage][0x1F].variant, 0, 0xFF, 0x10, 4, 0xC4, 0x30, 0);
+    SpriteInitNoPointer2(sprite, VramMalloc(sMenuSpriteAnims[gLanguage][0x1F].numTiles), 0x3C0,
+        sMenuSpriteAnims[gLanguage][0x1F].animId, sMenuSpriteAnims[gLanguage][0x1F].variant, 0, 0xFF, 0x10, 4, 0xC4, 0x30, 0);
     sprite->unk8 |= 0x80000;
-    vram[0] = VramMalloc(gUnk_08385CD4[gLanguage][0x20].numTiles);
-    vram[1] = VramMalloc(gUnk_08385CD4[gLanguage][0x21].numTiles);
+    vram[0] = VramMalloc(sMenuSpriteAnims[gLanguage][0x20].numTiles);
+    vram[1] = VramMalloc(sMenuSpriteAnims[gLanguage][0x21].numTiles);
     for (j = 0; j < 3; ++j) {
         for (i = 0; i < 2; ++i) {
             sprite = &a1->unk6D0[j][i];
-            SpriteInitNoPointer2(sprite, vram[i], 0x3C0, gUnk_08385CD4[gLanguage][i + 0x20].animId, gUnk_08385CD4[gLanguage][i + 0x20].variant,
+            SpriteInitNoPointer2(sprite, vram[i], 0x3C0, sMenuSpriteAnims[gLanguage][i + 0x20].animId, sMenuSpriteAnims[gLanguage][i + 0x20].variant,
                 0, 0xFF, 0x10, 4, i * 0x40 + 0xAD, 0x5E, j | 0x20 | 0x40000);
             sprite->unk8 |= 0x80000;
         }
     }
 }
 
-static void LinkFileSelectCreateSprites(struct Unk_08138D64 *a1) {
+static void LinkFileSelectCreateSprites(struct MainMenu *a1) {
     struct Sprite *sprite;
 #ifdef NONMATCHING
     u32 r0;
@@ -1084,8 +1084,8 @@ static void LinkFileSelectCreateSprites(struct Unk_08138D64 *a1) {
     SpriteInitNoPointer2(sprite, VramMalloc(0), 0x3FC0, 0x35E, 0xA, 0, 0xFF, 0x10, 3, -0x40, -0x40, 0);
     for (i = 0; i < 4; ++i) {
         sprite = &a1->unk2DC[i];
-        SpriteInitNoPointer2(sprite, VramMalloc(gUnk_08385CD4[gLanguage][i + 0x22].numTiles), 0x500,
-            gUnk_08385CD4[gLanguage][i + 0x22].animId, gUnk_08385CD4[gLanguage][i + 0x22].variant, 0, 0xFF, 0x10, sp00[i], 0x58, 0x15 * i + 0x1B, sp08[i]);
+        SpriteInitNoPointer2(sprite, VramMalloc(sMenuSpriteAnims[gLanguage][i + 0x22].numTiles), 0x500,
+            sMenuSpriteAnims[gLanguage][i + 0x22].animId, sMenuSpriteAnims[gLanguage][i + 0x22].variant, 0, 0xFF, 0x10, sp00[i], 0x58, 0x15 * i + 0x1B, sp08[i]);
     }
     sp2C = 0xC8;
     for (i = 0; i < 4; ++i) {
@@ -1101,20 +1101,20 @@ static void LinkFileSelectCreateSprites(struct Unk_08138D64 *a1) {
         }
         for (j = 0; j < 3; ++j) {
             sprite = &a1->unk7E4[i][j];
-            SpriteInitNoPointer2(sprite, VramMalloc(gUnk_083864B4[sp28[j]].numTiles), 0x4C0,
-                gUnk_083864B4[sp28[j]].animId, gUnk_083864B4[sp28[j]].variant, 0, 0xFF, 0x10, sp04[i], 8 * j + sp2C, 0x15 * i + 0x22, sp08[i]);
+            SpriteInitNoPointer2(sprite, VramMalloc(sDigitAnims[sp28[j]].numTiles), 0x4C0,
+                sDigitAnims[sp28[j]].animId, sDigitAnims[sp28[j]].variant, 0, 0xFF, 0x10, sp04[i], 8 * j + sp2C, 0x15 * i + 0x22, sp08[i]);
         }
     }
 }
 
 #ifdef UBFIX
-static void SubGameSelectCreateSprites(struct Unk_08138D64 *a1) {
+static void SubGameSelectCreateSprites(struct MainMenu *a1) {
     struct Sprite *sprite;
     u8 i;
     u8 sp1C = a1->unk4[a1->unkA];
     // doesn't match with a union
     union {
-        struct Unk_08385CD4 pat1[3];
+        struct MenuSpriteAnim pat1[3];
         struct {
             u8 unk0[4];
             u8 unk4[4];
@@ -1123,8 +1123,8 @@ static void SubGameSelectCreateSprites(struct Unk_08138D64 *a1) {
     } sp00;
     u8 sp18[3];
 
-    memcpy(sp00.pat1, gUnk_08386568, sizeof(gUnk_08386568));
-    memcpy(sp18, gUnk_08386580, sizeof(gUnk_08386580));
+    memcpy(sp00.pat1, sMainMenuPalLoadAnims, sizeof(sMainMenuPalLoadAnims));
+    memcpy(sp18, sMainMenuPalLoadIds, sizeof(sMainMenuPalLoadIds));
     for (i = 0; i < 3; ++i) {
         sprite = &a1->unk2B4;
         SpriteInitNoPointer2(sprite, VramMalloc(sp00.pat1[i].numTiles), 0x3FC0, sp00.pat1[i].animId, sp00.pat1[i].variant, 0, 0xFF, 0x10, sp18[i], -0x40, -0x40, 0);
@@ -1141,27 +1141,27 @@ static void SubGameSelectCreateSprites(struct Unk_08138D64 *a1) {
     }
     for (i = 0; i < 4; ++i) {
         sprite = &a1->unk2DC[i];
-        SpriteInitNoPointer2(sprite, VramMalloc(gUnk_08385CD4[gLanguage][i + 0x26].numTiles), sp00.pat2.unk0[i] * 0x40,
-            gUnk_08385CD4[gLanguage][i + 0x26].animId, gUnk_08385CD4[gLanguage][i + 0x26].variant, 0, 0xFF, 0x10, sp00.pat2.unk4[i],
+        SpriteInitNoPointer2(sprite, VramMalloc(sMenuSpriteAnims[gLanguage][i + 0x26].numTiles), sp00.pat2.unk0[i] * 0x40,
+            sMenuSpriteAnims[gLanguage][i + 0x26].animId, sMenuSpriteAnims[gLanguage][i + 0x26].variant, 0, 0xFF, 0x10, sp00.pat2.unk4[i],
             0xF0, !sp1C ? 8 * i + 0x2B : 8 * i + 0x1B, sp00.pat2.unk8[i]);
     }
     sprite = &a1->unk37C;
-    SpriteInitNoPointer2(sprite, VramMalloc(gUnk_08385CD4[gLanguage][0x17].numTiles), 0x200, gUnk_08385CD4[gLanguage][0x17].animId,
-        gUnk_08385CD4[gLanguage][0x17].variant, 0, 0xFF, 0x10, 5, 0x80, -0x40, 0);
+    SpriteInitNoPointer2(sprite, VramMalloc(sMenuSpriteAnims[gLanguage][0x17].numTiles), 0x200, sMenuSpriteAnims[gLanguage][0x17].animId,
+        sMenuSpriteAnims[gLanguage][0x17].variant, 0, 0xFF, 0x10, 5, 0x80, -0x40, 0);
 }
 #else
-static void SubGameSelectCreateSprites(struct Unk_08138D64 *a1) {
+static void SubGameSelectCreateSprites(struct MainMenu *a1) {
     struct Sprite *sprite;
     u8 i;
     u8 sp1C = a1->unk4[a1->unkA];
-    struct Unk_08385CD4 sp00_struct[0];
+    struct MenuSpriteAnim sp00_struct[0];
     u8 sp00[4];
     u8 sp04[4];
     u32 sp08[4];
     u8 sp18[3];
 
-    memcpy(sp00_struct, gUnk_08386568, sizeof(gUnk_08386568));
-    memcpy(sp18, gUnk_08386580, sizeof(gUnk_08386580));
+    memcpy(sp00_struct, sMainMenuPalLoadAnims, sizeof(sMainMenuPalLoadAnims));
+    memcpy(sp18, sMainMenuPalLoadIds, sizeof(sMainMenuPalLoadIds));
     for (i = 0; i < 3; ++i) {
         sprite = &a1->unk2B4;
         SpriteInitNoPointer2(sprite, VramMalloc(sp00_struct[i].numTiles), 0x3FC0, sp00_struct[i].animId, sp00_struct[i].variant, 0, 0xFF, 0x10, sp18[i], -0x40, -0x40, 0);
@@ -1178,17 +1178,17 @@ static void SubGameSelectCreateSprites(struct Unk_08138D64 *a1) {
     }
     for (i = 0; i < 4; ++i) {
         sprite = &a1->unk2DC[i];
-        SpriteInitNoPointer2(sprite, VramMalloc(gUnk_08385CD4[gLanguage][i + 0x26].numTiles), sp00[i] * 0x40,
-            gUnk_08385CD4[gLanguage][i + 0x26].animId, gUnk_08385CD4[gLanguage][i + 0x26].variant, 0, 0xFF, 0x10, sp04[i],
+        SpriteInitNoPointer2(sprite, VramMalloc(sMenuSpriteAnims[gLanguage][i + 0x26].numTiles), sp00[i] * 0x40,
+            sMenuSpriteAnims[gLanguage][i + 0x26].animId, sMenuSpriteAnims[gLanguage][i + 0x26].variant, 0, 0xFF, 0x10, sp04[i],
             0xF0, !sp1C ? 8 * i + 0x2B : 8 * i + 0x1B, sp08[i]);
     }
     sprite = &a1->unk37C;
-    SpriteInitNoPointer2(sprite, VramMalloc(gUnk_08385CD4[gLanguage][0x17].numTiles), 0x200, gUnk_08385CD4[gLanguage][0x17].animId,
-        gUnk_08385CD4[gLanguage][0x17].variant, 0, 0xFF, 0x10, 5, 0x80, -0x40, 0);
+    SpriteInitNoPointer2(sprite, VramMalloc(sMenuSpriteAnims[gLanguage][0x17].numTiles), 0x200, sMenuSpriteAnims[gLanguage][0x17].animId,
+        sMenuSpriteAnims[gLanguage][0x17].variant, 0, 0xFF, 0x10, 5, 0x80, -0x40, 0);
 }
 #endif
 
-static void FileSelectFreeSprites(struct Unk_08138D64 *a1) {
+static void FileSelectFreeSprites(struct MainMenu *a1) {
     u8 i;
 
     for (i = 0; i < 3; ++i) {
@@ -1218,7 +1218,7 @@ static void FileSelectFreeSprites(struct Unk_08138D64 *a1) {
     }
 }
 
-static void MainMenuFreeSprites(struct Unk_08138D64 *a1) {
+static void MainMenuFreeSprites(struct MainMenu *a1) {
     if (a1->unk2DC[0].tilesVram) {
         VramFree(a1->unk2DC[0].tilesVram);
         a1->unk2DC[0].tilesVram = 0;
@@ -1241,7 +1241,7 @@ static void MainMenuFreeSprites(struct Unk_08138D64 *a1) {
     }
 }
 
-static void EraseFileFreeSprites(struct Unk_08138D64 *a1) {
+static void EraseFileFreeSprites(struct MainMenu *a1) {
     u8 var = a1->unkA, i;
 
     if (a1->unk3A8.tilesVram) {
@@ -1280,7 +1280,7 @@ static void EraseFileFreeSprites(struct Unk_08138D64 *a1) {
     }
 }
 
-static void LinkConnectFreeSprites(struct Unk_08138D64 *a1) {
+static void LinkConnectFreeSprites(struct MainMenu *a1) {
     if (a1->unk478.tilesVram) {
         VramFree(a1->unk478.tilesVram);
         a1->unk478.tilesVram = 0;
@@ -1351,7 +1351,7 @@ static void LinkConnectFreeSprites(struct Unk_08138D64 *a1) {
     }
 }
 
-static void LinkFileSelectFreeSprites(struct Unk_08138D64 *a1) {
+static void LinkFileSelectFreeSprites(struct MainMenu *a1) {
     u8 i;
 
     for (i = 0; i < 4; ++i) {
@@ -1374,7 +1374,7 @@ static void LinkFileSelectFreeSprites(struct Unk_08138D64 *a1) {
     }
 }
 
-static void SubGameSelectFreeSprites(struct Unk_08138D64 *a1) {
+static void SubGameSelectFreeSprites(struct MainMenu *a1) {
     if (a1->unk2DC[0].tilesVram) {
         VramFree(a1->unk2DC[0].tilesVram);
         a1->unk2DC[0].tilesVram = 0;
@@ -1397,7 +1397,7 @@ static void SubGameSelectFreeSprites(struct Unk_08138D64 *a1) {
     }
 }
 
-static void FileSelectDisplaySprites(struct Unk_08138D64 *a1) {
+static void FileSelectDisplaySprites(struct MainMenu *a1) {
     u8 i;
 
     DisplaySprite(&a1->unkC);
@@ -1414,7 +1414,7 @@ static void FileSelectDisplaySprites(struct Unk_08138D64 *a1) {
     }
 }
 
-static void FileSelectDisplayCurFileSprites(struct Unk_08138D64 *a1) {
+static void FileSelectDisplayCurFileSprites(struct MainMenu *a1) {
     u8 var = a1->unkA;
 
     DisplaySprite(&a1->unkC);
@@ -1429,7 +1429,7 @@ static void FileSelectDisplayCurFileSprites(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unk124[var][2]);
 }
 
-static void LinkFileSelectDisplaySprites(struct Unk_08138D64 *a1) {
+static void LinkFileSelectDisplaySprites(struct MainMenu *a1) {
     u8 i;
 
     DisplaySprite(&a1->unkC);
@@ -1444,54 +1444,54 @@ static void LinkFileSelectDisplaySprites(struct Unk_08138D64 *a1) {
     }
 }
 
-static bool32 GetCompletionBarAnim(struct Unk_08385CD4 *a1, s8 a2) {
+static bool32 GetCompletionBarAnim(struct MenuSpriteAnim *a1, s8 a2) {
     if (a2 < 0xA)
         return FALSE;
     if (a2 < 0x14) {
-        a1->animId = gUnk_08385CD4[gLanguage][9].animId;
-        a1->variant = gUnk_08385CD4[gLanguage][9].variant;
-        a1->numTiles = gUnk_08385CD4[gLanguage][9].numTiles;
+        a1->animId = sMenuSpriteAnims[gLanguage][9].animId;
+        a1->variant = sMenuSpriteAnims[gLanguage][9].variant;
+        a1->numTiles = sMenuSpriteAnims[gLanguage][9].numTiles;
     } else if (a2 < 0x1E) {
-        a1->animId = gUnk_08385CD4[gLanguage][0xA].animId;
-        a1->variant = gUnk_08385CD4[gLanguage][0xA].variant;
-        a1->numTiles = gUnk_08385CD4[gLanguage][0xA].numTiles;
+        a1->animId = sMenuSpriteAnims[gLanguage][0xA].animId;
+        a1->variant = sMenuSpriteAnims[gLanguage][0xA].variant;
+        a1->numTiles = sMenuSpriteAnims[gLanguage][0xA].numTiles;
     } else if (a2 < 0x28) {
-        a1->animId = gUnk_08385CD4[gLanguage][0xB].animId;
-        a1->variant = gUnk_08385CD4[gLanguage][0xB].variant;
-        a1->numTiles = gUnk_08385CD4[gLanguage][0xB].numTiles;
+        a1->animId = sMenuSpriteAnims[gLanguage][0xB].animId;
+        a1->variant = sMenuSpriteAnims[gLanguage][0xB].variant;
+        a1->numTiles = sMenuSpriteAnims[gLanguage][0xB].numTiles;
     } else if (a2 < 0x32) {
-        a1->animId = gUnk_08385CD4[gLanguage][0xC].animId;
-        a1->variant = gUnk_08385CD4[gLanguage][0xC].variant;
-        a1->numTiles = gUnk_08385CD4[gLanguage][0xC].numTiles;
+        a1->animId = sMenuSpriteAnims[gLanguage][0xC].animId;
+        a1->variant = sMenuSpriteAnims[gLanguage][0xC].variant;
+        a1->numTiles = sMenuSpriteAnims[gLanguage][0xC].numTiles;
     } else if (a2 < 0x3C) {
-        a1->animId = gUnk_08385CD4[gLanguage][0xD].animId;
-        a1->variant = gUnk_08385CD4[gLanguage][0xD].variant;
-        a1->numTiles = gUnk_08385CD4[gLanguage][0xD].numTiles;
+        a1->animId = sMenuSpriteAnims[gLanguage][0xD].animId;
+        a1->variant = sMenuSpriteAnims[gLanguage][0xD].variant;
+        a1->numTiles = sMenuSpriteAnims[gLanguage][0xD].numTiles;
     } else if (a2 < 0x46) {
-        a1->animId = gUnk_08385CD4[gLanguage][0xE].animId;
-        a1->variant = gUnk_08385CD4[gLanguage][0xE].variant;
-        a1->numTiles = gUnk_08385CD4[gLanguage][0xE].numTiles;
+        a1->animId = sMenuSpriteAnims[gLanguage][0xE].animId;
+        a1->variant = sMenuSpriteAnims[gLanguage][0xE].variant;
+        a1->numTiles = sMenuSpriteAnims[gLanguage][0xE].numTiles;
     } else if (a2 < 0x50) {
-        a1->animId = gUnk_08385CD4[gLanguage][0xF].animId;
-        a1->variant = gUnk_08385CD4[gLanguage][0xF].variant;
-        a1->numTiles = gUnk_08385CD4[gLanguage][0xF].numTiles;
+        a1->animId = sMenuSpriteAnims[gLanguage][0xF].animId;
+        a1->variant = sMenuSpriteAnims[gLanguage][0xF].variant;
+        a1->numTiles = sMenuSpriteAnims[gLanguage][0xF].numTiles;
     } else if (a2 < 0x5A) {
-        a1->animId = gUnk_08385CD4[gLanguage][0x10].animId;
-        a1->variant = gUnk_08385CD4[gLanguage][0x10].variant;
-        a1->numTiles = gUnk_08385CD4[gLanguage][0x10].numTiles;
+        a1->animId = sMenuSpriteAnims[gLanguage][0x10].animId;
+        a1->variant = sMenuSpriteAnims[gLanguage][0x10].variant;
+        a1->numTiles = sMenuSpriteAnims[gLanguage][0x10].numTiles;
     } else if (a2 < 0x64) {
-        a1->animId = gUnk_08385CD4[gLanguage][0x11].animId;
-        a1->variant = gUnk_08385CD4[gLanguage][0x11].variant;
-        a1->numTiles = gUnk_08385CD4[gLanguage][0x11].numTiles;
+        a1->animId = sMenuSpriteAnims[gLanguage][0x11].animId;
+        a1->variant = sMenuSpriteAnims[gLanguage][0x11].variant;
+        a1->numTiles = sMenuSpriteAnims[gLanguage][0x11].numTiles;
     } else if (a2 == 0x64) {
-        a1->animId = gUnk_08385CD4[gLanguage][0x12].animId;
-        a1->variant = gUnk_08385CD4[gLanguage][0x12].variant;
-        a1->numTiles = gUnk_08385CD4[gLanguage][0x12].numTiles;
+        a1->animId = sMenuSpriteAnims[gLanguage][0x12].animId;
+        a1->variant = sMenuSpriteAnims[gLanguage][0x12].variant;
+        a1->numTiles = sMenuSpriteAnims[gLanguage][0x12].numTiles;
     }
     return TRUE;
 }
 
-static void FileSelectUpdateFilePalettes(struct Unk_08138D64 *a1) {
+static void FileSelectUpdateFilePalettes(struct MainMenu *a1) {
     u8 unkA = a1->unkA;
     u8 unkB = a1->unkB;
     bool32 r1, r1_2;
@@ -1549,7 +1549,7 @@ static void FileSelectUpdateFilePalettes(struct Unk_08138D64 *a1) {
     UpdateSpriteAnimation(sprite);
 }
 
-static void LinkFileSelectUpdateFilePalettes(struct Unk_08138D64 *a1) {
+static void LinkFileSelectUpdateFilePalettes(struct MainMenu *a1) {
     u8 a = a1->unk9C8[0];
     u8 b = a1->unk9C8[1];
     struct Sprite *sprite;
@@ -1597,7 +1597,7 @@ static u8 MainMenuGetInput(void) {
         return 0;   
 }
 
-static bool32 MainMenuUpdateIdleTimer(struct Unk_08138D64 *a1) {
+static bool32 MainMenuUpdateIdleTimer(struct MainMenu *a1) {
     if (gPrevInput == gHeldKeys) {
         if (++a1->unkBF0 >= 0x1C20) {
             a1->unkBF0 = 0;
@@ -1610,7 +1610,7 @@ static bool32 MainMenuUpdateIdleTimer(struct Unk_08138D64 *a1) {
     return FALSE;
 }
 
-static bool32 LinkConnectPollPlayerCount(struct Unk_08138D64 *a1, u8 a2) {
+static bool32 LinkConnectPollPlayerCount(struct MainMenu *a1, u8 a2) {
     if (!a1->unk7D5) {
         if (a1->unkBE8.pat2->unk11 != a1->unk7D0) {
             a1->unk7D5 = 1;
@@ -1632,7 +1632,7 @@ static bool32 LinkConnectPollPlayerCount(struct Unk_08138D64 *a1, u8 a2) {
     return FALSE;
 }
 
-static bool32 LinkConnectCheckCancel(struct Unk_08138D64 *a1) {
+static bool32 LinkConnectCheckCancel(struct MainMenu *a1) {
     if (a1->unk7DE) {
         if (++a1->unk7E0 < 0xB4)
             return FALSE;
@@ -1654,7 +1654,7 @@ static bool32 LinkConnectCheckCancel(struct Unk_08138D64 *a1) {
     return FALSE;
 }
 
-static bool32 LinkConnectCheckStart(struct Unk_08138D64 *a1) {
+static bool32 LinkConnectCheckStart(struct MainMenu *a1) {
     if (!a1->unk7D1 && a1->unkBE8.pat2->unkE == 1 && (gPressedKeys & A_BUTTON || gPressedKeys & START_BUTTON)) {
         sub_08032BA4(a1->unkBE8.pat2);
         m4aSongNumStart(SE_MAIN_MENU_SELECT);
@@ -1667,18 +1667,18 @@ static bool32 LinkConnectCheckStart(struct Unk_08138D64 *a1) {
     return FALSE;
 }
 
-static void LinkConnectLerp2PlayerLayout(struct Unk_08138D64 *a1, s16 a2, u8 a3) {
+static void LinkConnectLerp2PlayerLayout(struct MainMenu *a1, s16 a2, u8 a3) {
     u8 i;
     s16 v10[4][4];
 
-    memcpy(v10, gUnk_0838659C, sizeof(gUnk_0838659C));
+    memcpy(v10, sLink2PlayerLayout, sizeof(sLink2PlayerLayout));
     for (i = 0; i < 4; ++i) {
         a1->unk7C0[i][0] = v10[i][0] + a2 * (v10[i][2] - v10[i][0]) / a3;
         a1->unk7C0[i][1] = v10[i][1] + a2 * (v10[i][3] - v10[i][1]) / a3;
     }
 }
 
-static void LinkConnectDisplay2PlayerLayout(struct Unk_08138D64 *a1, u8 a2) {
+static void LinkConnectDisplay2PlayerLayout(struct MainMenu *a1, u8 a2) {
     struct Sprite *sprites1[] = {
         &a1->unk4C8,
         &a1->unk4C8,
@@ -1709,11 +1709,11 @@ static void LinkConnectDisplay2PlayerLayout(struct Unk_08138D64 *a1, u8 a2) {
     DisplaySprite(r0);
 }
 
-static void LinkConnectLerp3PlayerLayout(struct Unk_08138D64 *a1, s16 a2, u8 a3) {
+static void LinkConnectLerp3PlayerLayout(struct MainMenu *a1, s16 a2, u8 a3) {
     u8 i;
     s16 v14[4][4];
 
-    memcpy(v14, gUnk_083865BC, sizeof(gUnk_083865BC));
+    memcpy(v14, sLink3PlayerLayout, sizeof(sLink3PlayerLayout));
     for (i = 0; i < 4; ++i) {
         a1->unk7C0[i][0] = v14[i][0] + a2 * (v14[i][2] - v14[i][0]) / a3;
         a1->unk7C0[i][1] = v14[i][1] + a2 * (v14[i][3] - v14[i][1]) / a3;
@@ -1727,7 +1727,7 @@ static void LinkConnectLerp3PlayerLayout(struct Unk_08138D64 *a1, s16 a2, u8 a3)
     }
 }
 
-static void LinkConnectDisplay3PlayerLayout(struct Unk_08138D64 *a1, u8 a2) {
+static void LinkConnectDisplay3PlayerLayout(struct MainMenu *a1, u8 a2) {
     u8 i;
     struct Sprite *r5 = &a1->unk4C8, *r4 = &a1->unk4F0, *r0;
 
@@ -1752,11 +1752,11 @@ static void LinkConnectDisplay3PlayerLayout(struct Unk_08138D64 *a1, u8 a2) {
         DisplaySprite(&a1->unk590);
 }
 
-static void LinkConnectLerp4PlayerLayout(struct Unk_08138D64 *a1, s16 a2, u8 a3) {
+static void LinkConnectLerp4PlayerLayout(struct MainMenu *a1, s16 a2, u8 a3) {
     u8 i;
     s16 v14[4][4];
 
-    memcpy(v14, gUnk_083865DC, sizeof(gUnk_083865DC));
+    memcpy(v14, sLink4PlayerLayout, sizeof(sLink4PlayerLayout));
     for (i = 0; i < 4; ++i) {
         a1->unk7C0[i][0] = v14[i][0] + a2 * (v14[i][2] - v14[i][0]) / a3;
         a1->unk7C0[i][1] = v14[i][1] + a2 * (v14[i][3] - v14[i][1]) / a3;
@@ -1770,7 +1770,7 @@ static void LinkConnectLerp4PlayerLayout(struct Unk_08138D64 *a1, s16 a2, u8 a3)
     }
 }
 
-static void LinkConnectDisplay4PlayerLayout(struct Unk_08138D64 *a1, u8 a2) {
+static void LinkConnectDisplay4PlayerLayout(struct MainMenu *a1, u8 a2) {
     struct Sprite *sprites1[] = {
         &a1->unk518,
         &a1->unk518,
@@ -1805,7 +1805,7 @@ static void LinkConnectDisplay4PlayerLayout(struct Unk_08138D64 *a1, u8 a2) {
     DisplaySprite(r0);
 }
 
-static bool32 LinkConnectDisplayJoinPopups(struct Unk_08138D64 *a1, u8 a2) {
+static bool32 LinkConnectDisplayJoinPopups(struct MainMenu *a1, u8 a2) {
     u8 i, j;
 
     if (a1->unk7D1) return FALSE;
@@ -1846,7 +1846,7 @@ static bool32 LinkConnectDisplayJoinPopups(struct Unk_08138D64 *a1, u8 a2) {
     return TRUE;
 }
 
-static void MainMenuAmbienceHold1(struct Unk_08138D64 *a1) {
+static void MainMenuAmbienceHold1(struct MainMenu *a1) {
     if (--a1->unkBE6 < 1) {
         m4aSongNumStartOrChange(SE_MAIN_MENU_AMBIENT_1);
         a1->unkBE6 = (Rand32() & 0x3FF) * 2 + 0xB4;
@@ -1858,8 +1858,8 @@ static void MainMenuAmbienceHold1(struct Unk_08138D64 *a1) {
     }
 }
 
-static void MainMenuAmbienceFadeTo2(struct Unk_08138D64 *a1) {
-    if (++a1->unkBE0 >= gUnk_08385BF8[a1->unk3]
+static void MainMenuAmbienceFadeTo2(struct MainMenu *a1) {
+    if (++a1->unkBE0 >= sAmbienceStepDurations[a1->unk3]
         && (a1->unkBE0 = 0, a1->unkBE2 = 0, ++a1->unk3 == 7)) {
         const u16 *src = gUnk_03002E60[0xEA].x->palette;
 
@@ -1874,7 +1874,7 @@ static void MainMenuAmbienceFadeTo2(struct Unk_08138D64 *a1) {
     }
 }
 
-static void MainMenuAmbienceHold2(struct Unk_08138D64 *a1) {
+static void MainMenuAmbienceHold2(struct MainMenu *a1) {
     if (--a1->unkBE6 < 1) {
         m4aSongNumStartOrChange(SE_MAIN_MENU_AMBIENT_2);
         a1->unkBE6 = (Rand32() & 0x3FF) * 2 + 0xB4;
@@ -1886,8 +1886,8 @@ static void MainMenuAmbienceHold2(struct Unk_08138D64 *a1) {
     }
 }
 
-static void MainMenuAmbienceFadeTo1(struct Unk_08138D64 *a1) {
-    if (++a1->unkBE0 >= gUnk_08385BF8[a1->unk3]
+static void MainMenuAmbienceFadeTo1(struct MainMenu *a1) {
+    if (++a1->unkBE0 >= sAmbienceStepDurations[a1->unk3]
         && (a1->unkBE0 = 0, a1->unkBE2 = 0, ++a1->unk3 == 14)) {
         const u16 *src = gUnk_03002E60[0xE3].x->palette;
 
@@ -1903,7 +1903,7 @@ static void MainMenuAmbienceFadeTo1(struct Unk_08138D64 *a1) {
     }
 }
 
-static void MainMenuStepAmbiencePalette(struct Unk_08138D64 *a1) {
+static void MainMenuStepAmbiencePalette(struct MainMenu *a1) {
     union Unk_03002E60 var;
     u32 four = 4;
     u8 idx;
@@ -1917,8 +1917,8 @@ static void MainMenuStepAmbiencePalette(struct Unk_08138D64 *a1) {
     u32 sp68;
     s32 c = 0x25;
 
-    memcpy(sp00, gUnk_083865FC, sizeof(sp00));
-    memcpy(sp1C, gUnk_08386618, sizeof(sp1C));
+    memcpy(sp00, sAmbiencePalIds, sizeof(sp00));
+    memcpy(sp1C, sAmbienceColorDeltas, sizeof(sp1C));
     sp68 = 0;
     sl = c * (a1->unk9D4 % four);
     idx = a1->unk3;
@@ -1952,7 +1952,7 @@ static void MainMenuStepAmbiencePalette(struct Unk_08138D64 *a1) {
     gMainFlags |= MAIN_FLAG_BG_PALETTE_SYNC_ENABLE;
 }
 
-static void MainMenuInitBgTilemap(struct Unk_08138D64 *a1) {
+static void MainMenuInitBgTilemap(struct MainMenu *a1) {
     const struct TiledBg_082D7850 *ptr = gUnk_082D7850[0xE2];
     const u16 *tilemap = ptr->tilemap;
     u16 height = ptr->height;
@@ -1966,7 +1966,7 @@ static void MainMenuInitBgTilemap(struct Unk_08138D64 *a1) {
     a1->unk9CC = MainMenuInitBgLayers;
 }
 
-static void MainMenuInitBgLayers(struct Unk_08138D64 *a1) {
+static void MainMenuInitBgLayers(struct MainMenu *a1) {
     u16 i;
     u16 idx;
 
@@ -1978,7 +1978,7 @@ static void MainMenuInitBgLayers(struct Unk_08138D64 *a1) {
         u16 *vram;
         const u32 *tileset;
 
-        idx = gUnk_08385C14[gLanguage][0];
+        idx = sMenuBgIds[gLanguage][0];
         ptr = gUnk_082D7850[idx];
         tileset = ptr->tileset;
         tilemap = ptr->tilemap;
@@ -2011,7 +2011,7 @@ static void MainMenuInitBgLayers(struct Unk_08138D64 *a1) {
     a1->unk9CC = MainMenuInitHeaderSprites;
 }
 
-static void MainMenuInitFirstScreen(struct Unk_08138D64 *a1) {
+static void MainMenuInitFirstScreen(struct MainMenu *a1) {
     a1->unkBEC = sub_0802E57C();
     if (!a1->unk1 && ++a1->unkBE4 <= a1->unkBE3)
         gBldRegs.bldY = 0x10 - (0x10 * a1->unkBE4 / a1->unkBE3);
@@ -2028,7 +2028,7 @@ static void MainMenuInitFirstScreen(struct Unk_08138D64 *a1) {
     }
 }
 
-static void FileSelectStart(struct Unk_08138D64 *a1) {
+static void FileSelectStart(struct MainMenu *a1) {
     u8 i;
     u16 idx;
 
@@ -2037,7 +2037,7 @@ static void FileSelectStart(struct Unk_08138D64 *a1) {
     a1->unk1 = 1;
     a1->unk9D8 = 0;
     a1->unk9CC = FileSelectSlideInBanner;
-    a1->unk28C.y = gUnk_08386504[a1->unkA];
+    a1->unk28C.y = sFileSelectCursorY[a1->unkA];
     a1->unk34[0].y = 0x1B;
     a1->unk34[1].y = 0x23;
     a1->unk34[2].y = 0x2B;
@@ -2048,7 +2048,7 @@ static void FileSelectStart(struct Unk_08138D64 *a1) {
     if (!a1->unk0 && ++a1->unkBE4 <= a1->unkBE3)
         gBldRegs.bldY = 0x10 - (0x10 * a1->unkBE4 / a1->unkBE3);
     if (a1->unk0 == 2 || a1->unk0 == 3) {
-        SpriteInit(&a1->unkC, a1->unkC.tilesVram, 0x780, gUnk_08385CD4[gLanguage][0].animId, gUnk_08385CD4[gLanguage][0].variant, 0, 0xFF, 0x10,
+        SpriteInit(&a1->unkC, a1->unkC.tilesVram, 0x780, sMenuSpriteAnims[gLanguage][0].animId, sMenuSpriteAnims[gLanguage][0].variant, 0, 0xFF, 0x10,
             0, -0x9C, 0, 0x40000);
         {
             const struct TiledBg_082D7850 *ptr;
@@ -2058,7 +2058,7 @@ static void FileSelectStart(struct Unk_08138D64 *a1) {
             const u32 *tileset;
             u16 i;
 
-            idx = gUnk_08385C14[gLanguage][0];
+            idx = sMenuBgIds[gLanguage][0];
             ptr = gUnk_082D7850[idx];
             tileset = ptr->tileset;
             tilemap = ptr->tilemap;
@@ -2074,7 +2074,7 @@ static void FileSelectStart(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void FileSelectSlideInBanner(struct Unk_08138D64 *a1) {
+static void FileSelectSlideInBanner(struct MainMenu *a1) {
     ++a1->unk9D8;
     a1->unkC.x = 0x9C * a1->unk9D8 / 5 - 0x9C;
     if (!a1->unk0)
@@ -2089,7 +2089,7 @@ static void FileSelectSlideInBanner(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void FileSelectEndSlideInBanner(struct Unk_08138D64 *a1) {
+static void FileSelectEndSlideInBanner(struct MainMenu *a1) {
     a1->unk9D8 = 0;
     a1->unk9CC = FileSelectSlideInFiles;
     if (!UpdateSpriteAnimation(&a1->unk28C))
@@ -2100,7 +2100,7 @@ static void FileSelectEndSlideInBanner(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void FileSelectSlideInFiles(struct Unk_08138D64 *a1) {
+static void FileSelectSlideInFiles(struct MainMenu *a1) {
     u8 i;
 
     ++a1->unk9D8;
@@ -2123,7 +2123,7 @@ static void FileSelectSlideInFiles(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void FileSelectEndSlideInFiles(struct Unk_08138D64 *a1) {
+static void FileSelectEndSlideInFiles(struct MainMenu *a1) {
     a1->unk9D8 = 0;
     a1->unk9CC = FileSelectSpreadFiles;
     if (!a1->unk0 && ++a1->unkBE4 <= a1->unkBE3)
@@ -2134,7 +2134,7 @@ static void FileSelectEndSlideInFiles(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void FileSelectSpreadFiles(struct Unk_08138D64 *a1) {
+static void FileSelectSpreadFiles(struct MainMenu *a1) {
     u8 i;
 
     ++a1->unk9D8;
@@ -2159,7 +2159,7 @@ static void FileSelectSpreadFiles(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void FileSelectWaitInput(struct Unk_08138D64 *a1) {
+static void FileSelectWaitInput(struct MainMenu *a1) {
     a1->unkB = a1->unkA;
     MainMenuUpdateIdleTimer(a1);
     switch (MainMenuGetInput()) {
@@ -2199,7 +2199,7 @@ static void FileSelectWaitInput(struct Unk_08138D64 *a1) {
     }
     if (a1->unkA != a1->unkB) {
         FileSelectUpdateFilePalettes(a1);
-        a1->unk28C.y = gUnk_08386504[a1->unkA];
+        a1->unk28C.y = sFileSelectCursorY[a1->unkA];
         UpdateSpriteAnimation(&a1->unk28C);
     }
     if (!UpdateSpriteAnimation(&a1->unk28C))
@@ -2208,7 +2208,7 @@ static void FileSelectWaitInput(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void FileSelectSlideOut(struct Unk_08138D64 *a1) {
+static void FileSelectSlideOut(struct MainMenu *a1) {
     u8 i;
     s32 var;
 
@@ -2235,7 +2235,7 @@ static void FileSelectSlideOut(struct Unk_08138D64 *a1) {
     }
 }
 
-static void FileSelectFadeOut(struct Unk_08138D64 *a1) {
+static void FileSelectFadeOut(struct MainMenu *a1) {
     u8 i;
     s32 var;
 
@@ -2260,11 +2260,11 @@ static void FileSelectFadeOut(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static inline struct Sprite *GetUnk2DC(struct Unk_08138D64 *a1) {
+static inline struct Sprite *GetUnk2DC(struct MainMenu *a1) {
     return a1->unk2DC;
 }
 
-static void MainMenuStart(struct Unk_08138D64 *a1) {
+static void MainMenuStart(struct MainMenu *a1) {
     u8 j;
     struct Sprite *sprite;
 
@@ -2272,7 +2272,7 @@ static void MainMenuStart(struct Unk_08138D64 *a1) {
     a1->unk0 = a1->unk1;
     a1->unk1 = 2;
     a1->unk9D8 = 0;
-    SpriteInit(&a1->unkC, a1->unkC.tilesVram, 0x780, gUnk_08385CD4[gLanguage][1].animId, gUnk_08385CD4[gLanguage][1].variant, 0, 0xFF,
+    SpriteInit(&a1->unkC, a1->unkC.tilesVram, 0x780, sMenuSpriteAnims[gLanguage][1].animId, sMenuSpriteAnims[gLanguage][1].variant, 0, 0xFF,
         0x10, 0, -0x9C, 0, 0x40000);
     a1->unk2DC[0].y = 0x1B;
     a1->unk2DC[1].y = 0x23;
@@ -2289,7 +2289,7 @@ static void MainMenuStart(struct Unk_08138D64 *a1) {
             u16 idx;
             u16 i;
 
-            idx = gUnk_08385C14[gLanguage][1];
+            idx = sMenuBgIds[gLanguage][1];
             ptr = gUnk_082D7850[idx];
             tileset = ptr->tileset;
             tilemap = ptr->tilemap;
@@ -2313,13 +2313,13 @@ static void MainMenuStart(struct Unk_08138D64 *a1) {
         a1->unk9CC = MainMenuWaitStart;
         break;
     case 3:
-        a1->unk28C.y = gUnk_0838650A[a1->unk3A4];
+        a1->unk28C.y = sMainMenuCursorY[a1->unk3A4];
         UpdateSpriteAnimation(&a1->unk28C);
         a1->unk9CC = MainMenuWaitStart;
         break;
     case 4:
         a1->unkBEC = sub_0802E57C();
-        a1->unk28C.y = gUnk_0838650A[a1->unk3A4];
+        a1->unk28C.y = sMainMenuCursorY[a1->unk3A4];
         UpdateSpriteAnimation(&a1->unk28C);
         a1->unk9CC = MainMenuStartFromLinkConnect;
         break;
@@ -2333,7 +2333,7 @@ static void MainMenuStart(struct Unk_08138D64 *a1) {
             u16 idx;
             u16 i;
 
-            idx = gUnk_08385C14[gLanguage][2];
+            idx = sMenuBgIds[gLanguage][2];
             ptr = gUnk_082D7850[idx];
             tileset = ptr->tileset;
             tilemap = ptr->tilemap;
@@ -2343,7 +2343,7 @@ static void MainMenuStart(struct Unk_08138D64 *a1) {
             for (i = 0; i < height; ++i)
                 CpuCopy16(tilemap + i * 0x1E, vram + i * 0x20, 0x20 * sizeof(u16));
         }
-        a1->unk28C.y = gUnk_0838650A[a1->unk3A4];
+        a1->unk28C.y = sMainMenuCursorY[a1->unk3A4];
         UpdateSpriteAnimation(&a1->unk28C);
         a1->unk9CC = MainMenuWaitStart;
         break;
@@ -2354,7 +2354,7 @@ static void MainMenuStart(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void MainMenuSlideInBanner(struct Unk_08138D64 *a1) {
+static void MainMenuSlideInBanner(struct MainMenu *a1) {
     u8 i;
 
     ++a1->unk9D8;
@@ -2370,7 +2370,7 @@ static void MainMenuSlideInBanner(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void MainMenuSlideInItems(struct Unk_08138D64 *a1) {
+static void MainMenuSlideInItems(struct MainMenu *a1) {
     u8 i;
 
     ++a1->unk9D8;
@@ -2386,7 +2386,7 @@ static void MainMenuSlideInItems(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void MainMenuSpreadItems(struct Unk_08138D64 *a1) {
+static void MainMenuSpreadItems(struct MainMenu *a1) {
     u8 i;
 
     ++a1->unk9D8;
@@ -2410,7 +2410,7 @@ static void MainMenuSpreadItems(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void MainMenuStartFromLinkConnect(struct Unk_08138D64 *a1) {
+static void MainMenuStartFromLinkConnect(struct MainMenu *a1) {
     struct Sprite *sprite;
 
     gDispCnt |= DISPCNT_BG1_ON;
@@ -2423,7 +2423,7 @@ static void MainMenuStartFromLinkConnect(struct Unk_08138D64 *a1) {
         u16 idx;
         u16 i;
 
-        idx = gUnk_08385C14[gLanguage][6];
+        idx = sMenuBgIds[gLanguage][6];
         ptr = gUnk_082D7850[idx];
         tileset = ptr->tileset;
         tilemap = ptr->tilemap;
@@ -2454,7 +2454,7 @@ static void MainMenuStartFromLinkConnect(struct Unk_08138D64 *a1) {
     a1->unk9CC = MainMenuFadeInFromLinkConnect;
 }
 
-static void MainMenuFadeInFromLinkConnect(struct Unk_08138D64 *a1) {
+static void MainMenuFadeInFromLinkConnect(struct MainMenu *a1) {
     u8 i;
 
     ++a1->unk9D8;
@@ -2468,7 +2468,7 @@ static void MainMenuFadeInFromLinkConnect(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unk37C);
 }
 
-static void MainMenuStartFromCollectionRoom(struct Unk_08138D64 *a1) {
+static void MainMenuStartFromCollectionRoom(struct MainMenu *a1) {
     struct Sprite *sprite;
 
     a1->unk3A4 = 2;
@@ -2481,7 +2481,7 @@ static void MainMenuStartFromCollectionRoom(struct Unk_08138D64 *a1) {
         u16 idx;
         u16 i;
 
-        idx = gUnk_08385C14[gLanguage][3];
+        idx = sMenuBgIds[gLanguage][3];
         ptr = gUnk_082D7850[idx];
         tileset = ptr->tileset;
         tilemap = ptr->tilemap;
@@ -2506,7 +2506,7 @@ static void MainMenuStartFromCollectionRoom(struct Unk_08138D64 *a1) {
     a1->unk9CC = MainMenuFadeInFromCollectionRoom;
 }
 
-static void MainMenuFadeInFromCollectionRoom(struct Unk_08138D64 *a1) {
+static void MainMenuFadeInFromCollectionRoom(struct MainMenu *a1) {
     u8 i;
 
     ++a1->unkBE4;
@@ -2521,7 +2521,7 @@ static void MainMenuFadeInFromCollectionRoom(struct Unk_08138D64 *a1) {
         DisplaySprite(&a1->unk2DC[i]);
 }
 
-static void MainMenuEndFadeInFromCollectionRoom(struct Unk_08138D64 *a1) {
+static void MainMenuEndFadeInFromCollectionRoom(struct MainMenu *a1) {
     u8 i;
 
     gBldRegs.bldCnt = 0;
@@ -2537,23 +2537,23 @@ static void MainMenuEndFadeInFromCollectionRoom(struct Unk_08138D64 *a1) {
         DisplaySprite(&a1->unk2DC[i]);
 }
 
-static inline u8 GetUnk3A4(struct Unk_08138D64 *a1) {
+static inline u8 GetUnk3A4(struct MainMenu *a1) {
     return a1->unk3A4;
 }
 
-static inline u8 GetUnk3A5(struct Unk_08138D64 *a1) {
+static inline u8 GetUnk3A5(struct MainMenu *a1) {
     return a1->unk3A5;
 }
 
-static inline struct Sprite *GetUnk28C(struct Unk_08138D64 *a1) {
+static inline struct Sprite *GetUnk28C(struct MainMenu *a1) {
     return &a1->unk28C;
 }
 
-static inline struct Sprite *GetUnk2DCSub(struct Unk_08138D64 *a1, u32 idx) {
+static inline struct Sprite *GetUnk2DCSub(struct MainMenu *a1, u32 idx) {
     return &a1->unk2DC[idx];
 }
 
-static void MainMenuWaitInput(struct Unk_08138D64 *a1) {
+static void MainMenuWaitInput(struct MainMenu *a1) {
     struct Sprite *sprite = NULL;
     u8 j;
 
@@ -2615,7 +2615,7 @@ static void MainMenuWaitInput(struct Unk_08138D64 *a1) {
             u16 i;
             u16 idx;
 
-            idx = gUnk_08385C14[gLanguage][a1->unk3A4 + 1];
+            idx = sMenuBgIds[gLanguage][a1->unk3A4 + 1];
             ptr = gUnk_082D7850[idx];
             tileset = ptr->tileset;
             tilemap = ptr->tilemap;
@@ -2630,7 +2630,7 @@ static void MainMenuWaitInput(struct Unk_08138D64 *a1) {
             sprite = GetUnk2DCSub(a1, GetUnk3A5(a1));
             sprite->palId = 3;
             UpdateSpriteAnimation(sprite);
-            a1->unk28C.y = gUnk_0838650A[a1->unk3A4];
+            a1->unk28C.y = sMainMenuCursorY[a1->unk3A4];
             UpdateSpriteAnimation(&a1->unk28C);
         }
     } while (0);
@@ -2643,7 +2643,7 @@ static void MainMenuWaitInput(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void MainMenuOpenPlayerCountMenu(struct Unk_08138D64 *a1) {
+static void MainMenuOpenPlayerCountMenu(struct MainMenu *a1) {
     struct Sprite *sprite;
     u8 i;
 
@@ -2663,7 +2663,7 @@ static void MainMenuOpenPlayerCountMenu(struct Unk_08138D64 *a1) {
         u16 idx;
         u16 i;
 
-        idx = gUnk_08385C14[gLanguage][5];
+        idx = sMenuBgIds[gLanguage][5];
         ptr = gUnk_082D7850[idx];
         tileset = ptr->tileset;
         tilemap = ptr->tilemap;
@@ -2686,8 +2686,8 @@ static void MainMenuOpenPlayerCountMenu(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unk37C);
 }
 
-static void MainMenuPlayerCountWaitInput(struct Unk_08138D64 *a1) {
-    const u16 array[] = { gUnk_08385C14[gLanguage][5], gUnk_08385C14[gLanguage][6] };
+static void MainMenuPlayerCountWaitInput(struct MainMenu *a1) {
+    const u16 array[] = { sMenuBgIds[gLanguage][5], sMenuBgIds[gLanguage][6] };
     u8 i;
 
     MainMenuUpdateIdleTimer(a1);
@@ -2769,7 +2769,7 @@ static void MainMenuPlayerCountWaitInput(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unk37C);
 }
 
-static void MainMenuClosePlayerCountMenu(struct Unk_08138D64 *a1) {
+static void MainMenuClosePlayerCountMenu(struct MainMenu *a1) {
     u8 i;
     struct Sprite *sprite = &a1->unk2DC[a1->unk3A4];
 
@@ -2785,7 +2785,7 @@ static void MainMenuClosePlayerCountMenu(struct Unk_08138D64 *a1) {
         u16 idx;
         u16 i;
 
-        idx = gUnk_08385C14[gLanguage][a1->unk3A4 + 1];
+        idx = sMenuBgIds[gLanguage][a1->unk3A4 + 1];
         ptr = gUnk_082D7850[idx];
         tileset = ptr->tileset;
         tilemap = ptr->tilemap;
@@ -2802,7 +2802,7 @@ static void MainMenuClosePlayerCountMenu(struct Unk_08138D64 *a1) {
         DisplaySprite(&a1->unk2DC[i]);
 }
 
-static void MainMenuMainGameFadeOutMenu(struct Unk_08138D64 *a1) {
+static void MainMenuMainGameFadeOutMenu(struct MainMenu *a1) {
     u8 i;
 
     ++a1->unk9D8;
@@ -2815,7 +2815,7 @@ static void MainMenuMainGameFadeOutMenu(struct Unk_08138D64 *a1) {
         DisplaySprite(&a1->unk2DC[i]);
 }
 
-static void MainMenuMainGameFadeInAnim(struct Unk_08138D64 *a1) {
+static void MainMenuMainGameFadeInAnim(struct MainMenu *a1) {
     ++a1->unk9D8;
     gBldRegs.bldY = 0x10 - 0x10 * a1->unk9D8 / 0xF;
     if (a1->unk9D8 > 0xE) {
@@ -2827,7 +2827,7 @@ static void MainMenuMainGameFadeInAnim(struct Unk_08138D64 *a1) {
     }
 }
 
-static void MainMenuFadeOutToLinkConnect(struct Unk_08138D64 *a1) {
+static void MainMenuFadeOutToLinkConnect(struct MainMenu *a1) {
     u8 i;
 
     ++a1->unk9D8;
@@ -2841,7 +2841,7 @@ static void MainMenuFadeOutToLinkConnect(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unk37C);
 }
 
-static void MainMenuSlideOut(struct Unk_08138D64 *a1) {
+static void MainMenuSlideOut(struct MainMenu *a1) {
     u8 i;
 
     ++a1->unk9D8;
@@ -2865,7 +2865,7 @@ static void MainMenuSlideOut(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void MainMenuStartFadeOutToCollectionRoom(struct Unk_08138D64 *a1) {
+static void MainMenuStartFadeOutToCollectionRoom(struct MainMenu *a1) {
     u8 i;
 
     m4aMPlayFadeOut(&gMPlayInfo_0, 1);
@@ -2882,7 +2882,7 @@ static void MainMenuStartFadeOutToCollectionRoom(struct Unk_08138D64 *a1) {
         a1->unk28C.unk1B = 0xFF;
 }
 
-static void MainMenuFadeOutToCollectionRoom(struct Unk_08138D64 *a1) {
+static void MainMenuFadeOutToCollectionRoom(struct MainMenu *a1) {
 #ifdef NONMATCHING
     struct Sprite *sprite;
 #else
@@ -2903,7 +2903,7 @@ static void MainMenuFadeOutToCollectionRoom(struct Unk_08138D64 *a1) {
         a1->unk28C.unk1B = 0xFF;
 }
 
-static void EraseFileStart(struct Unk_08138D64 *a1) {
+static void EraseFileStart(struct MainMenu *a1) {
     struct Sprite *sprite;
 
     EraseFileCreateSprites(a1);
@@ -2911,14 +2911,14 @@ static void EraseFileStart(struct Unk_08138D64 *a1) {
     a1->unk1 = 3;
     a1->unk472 = a1->unk7[a1->unkA];
     sprite = &a1->unkC;
-    SpriteInitNoPointer2(sprite, sprite->tilesVram, 0x780, gUnk_08385CD4[gLanguage][4].animId, gUnk_08385CD4[gLanguage][4].variant, 0, 0xFF, 0x10,
+    SpriteInitNoPointer2(sprite, sprite->tilesVram, 0x780, sMenuSpriteAnims[gLanguage][4].animId, sMenuSpriteAnims[gLanguage][4].variant, 0, 0xFF, 0x10,
         0, -0x9C, 0, 0x40000);
     a1->unk28C.unk1B = 0xFF;
     UpdateSpriteAnimation(&a1->unk28C);
     a1->unk9CC = EraseFileStartSlideInBanner;
 }
 
-static void EraseFileStartSlideInFile(struct Unk_08138D64 *a1) {
+static void EraseFileStartSlideInFile(struct MainMenu *a1) {
     u8 idx = a1->unkA;
     s16 var;
 
@@ -2926,13 +2926,13 @@ static void EraseFileStartSlideInFile(struct Unk_08138D64 *a1) {
     var = 0x27;
     a1->unkAC[idx].y = var;
     a1->unk124[idx][0].y = a1->unk124[idx][1].y = a1->unk124[idx][2].y = a1->unk34[idx].y + 8;
-    a1->unk28C.y = gUnk_08386504[0];
+    a1->unk28C.y = sFileSelectCursorY[0];
     a1->unk9D8 = 0;
     a1->unk9CC = EraseFileSlideInFile;
     FileSelectDisplayCurFileSprites(a1);
 }
 
-static void EraseFileSlideInFile(struct Unk_08138D64 *a1) {
+static void EraseFileSlideInFile(struct MainMenu *a1) {
     u8 idx = a1->unkA;
     s32 var;
 
@@ -2948,7 +2948,7 @@ static void EraseFileSlideInFile(struct Unk_08138D64 *a1) {
     FileSelectDisplayCurFileSprites(a1);
 }
 
-static void EraseFileAsk(struct Unk_08138D64 *a1) {
+static void EraseFileAsk(struct MainMenu *a1) {
     struct Sprite *sprite;
 
     a1->unk470 = 1;
@@ -2956,8 +2956,8 @@ static void EraseFileAsk(struct Unk_08138D64 *a1) {
     a1->unk3D0.palId = 7;
     UpdateSpriteAnimation(&a1->unk3D0);
     sprite = &a1->unk3A8;
-    sprite->animId = gUnk_08385CD4[gLanguage][0x18].animId;
-    sprite->variant = gUnk_08385CD4[gLanguage][0x18].variant;
+    sprite->animId = sMenuSpriteAnims[gLanguage][0x18].animId;
+    sprite->variant = sMenuSpriteAnims[gLanguage][0x18].variant;
     UpdateSpriteAnimation(&a1->unk3A8);
     FileSelectDisplayCurFileSprites(a1);
     DisplaySprite(&a1->unk3A8);
@@ -2966,7 +2966,7 @@ static void EraseFileAsk(struct Unk_08138D64 *a1) {
     a1->unk9CC = EraseFileWaitInput;
 }
 
-static void EraseFileAskAgain(struct Unk_08138D64 *a1) {
+static void EraseFileAskAgain(struct MainMenu *a1) {
     struct Sprite *sprite;
 
     a1->unk470 = 2;
@@ -2974,8 +2974,8 @@ static void EraseFileAskAgain(struct Unk_08138D64 *a1) {
     a1->unk3D0.palId = 7;
     UpdateSpriteAnimation(&a1->unk3D0);
     sprite = &a1->unk3A8;
-    sprite->animId = gUnk_08385CD4[gLanguage][0x19].animId;
-    sprite->variant = gUnk_08385CD4[gLanguage][0x19].variant;
+    sprite->animId = sMenuSpriteAnims[gLanguage][0x19].animId;
+    sprite->variant = sMenuSpriteAnims[gLanguage][0x19].variant;
     UpdateSpriteAnimation(&a1->unk3A8);
     FileSelectDisplayCurFileSprites(a1);
     DisplaySprite(&a1->unk3A8);
@@ -2984,7 +2984,7 @@ static void EraseFileAskAgain(struct Unk_08138D64 *a1) {
     a1->unk9CC = EraseFileWaitInput;
 }
 
-static void EraseFileWaitInput(struct Unk_08138D64 *a1) {
+static void EraseFileWaitInput(struct MainMenu *a1) {
     MainMenuUpdateIdleTimer(a1);
     switch (MainMenuGetInput()) {
     case 0:
@@ -3028,7 +3028,7 @@ static void EraseFileWaitInput(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unk3D0);
 }
 
-static void EraseFileStartShred(struct Unk_08138D64 *a1) {
+static void EraseFileStartShred(struct MainMenu *a1) {
     u8 i, j;
     u32 var;
 
@@ -3049,11 +3049,11 @@ static void EraseFileStartShred(struct Unk_08138D64 *a1) {
     a1->unk474 = (Rand32() & 7) + 5;
 }
 
-static void EraseFileShred(struct Unk_08138D64 *a1) {
+static void EraseFileShred(struct MainMenu *a1) {
     u8 i;
     u8 idx = a1->unkA;
     u8 sp00[3];
-    struct Unk_08385CD4 sp04;
+    struct MenuSpriteAnim sp04;
     s8 sp0C = (Rand32() & 7) - 4;
 
     if (++a1->unk9D8 > 0x3B)
@@ -3064,19 +3064,19 @@ static void EraseFileShred(struct Unk_08138D64 *a1) {
         bool32 b;
         s8 tmp;
 
-        memcpy(sp00, gUnk_08386659, sizeof(gUnk_08386659));
+        memcpy(sp00, sEraseFileShredSteps, sizeof(sEraseFileShredSteps));
         a1->unk7[idx] -= sp00[a1->unk9D8 % 3];
         if (a1->unk7[idx] < 0)
             a1->unk7[idx] = 0;
         r5 = a1->unk7[idx] / 10 % 10;
         r6 = a1->unk7[idx] % 10;
         sprite_r1 = &a1->unk124[idx][1];
-        sprite_r1->animId = gUnk_083864B4[r5].animId;
-        sprite_r1->variant = gUnk_083864B4[r5].variant;
+        sprite_r1->animId = sDigitAnims[r5].animId;
+        sprite_r1->variant = sDigitAnims[r5].variant;
         UpdateSpriteAnimation(sprite_r1);
         sprite_r1 = &a1->unk124[idx][2];
-        sprite_r1->animId = gUnk_083864B4[r6].animId;
-        sprite_r1->variant = gUnk_083864B4[r6].variant;
+        sprite_r1->animId = sDigitAnims[r6].animId;
+        sprite_r1->variant = sDigitAnims[r6].variant;
         UpdateSpriteAnimation(sprite_r1);
         tmp = a1->unk7[idx];
         if (tmp < 10)
@@ -3098,7 +3098,7 @@ static void EraseFileShred(struct Unk_08138D64 *a1) {
     a1->unkAC[idx].y = sp0C + 0x27;
     for (i = 0; i < 3; ++i)
         a1->unk3F8[i].y = gUnk_08D62511[2 * i] + sp0C;
-    a1->unk28C.y = gUnk_08386504[0] + sp0C;
+    a1->unk28C.y = sFileSelectCursorY[0] + sp0C;
     gBgScrollRegs[2][1] = sp0C;
     for (i = 0; i < 3; ++i) {
         if (!UpdateSpriteAnimation(&a1->unk3F8[i])) {
@@ -3126,25 +3126,25 @@ static void EraseFileShred(struct Unk_08138D64 *a1) {
         DisplaySprite(&a1->unk3F8[i]);
 }
 
-static void EraseFileEndShred(struct Unk_08138D64 *a1) {
+static void EraseFileEndShred(struct MainMenu *a1) {
     u8 idx = a1->unkA;
     struct Sprite *sprite;
 
     a1->unk9D8 = 0;
     a1->unk9CC = EraseFileClearSave;
     sprite = &a1->unk124[idx][0];
-    sprite->animId = gUnk_083864B4[0].animId;
-    sprite->variant = gUnk_083864B4[0].variant;
+    sprite->animId = sDigitAnims[0].animId;
+    sprite->variant = sDigitAnims[0].variant;
     UpdateSpriteAnimation(sprite);
     sprite = &a1->unk124[idx][1];
-    sprite->animId = gUnk_083864B4[0].animId;
-    sprite->variant = gUnk_083864B4[0].variant;
+    sprite->animId = sDigitAnims[0].animId;
+    sprite->variant = sDigitAnims[0].variant;
     UpdateSpriteAnimation(sprite);
     sprite = &a1->unk124[idx][2];
-    sprite->animId = gUnk_083864B4[0].animId;
-    sprite->variant = gUnk_083864B4[0].variant;
+    sprite->animId = sDigitAnims[0].animId;
+    sprite->variant = sDigitAnims[0].variant;
     UpdateSpriteAnimation(sprite);
-    a1->unk28C.y = gUnk_08386504[0];
+    a1->unk28C.y = sFileSelectCursorY[0];
     a1->unkC.y = 0;
     a1->unk34[idx].y = 0x1B;
     a1->unk124[idx][0].y = a1->unk124[idx][1].y = a1->unk124[idx][2].y = 0x23;
@@ -3161,7 +3161,7 @@ static void EraseFileEndShred(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unk3D0);
 }
 
-static void EraseFileSlideOut(struct Unk_08138D64 *a1) {
+static void EraseFileSlideOut(struct MainMenu *a1) {
     u8 idx = a1->unkA;
     u32 var;
 
@@ -3181,7 +3181,7 @@ static void EraseFileSlideOut(struct Unk_08138D64 *a1) {
         FileSelectDisplayCurFileSprites(a1);
 }
 
-static void LinkConnectStart(struct Unk_08138D64 *a1) {
+static void LinkConnectStart(struct MainMenu *a1) {
     struct Sprite *sprite;
 
     a1->unk0 = a1->unk1;
@@ -3207,7 +3207,7 @@ static void LinkConnectStart(struct Unk_08138D64 *a1) {
         u16 idx;
         u16 i;
 
-        idx = gUnk_08385C14[gLanguage][0xD];
+        idx = sMenuBgIds[gLanguage][0xD];
         ptr = gUnk_082D7850[idx];
         tileset = ptr->tileset;
         tilemap = ptr->tilemap;
@@ -3222,13 +3222,13 @@ static void LinkConnectStart(struct Unk_08138D64 *a1) {
     DmaCopy16(3, a1->unk9DA, gBgPalette, 0x120);
     gMainFlags |= MAIN_FLAG_BG_PALETTE_SYNC_ENABLE;
     sprite = &a1->unkC;
-    SpriteInitNoPointer2(sprite, sprite->tilesVram, 0x780, gUnk_08385CD4[gLanguage][3].animId, gUnk_08385CD4[gLanguage][3].variant,
+    SpriteInitNoPointer2(sprite, sprite->tilesVram, 0x780, sMenuSpriteAnims[gLanguage][3].animId, sMenuSpriteAnims[gLanguage][3].variant,
         0, 0xFF, 0x10, 0, 0, 0, 0x40000);
     sprite->unk8 |= 0x80000;
     a1->unk9CC = LinkConnectWaitStart;
 }
 
-static void LinkConnectStartFadeIn(struct Unk_08138D64 *a1) {
+static void LinkConnectStartFadeIn(struct MainMenu *a1) {
     u8 i;
     u16 var;
 
@@ -3244,7 +3244,7 @@ static void LinkConnectStartFadeIn(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unk4A0);
 }
 
-static void LinkConnectFadeIn(struct Unk_08138D64 *a1) {
+static void LinkConnectFadeIn(struct MainMenu *a1) {
     ++a1->unk9D8;
     gBldRegs.bldY = 0x10 - 0x10 * a1->unk9D8 / 0xF;
     if (a1->unk9D8 > 0xE)
@@ -3260,7 +3260,7 @@ static void LinkConnectFadeIn(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unk568);
 }
 
-static void LinkConnectEndFadeIn(struct Unk_08138D64 *a1) {
+static void LinkConnectEndFadeIn(struct MainMenu *a1) {
     gBldRegs.bldCnt = 0;
     gBldRegs.bldAlpha = 0;
     gBldRegs.bldY = 0;
@@ -3276,7 +3276,7 @@ static void LinkConnectEndFadeIn(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unk568);
 }
 
-static void LinkConnectStartWait1Player(struct Unk_08138D64 *a1) {
+static void LinkConnectStartWait1Player(struct MainMenu *a1) {
     a1->unk9D8 = 0;
     a1->unk7D3 = 0;
     a1->unk9CC = LinkConnectWait1Player;
@@ -3296,7 +3296,7 @@ static void LinkConnectStartWait1Player(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unk568);
 }
 
-static void LinkConnectWait1Player(struct Unk_08138D64 *a1) {
+static void LinkConnectWait1Player(struct MainMenu *a1) {
     if (LinkConnectPollPlayerCount(a1, 0x3C) && a1->unk7D0 > 1 && a1->unk7D0 > a1->unk7D1)
         a1->unk9CC = LinkConnectStartGrowTo2Players;
     else
@@ -3327,7 +3327,7 @@ static void LinkConnectWait1Player(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unk568);
 }
 
-static void LinkConnectStartGrowTo2Players(struct Unk_08138D64 *a1) {
+static void LinkConnectStartGrowTo2Players(struct MainMenu *a1) {
     a1->unk7D4 = 0;
     a1->unk7D6 = 0;
     a1->unk7D5 = 0;
@@ -3353,7 +3353,7 @@ static void LinkConnectStartGrowTo2Players(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unkC);
 }
 
-static void LinkConnectGrowTo2Players(struct Unk_08138D64 *a1) {
+static void LinkConnectGrowTo2Players(struct MainMenu *a1) {
     if (++a1->unk9D8 > 4) {
         a1->unk7D8[0] = 0;
         a1->unk7DB[0] = 1;
@@ -3381,11 +3381,11 @@ static void LinkConnectGrowTo2Players(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unkC);
 }
 
-static inline struct Multi_08032B0C *GetUnkBE8(struct Unk_08138D64 *a1) {
+static inline struct Multi_08032B0C *GetUnkBE8(struct MainMenu *a1) {
     return a1->unkBE8.pat2;
 }
 
-static void LinkConnectWait2Players(struct Unk_08138D64 *a1) {
+static void LinkConnectWait2Players(struct MainMenu *a1) {
     LinkConnectCheckStart(a1);
     if (LinkConnectPollPlayerCount(a1, 0xF) && a1->unk7D0 != 2) {
         switch (a1->unk7D0) {
@@ -3442,7 +3442,7 @@ static void LinkConnectWait2Players(struct Unk_08138D64 *a1) {
         DisplaySprite(&a1->unk608);
 }
 
-static void LinkConnectStartShrinkTo1Player(struct Unk_08138D64 *a1) {
+static void LinkConnectStartShrinkTo1Player(struct MainMenu *a1) {
     a1->unk9D8 = 1;
     a1->unk9CC = LinkConnectShrinkTo1Player;
     if (a1->unkBE8.pat2->unkE == 8) {
@@ -3463,7 +3463,7 @@ static void LinkConnectStartShrinkTo1Player(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unkC);
 }
 
-static void LinkConnectShrinkTo1Player(struct Unk_08138D64 *a1) {
+static void LinkConnectShrinkTo1Player(struct MainMenu *a1) {
     if (++a1->unk9D8 > 4)
         a1->unk9CC = LinkConnectStartFadeIn;
     if (a1->unkBE8.pat2->unkE == 8) {
@@ -3483,7 +3483,7 @@ static void LinkConnectShrinkTo1Player(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unkC);
 }
 
-static void LinkConnectStartGrowTo3Players(struct Unk_08138D64 *a1) {
+static void LinkConnectStartGrowTo3Players(struct MainMenu *a1) {
     a1->unk7D4 = 0;
     a1->unk7D6 = 0;
     a1->unk7D5 = 0;
@@ -3507,7 +3507,7 @@ static void LinkConnectStartGrowTo3Players(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unkC);
 }
 
-static void LinkConnectGrowTo3Players(struct Unk_08138D64 *a1) {
+static void LinkConnectGrowTo3Players(struct MainMenu *a1) {
     if (++a1->unk9D8 > 4) {
         a1->unk7D8[1] = 0;
         a1->unk7DB[1] = 1;
@@ -3535,7 +3535,7 @@ static void LinkConnectGrowTo3Players(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unkC);
 }
 
-static void LinkConnectWait3Players(struct Unk_08138D64 *a1) {
+static void LinkConnectWait3Players(struct MainMenu *a1) {
     LinkConnectCheckStart(a1);
     if (LinkConnectPollPlayerCount(a1, 0xF) && a1->unk7D0 != 3) {
         switch (a1->unk7D0) {
@@ -3592,7 +3592,7 @@ static void LinkConnectWait3Players(struct Unk_08138D64 *a1) {
         DisplaySprite(&a1->unk608);
 }
 
-static void LinkConnectStartShrinkTo2Players(struct Unk_08138D64 *a1) {
+static void LinkConnectStartShrinkTo2Players(struct MainMenu *a1) {
     a1->unk9D8 = 1;
     a1->unk9CC = LinkConnectShrinkTo2Players;
     if (a1->unkBE8.pat2->unkE == 8) {
@@ -3613,7 +3613,7 @@ static void LinkConnectStartShrinkTo2Players(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unkC);
 }
 
-static void LinkConnectShrinkTo2Players(struct Unk_08138D64 *a1) {
+static void LinkConnectShrinkTo2Players(struct MainMenu *a1) {
     if (++a1->unk9D8 > 4) {
         a1->unk7D1 = a1->unkBE8.pat2->unk10;
         switch (a1->unk7D0) {
@@ -3655,7 +3655,7 @@ static void LinkConnectShrinkTo2Players(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unkC);
 }
 
-static void LinkConnectStartGrowTo4Players(struct Unk_08138D64 *a1) {
+static void LinkConnectStartGrowTo4Players(struct MainMenu *a1) {
     a1->unk7D4 = 0;
     a1->unk7D6 = 0;
     a1->unk7D5 = 0;
@@ -3679,7 +3679,7 @@ static void LinkConnectStartGrowTo4Players(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unkC);
 }
 
-static void LinkConnectGrowTo4Players(struct Unk_08138D64 *a1) {
+static void LinkConnectGrowTo4Players(struct MainMenu *a1) {
     if (++a1->unk9D8 > 4) {
         a1->unk7D8[2] = 0;
         a1->unk7DB[2] = 1;
@@ -3704,7 +3704,7 @@ static void LinkConnectGrowTo4Players(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unkC);
 }
 
-static void LinkConnectWait4Players(struct Unk_08138D64 *a1) {
+static void LinkConnectWait4Players(struct MainMenu *a1) {
     LinkConnectCheckStart(a1);
     if (LinkConnectPollPlayerCount(a1, 0xF)) {
         a1->unk9CC = LinkConnectStartShrinkTo3Players;
@@ -3752,7 +3752,7 @@ static void LinkConnectWait4Players(struct Unk_08138D64 *a1) {
         DisplaySprite(&a1->unk608);
 }
 
-static void LinkConnectStartShrinkTo3Players(struct Unk_08138D64 *a1) {
+static void LinkConnectStartShrinkTo3Players(struct MainMenu *a1) {
     a1->unk9D8 = 1;
     a1->unk9CC = LinkConnectShrinkTo3Players;
     if (a1->unkBE8.pat2->unkE == 8) {
@@ -3773,7 +3773,7 @@ static void LinkConnectStartShrinkTo3Players(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unkC);
 }
 
-static void LinkConnectShrinkTo3Players(struct Unk_08138D64 *a1) {
+static void LinkConnectShrinkTo3Players(struct MainMenu *a1) {
     if (++a1->unk9D8 > 4) {
         a1->unk7D1 = a1->unkBE8.pat2->unk10;
         switch (a1->unk7D0) {
@@ -3814,8 +3814,8 @@ static inline void LoadBgPaletteWithTransformation2(const u16 *src, u8 offset, u
     LoadBgPaletteWithTransformation(src, offset, size);
 }
 
-static void LinkErrorStart(struct Unk_08138D64 *a1) {
-    CpuCopy16(gUnk_082D7850[gUnk_08385C14[gLanguage][0xF]]->palette + 0x90, (u16 *)0x5000120, 0x20);
+static void LinkErrorStart(struct MainMenu *a1) {
+    CpuCopy16(gUnk_082D7850[sMenuBgIds[gLanguage][0xF]]->palette + 0x90, (u16 *)0x5000120, 0x20);
     {
         const struct TiledBg_082D7850 *ptr;
         const u16 *tilemap;
@@ -3827,7 +3827,7 @@ static void LinkErrorStart(struct Unk_08138D64 *a1) {
         u32 j;
         u16 *dst;
 
-        idx = gUnk_08385C14[gLanguage][0xF];
+        idx = sMenuBgIds[gLanguage][0xF];
         ptr = gUnk_082D7850[idx];
         tileset = ptr->tileset;
         do tilemap = ptr->tilemap; while (0);
@@ -3844,9 +3844,9 @@ static void LinkErrorStart(struct Unk_08138D64 *a1) {
             CpuCopy16(tilemap + i * 0x1E, vram + i * 0x20, 0x20 * sizeof(u16));
     }
     if (gMainFlags & MAIN_FLAG_BG_PALETTE_TRANSFORMATION_ENABLE)
-        LoadBgPaletteWithTransformation2(gUnk_082D7850[gUnk_08385C14[gLanguage][0xF]]->palette, 0, 0x100);
+        LoadBgPaletteWithTransformation2(gUnk_082D7850[sMenuBgIds[gLanguage][0xF]]->palette, 0, 0x100);
     else {
-        DmaCopy16(3, gUnk_082D7850[gUnk_08385C14[gLanguage][0xF]]->palette, gBgPalette, 0x200);
+        DmaCopy16(3, gUnk_082D7850[sMenuBgIds[gLanguage][0xF]]->palette, gBgPalette, 0x200);
         gMainFlags |= MAIN_FLAG_BG_PALETTE_SYNC_ENABLE;
     }
     DmaCopy16(3, a1->unk9DA, gBgPalette, 0x120);
@@ -3855,7 +3855,7 @@ static void LinkErrorStart(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unkC);
 }
 
-static void LinkErrorEnd(struct Unk_08138D64 *a1) {
+static void LinkErrorEnd(struct MainMenu *a1) {
     CpuFill16_2(0, (u16 *)0x06000000, 0x4000);
     CpuFill16_2(0x1ff, (u16 *)0x0600F800, 0x800);
     if (gMainFlags & MAIN_FLAG_BG_PALETTE_TRANSFORMATION_ENABLE)
@@ -3872,7 +3872,7 @@ static void LinkErrorEnd(struct Unk_08138D64 *a1) {
         a1->unk9CC = SubGameSelectReopen;
 }
 
-static void LinkConnectStartFadeOut(struct Unk_08138D64 *a1) {
+static void LinkConnectStartFadeOut(struct MainMenu *a1) {
     gBldRegs.bldCnt = BLDCNT_TGT1_BG0 | BLDCNT_TGT1_BG1 | BLDCNT_TGT1_BG2 | BLDCNT_TGT1_OBJ | BLDCNT_EFFECT_LIGHTEN;
     gBldRegs.bldAlpha = 0;
     gBldRegs.bldY = 0;
@@ -3905,7 +3905,7 @@ static void LinkConnectStartFadeOut(struct Unk_08138D64 *a1) {
         DisplaySprite(&a1->unk608);
 }
 
-static void LinkConnectFadeOut(struct Unk_08138D64 *a1) {
+static void LinkConnectFadeOut(struct MainMenu *a1) {
     s32 var;
     s32 f = 0xF;
 
@@ -3941,7 +3941,7 @@ static void LinkConnectFadeOut(struct Unk_08138D64 *a1) {
         DisplaySprite(&a1->unk608);
 }
 
-static void LinkConnectEnd(struct Unk_08138D64 *a1) {
+static void LinkConnectEnd(struct MainMenu *a1) {
     struct Multi_08032B0C *ptr = a1->unkBE8.pat2;
     u16 fill[2];
 
@@ -3977,7 +3977,7 @@ static void LinkConnectEnd(struct Unk_08138D64 *a1) {
     }
 }
 
-static void LinkFileSelectStart(struct Unk_08138D64 *a1) {
+static void LinkFileSelectStart(struct MainMenu *a1) {
     u8 i;
     struct Sprite *sprite;
 
@@ -4002,7 +4002,7 @@ static void LinkFileSelectStart(struct Unk_08138D64 *a1) {
         u16 idx;
         u16 i;
 
-        idx = gUnk_08385C14[gLanguage][0xE];
+        idx = sMenuBgIds[gLanguage][0xE];
         ptr = gUnk_082D7850[idx];
         tileset = ptr->tileset;
         tilemap = ptr->tilemap;
@@ -4015,7 +4015,7 @@ static void LinkFileSelectStart(struct Unk_08138D64 *a1) {
     DmaCopy16(3, a1->unk9DA, gBgPalette, 0x120);
     gMainFlags |= MAIN_FLAG_BG_PALETTE_SYNC_ENABLE;
     sprite = &a1->unkC;
-    SpriteInitNoPointer2(sprite, sprite->tilesVram, 0x780, gUnk_08385CD4[gLanguage][5].animId, gUnk_08385CD4[gLanguage][5].variant,
+    SpriteInitNoPointer2(sprite, sprite->tilesVram, 0x780, sMenuSpriteAnims[gLanguage][5].animId, sMenuSpriteAnims[gLanguage][5].variant,
         0, 0xFF, 0x10, 0, 0, 0, 0x40000);
     a1->unk28C.x = 0x48;
     a1->unk28C.y = 0x10;
@@ -4025,7 +4025,7 @@ static void LinkFileSelectStart(struct Unk_08138D64 *a1) {
     a1->unk9CC = LinkFileSelectStartSlideIn;
 }
 
-static void LinkFileSelectSlideIn(struct Unk_08138D64 *a1) {
+static void LinkFileSelectSlideIn(struct MainMenu *a1) {
     u8 i;
 
     ++a1->unk9D8;
@@ -4046,7 +4046,7 @@ static void LinkFileSelectSlideIn(struct Unk_08138D64 *a1) {
     LinkFileSelectDisplaySprites(a1);
 }
 
-static void LinkFileSelectWaitInput(struct Unk_08138D64 *a1) {
+static void LinkFileSelectWaitInput(struct MainMenu *a1) {
     a1->unk9C8[1] = a1->unk9C8[0];
     a1->unk9C8[0] = a1->unkBE8.pat2->unk12;
     if (a1->unkBE8.pat2->unkE == 4) {
@@ -4065,7 +4065,7 @@ static void LinkFileSelectWaitInput(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void LinkFileSelectSlideOut(struct Unk_08138D64 *a1) {
+static void LinkFileSelectSlideOut(struct MainMenu *a1) {
     u8 i;
 
     ++a1; --a1;
@@ -4091,7 +4091,7 @@ static void LinkFileSelectSlideOut(struct Unk_08138D64 *a1) {
     }
 }
 
-static void LinkFileSelectFadeIn(struct Unk_08138D64 *a1) {
+static void LinkFileSelectFadeIn(struct MainMenu *a1) {
     ++a1->unk9D8;
     gBldRegs.bldY = 0x10 - 0x10 * a1->unk9D8 / 0xF;
     if (a1->unk9D8 > 0xE) {
@@ -4104,7 +4104,7 @@ static void LinkFileSelectFadeIn(struct Unk_08138D64 *a1) {
     }
 }
 
-static void SubGameSelectStart(struct Unk_08138D64 *a1) {
+static void SubGameSelectStart(struct MainMenu *a1) {
     struct Sprite *sprite;
 
     a1->unk0 = a1->unk1;
@@ -4114,7 +4114,7 @@ static void SubGameSelectStart(struct Unk_08138D64 *a1) {
     a1->unk9D8 = 0;
     SubGameSelectCreateSprites(a1);
     sprite = &a1->unkC;
-    SpriteInitNoPointer2(sprite, sprite->tilesVram, 0x780, gUnk_08385CD4[gLanguage][2].animId, gUnk_08385CD4[gLanguage][2].variant,
+    SpriteInitNoPointer2(sprite, sprite->tilesVram, 0x780, sMenuSpriteAnims[gLanguage][2].animId, sMenuSpriteAnims[gLanguage][2].variant,
         0, 0xFF, 0x10, 0, -0x9C, 0, 0x40000);
     {
         const struct TiledBg_082D7850 *ptr;
@@ -4125,7 +4125,7 @@ static void SubGameSelectStart(struct Unk_08138D64 *a1) {
         u16 idx;
         u16 i;
 
-        idx = gUnk_08385C14[gLanguage][7];
+        idx = sMenuBgIds[gLanguage][7];
         ptr = gUnk_082D7850[idx];
         tileset = ptr->tileset;
         tilemap = ptr->tilemap;
@@ -4141,7 +4141,7 @@ static void SubGameSelectStart(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void SubGameSelectSlideInBanner(struct Unk_08138D64 *a1) {
+static void SubGameSelectSlideInBanner(struct MainMenu *a1) {
     u8 i;
 
     ++a1->unk9D8;
@@ -4157,7 +4157,7 @@ static void SubGameSelectSlideInBanner(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void SubGameSelectSlideInItems(struct Unk_08138D64 *a1) {
+static void SubGameSelectSlideInItems(struct MainMenu *a1) {
     u8 i, j;
     u8 var = !a1->unk4[a1->unkA] ? 3 : 4;
     struct Sprite *sprite1, *sprite2;
@@ -4179,7 +4179,7 @@ static void SubGameSelectSlideInItems(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void SubGameSelectSpreadItems(struct Unk_08138D64 *a1) {
+static void SubGameSelectSpreadItems(struct MainMenu *a1) {
     u8 i, j;
     u8 r7 = a1->unk4[a1->unkA];
     u8 var = !r7 ? 3 : 4;
@@ -4210,11 +4210,11 @@ static void SubGameSelectSpreadItems(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static inline u16 *GetUnk9DA(struct Unk_08138D64 *a1) {
+static inline u16 *GetUnk9DA(struct MainMenu *a1) {
     return a1->unk9DA;
 }
 
-static void SubGameSelectReopen(struct Unk_08138D64 *a1) {
+static void SubGameSelectReopen(struct MainMenu *a1) {
     u8 r7 = a1->unk4[a1->unkA];
     u8 var = !r7 ? 3 : 4;
     struct Sprite *sprite;
@@ -4231,7 +4231,7 @@ static void SubGameSelectReopen(struct Unk_08138D64 *a1) {
         u16 idx;
         u16 i;
 
-        idx = gUnk_08385C14[gLanguage][a1->unk9CA + 7];
+        idx = sMenuBgIds[gLanguage][a1->unk9CA + 7];
         ptr = gUnk_082D7850[idx];
         tileset = ptr->tileset;
         tilemap = ptr->tilemap;
@@ -4246,7 +4246,7 @@ static void SubGameSelectReopen(struct Unk_08138D64 *a1) {
     gBgScrollRegs[0][1] = 0x18;
     SubGameSelectCreateSprites(a1);
     sprite = &a1->unkC;
-    SpriteInitNoPointer2(sprite, sprite->tilesVram, 0x780, gUnk_08385CD4[gLanguage][2].animId, gUnk_08385CD4[gLanguage][2].variant,
+    SpriteInitNoPointer2(sprite, sprite->tilesVram, 0x780, sMenuSpriteAnims[gLanguage][2].animId, sMenuSpriteAnims[gLanguage][2].variant,
         0, 0xFF, 0x10, 0, -0x9C, 0, 0x40000);
     a1->unkC.x = 0;
     for (i = 0; i < var; ++i) {
@@ -4271,7 +4271,7 @@ static void SubGameSelectReopen(struct Unk_08138D64 *a1) {
             u16 idx;
             u16 i;
 
-            idx = gUnk_08385C14[gLanguage][0xC];
+            idx = sMenuBgIds[gLanguage][0xC];
             ptr = gUnk_082D7850[idx];
             tileset = ptr->tileset;
             tilemap = ptr->tilemap;
@@ -4289,7 +4289,7 @@ static void SubGameSelectReopen(struct Unk_08138D64 *a1) {
             u16 idx;
             u16 i;
 
-            idx = gUnk_08385C14[gLanguage][6];
+            idx = sMenuBgIds[gLanguage][6];
             ptr = gUnk_082D7850[idx];
             tileset = ptr->tileset;
             tilemap = ptr->tilemap;
@@ -4308,7 +4308,7 @@ static void SubGameSelectReopen(struct Unk_08138D64 *a1) {
     a1->unk9CC = SubGameSelectFadeIn;
 }
 
-static void SubGameSelectFadeIn(struct Unk_08138D64 *a1) {
+static void SubGameSelectFadeIn(struct MainMenu *a1) {
     u8 i;
 
     ++a1->unk9D8;
@@ -4326,7 +4326,7 @@ static void SubGameSelectFadeIn(struct Unk_08138D64 *a1) {
         DisplaySprite(&a1->unk2DC[i]);
 }
 
-static void SubGameSelectEndFadeIn(struct Unk_08138D64 *a1) {
+static void SubGameSelectEndFadeIn(struct MainMenu *a1) {
     u8 i;
 
     gBldRegs.bldCnt = 0;
@@ -4347,15 +4347,15 @@ static void SubGameSelectEndFadeIn(struct Unk_08138D64 *a1) {
         DisplaySprite(&a1->unk2DC[i]);
 }
 
-static inline u8 GetUnk9CA(struct Unk_08138D64 *a1) {
+static inline u8 GetUnk9CA(struct MainMenu *a1) {
     return a1->unk9CA;
 }
 
-static inline u8 GetUnk9CB(struct Unk_08138D64 *a1) {
+static inline u8 GetUnk9CB(struct MainMenu *a1) {
     return a1->unk9CB;
 }
 
-static void SubGameSelectWaitInput(struct Unk_08138D64 *a1) {
+static void SubGameSelectWaitInput(struct MainMenu *a1) {
     u8 i;
     u8 r7 = a1->unk4[a1->unkA];
     u8 var = !r7 ? 3 : 4;
@@ -4400,7 +4400,7 @@ static void SubGameSelectWaitInput(struct Unk_08138D64 *a1) {
             u16 idx;
             u16 i;
     
-            idx = gUnk_08385C14[gLanguage][a1->unk9CA + 7];
+            idx = sMenuBgIds[gLanguage][a1->unk9CA + 7];
             ptr = gUnk_082D7850[idx];
             tileset = ptr->tileset;
             tilemap = ptr->tilemap;
@@ -4433,11 +4433,11 @@ static void SubGameSelectWaitInput(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static inline void SetUnkBF0(struct Unk_08138D64 *a1) {
+static inline void SetUnkBF0(struct MainMenu *a1) {
     a1->unkBF0 = 0;
 }
 
-static void SubGameSelectOpenPlayerCountMenu(struct Unk_08138D64 *a1) {
+static void SubGameSelectOpenPlayerCountMenu(struct MainMenu *a1) {
     u8 i;
     u8 r7 = a1->unk4[a1->unkA];
     u8 var = !r7 ? 3 : 4;
@@ -4459,7 +4459,7 @@ static void SubGameSelectOpenPlayerCountMenu(struct Unk_08138D64 *a1) {
         u16 idx;
         u16 i;
 
-        idx = gUnk_08385C14[gLanguage][0xB];
+        idx = sMenuBgIds[gLanguage][0xB];
         ptr = gUnk_082D7850[idx];
         tileset = ptr->tileset;
         tilemap = ptr->tilemap;
@@ -4482,7 +4482,7 @@ static void SubGameSelectOpenPlayerCountMenu(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unk37C);
 }
 
-static void SubGameSelectPlayerCountWaitInput(struct Unk_08138D64 *a1) {
+static void SubGameSelectPlayerCountWaitInput(struct MainMenu *a1) {
     u8 i;
 
     MainMenuUpdateIdleTimer(a1);
@@ -4520,7 +4520,7 @@ static void SubGameSelectPlayerCountWaitInput(struct Unk_08138D64 *a1) {
             u16 idx;
             u16 i;
 
-            idx = gUnk_08385C14[gLanguage][0xB];
+            idx = sMenuBgIds[gLanguage][0xB];
             ptr = gUnk_082D7850[idx];
             tileset = ptr->tileset;
             tilemap = ptr->tilemap;
@@ -4546,7 +4546,7 @@ static void SubGameSelectPlayerCountWaitInput(struct Unk_08138D64 *a1) {
             u16 idx;
             u16 i;
 
-            idx = gUnk_08385C14[gLanguage][0xC];
+            idx = sMenuBgIds[gLanguage][0xC];
             ptr = gUnk_082D7850[idx];
             tileset = ptr->tileset;
             tilemap = ptr->tilemap;
@@ -4564,7 +4564,7 @@ static void SubGameSelectPlayerCountWaitInput(struct Unk_08138D64 *a1) {
             u16 idx;
             u16 i;
 
-            idx = gUnk_08385C14[gLanguage][6];
+            idx = sMenuBgIds[gLanguage][6];
             ptr = gUnk_082D7850[idx];
             tileset = ptr->tileset;
             tilemap = ptr->tilemap;
@@ -4583,7 +4583,7 @@ static void SubGameSelectPlayerCountWaitInput(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unk37C);
 }
 
-static void SubGameSelectClosePlayerCountMenu(struct Unk_08138D64 *a1) {
+static void SubGameSelectClosePlayerCountMenu(struct MainMenu *a1) {
     u8 i;
     struct Sprite *sprite = &a1->unk2DC[a1->unk9CA];
 
@@ -4599,7 +4599,7 @@ static void SubGameSelectClosePlayerCountMenu(struct Unk_08138D64 *a1) {
         u16 idx;
         u16 i;
 
-        idx = gUnk_08385C14[gLanguage][a1->unk9CA + 7];
+        idx = sMenuBgIds[gLanguage][a1->unk9CA + 7];
         ptr = gUnk_082D7850[idx];
         tileset = ptr->tileset;
         tilemap = ptr->tilemap;
@@ -4616,7 +4616,7 @@ static void SubGameSelectClosePlayerCountMenu(struct Unk_08138D64 *a1) {
         DisplaySprite(&a1->unk2DC[i]);
 }
 
-static void SubGameSelectSlideOut(struct Unk_08138D64 *a1) {
+static void SubGameSelectSlideOut(struct MainMenu *a1) {
     u8 i, j;
     u8 r7 = a1->unk4[a1->unkA];
     u8 var = !r7 ? 3 : 4;
@@ -4638,7 +4638,7 @@ static void SubGameSelectSlideOut(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void SubGameSelectFadeOut(struct Unk_08138D64 *a1) {
+static void SubGameSelectFadeOut(struct MainMenu *a1) {
     u8 i;
     s32 var;
     s32 var2 = 0xF;
@@ -4655,7 +4655,7 @@ static void SubGameSelectFadeOut(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unk37C);
 }
 
-static void SubGameSelectLaunch(struct Unk_08138D64 *a1) {
+static void SubGameSelectLaunch(struct MainMenu *a1) {
     u8 unk9CA = a1->unk9CA;
 
     SubGameSelectFreeSprites(a1);
@@ -4690,7 +4690,7 @@ static void SubGameSelectLaunch(struct Unk_08138D64 *a1) {
     }
 }
 
-static void MainMenuDisplayCurScreenSprites(struct Unk_08138D64 *a1) {
+static void MainMenuDisplayCurScreenSprites(struct MainMenu *a1) {
     u8 i;
 
     switch (a1->unk0) {
@@ -4738,13 +4738,13 @@ void UpdateCurSaveFileCompletion(void) {
 }
 
 static void MainMenuMain(void) {
-    struct Unk_08138D64 *var = TaskGetStructPtr(gCurTask);
+    struct MainMenu *var = TaskGetStructPtr(gCurTask);
 
     ++var->unk9D4;
     var->unk9CC(var);
 }
 
-static void MainMenuInitPalette(struct Unk_08138D64 *a1) {
+static void MainMenuInitPalette(struct MainMenu *a1) {
     u8 i;
 
     for (i = 0; i < 3; ++i) {
@@ -4761,17 +4761,17 @@ static void MainMenuInitPalette(struct Unk_08138D64 *a1) {
     a1->unk9CC = MainMenuInitBgTileset;
 }
 
-static void MainMenuInitBgTileset(struct Unk_08138D64 *a1) {
+static void MainMenuInitBgTileset(struct MainMenu *a1) {
     LZ77UnCompVram(gUnk_082D7850[0xE2]->tileset, (u16 *)0x6008000);
     a1->unk9CC = MainMenuInitBgTilemap;
 }
 
-static void MainMenuInitHeaderSprites(struct Unk_08138D64 *a1) {
+static void MainMenuInitHeaderSprites(struct MainMenu *a1) {
     MainMenuCreateHeaderSprites(a1);
     a1->unk9CC = MainMenuInitFirstScreen;
 }
 
-static void FileSelectStartWaitInput(struct Unk_08138D64 *a1) {
+static void FileSelectStartWaitInput(struct MainMenu *a1) {
     a1->unkBF0 = 0;
     if (!UpdateSpriteAnimation(GetUnk28C(a1)))
         a1->unk28C.unk1B = 0xFF;
@@ -4780,7 +4780,7 @@ static void FileSelectStartWaitInput(struct Unk_08138D64 *a1) {
     a1->unk9CC = FileSelectWaitInput;
 }
 
-static void FileSelectStartSlideOut(struct Unk_08138D64 *a1) {
+static void FileSelectStartSlideOut(struct MainMenu *a1) {
     gUnk_0203ADE0 = -1;
     a1->unk9D8 = 0;
     a1->unk9CC = FileSelectSlideOut;
@@ -4790,7 +4790,7 @@ static void FileSelectStartSlideOut(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void FileSelectStartFadeOut(struct Unk_08138D64 *a1) {
+static void FileSelectStartFadeOut(struct MainMenu *a1) {
     m4aMPlayFadeOut(&gMPlayInfo_0, 1);
     a1->unk9D8 = 0;
     gBldRegs.bldCnt = BLDCNT_TGT1_ALL | BLDCNT_EFFECT_LIGHTEN;
@@ -4803,18 +4803,18 @@ static void FileSelectStartFadeOut(struct Unk_08138D64 *a1) {
     a1->unk9CC = FileSelectFadeOut;
 }
 
-static void FileSelectStopMusic(struct Unk_08138D64 *a1) {
+static void FileSelectStopMusic(struct MainMenu *a1) {
     m4aMPlayAllStop();
     a1->unk9D8 = 0;
     a1->unk9CC = FileSelectWaitMusicStop;
 }
 
-static void FileSelectWaitMusicStop(struct Unk_08138D64 *a1) {
+static void FileSelectWaitMusicStop(struct MainMenu *a1) {
     if (++a1->unk9D8 > 4)
         a1->unk9CC = FileSelectDestroyAnim;
 }
 
-static void FileSelectDestroyAnim(struct Unk_08138D64 *a1) {
+static void FileSelectDestroyAnim(struct MainMenu *a1) {
     if (a1->unkBEC) {
         sub_0802FBE0(a1->unkBEC);
         a1->unkBEC = NULL;
@@ -4822,32 +4822,32 @@ static void FileSelectDestroyAnim(struct Unk_08138D64 *a1) {
     a1->unk9CC = FileSelectWaitToTitle1;
 }
 
-static void FileSelectWaitToTitle1(struct Unk_08138D64 *a1) {
+static void FileSelectWaitToTitle1(struct MainMenu *a1) {
     a1->unk9CC = FileSelectWaitToTitle2;
 }
 
-static void FileSelectWaitToTitle2(struct Unk_08138D64 *a1) {
+static void FileSelectWaitToTitle2(struct MainMenu *a1) {
     a1->unk9CC = FileSelectReturnToTitle;
 }
 
-static void FileSelectReturnToTitle(struct Unk_08138D64 *a1) {
+static void FileSelectReturnToTitle(struct MainMenu *a1) {
     TaskDestroy(gCurTask);
     CreateTitleScreen();
 }
 
-static void MainMenuWaitStart(struct Unk_08138D64 *a1) {
+static void MainMenuWaitStart(struct MainMenu *a1) {
     if (++a1->unk9D8 > 4)
         a1->unk9CC = MainMenuStartSlideInBanner;
     a1->unkBDC(a1);
 }
 
-static void MainMenuStartSlideInBanner(struct Unk_08138D64 *a1) {
+static void MainMenuStartSlideInBanner(struct MainMenu *a1) {
     a1->unk9D8 = 0;
     a1->unk9CC = MainMenuSlideInBanner;
     a1->unkBDC(a1);
 }
 
-static void MainMenuStartSlideInItems(struct Unk_08138D64 *a1) {
+static void MainMenuStartSlideInItems(struct MainMenu *a1) {
     u8 i;
 
     a1->unk9D8 = 0;
@@ -4861,7 +4861,7 @@ static void MainMenuStartSlideInItems(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void MainMenuStartSpreadItems(struct Unk_08138D64 *a1) {
+static void MainMenuStartSpreadItems(struct MainMenu *a1) {
     u8 i;
 
     a1->unk9D8 = 0;
@@ -4875,7 +4875,7 @@ static void MainMenuStartSpreadItems(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void MainMenuEndFadeInFromLinkConnect(struct Unk_08138D64 *a1) {
+static void MainMenuEndFadeInFromLinkConnect(struct MainMenu *a1) {
     u8 i;
 
     gBldRegs.bldCnt = 0;
@@ -4889,7 +4889,7 @@ static void MainMenuEndFadeInFromLinkConnect(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unk37C);
 }
 
-static void MainMenuStartMainGame(struct Unk_08138D64 *a1) {
+static void MainMenuStartMainGame(struct MainMenu *a1) {
     u8 i;
 
     gBldRegs.bldCnt = BLDCNT_TGT1_ALL | BLDCNT_EFFECT_LIGHTEN;
@@ -4903,7 +4903,7 @@ static void MainMenuStartMainGame(struct Unk_08138D64 *a1) {
         DisplaySprite(&a1->unk2DC[i]);
 }
 
-static void MainMenuMainGameFreeMenuGfx(struct Unk_08138D64 *a1) {
+static void MainMenuMainGameFreeMenuGfx(struct MainMenu *a1) {
     gDispCnt &= ~(DISPCNT_BG0_ON | DISPCNT_BG1_ON);
     if (a1->unk28C.tilesVram) {
         VramFree(a1->unk28C.tilesVram);
@@ -4919,27 +4919,27 @@ static void MainMenuMainGameFreeMenuGfx(struct Unk_08138D64 *a1) {
     a1->unk9CC = MainMenuMainGameWaitFree;
 }
 
-static void MainMenuMainGameWaitFree(struct Unk_08138D64 *a1) {
+static void MainMenuMainGameWaitFree(struct MainMenu *a1) {
     if (++a1->unk9D8 > 4) {
         a1->unk9D8 = 0;
         a1->unk9CC = MainMenuMainGameFadeInAnim;
     }
 }
 
-static void MainMenuMainGameStartAnim(struct Unk_08138D64 *a1) {
+static void MainMenuMainGameStartAnim(struct MainMenu *a1) {
     sub_0802FBF4(a1->unkBEC);
     a1->unk9D8 = 0;
     a1->unk9CC = MainMenuMainGameWaitAnim;
 }
 
-static void MainMenuMainGameWaitAnim(struct Unk_08138D64 *a1) {
+static void MainMenuMainGameWaitAnim(struct MainMenu *a1) {
     if (a1->unkBEC->unk188 & 1 || gPressedKeys & (A_BUTTON | B_BUTTON | START_BUTTON)) {
         m4aMPlayFadeOut(&gMPlayInfo_0, 1);
         a1->unk9CC = MainMenuMainGameStartFadeOut;
     }
 }
 
-static void MainMenuMainGameStartFadeOut(struct Unk_08138D64 *a1) {
+static void MainMenuMainGameStartFadeOut(struct MainMenu *a1) {
     gBldRegs.bldCnt = BLDCNT_TGT1_ALL | BLDCNT_EFFECT_LIGHTEN;
     gBldRegs.bldAlpha = 0;
     gBldRegs.bldY = 0;
@@ -4947,7 +4947,7 @@ static void MainMenuMainGameStartFadeOut(struct Unk_08138D64 *a1) {
     a1->unk9CC = MainMenuMainGameFadeOut;
 }
 
-static void MainMenuMainGameFadeOut(struct Unk_08138D64 *a1) {
+static void MainMenuMainGameFadeOut(struct MainMenu *a1) {
     ++a1->unk9D8;
     gBldRegs.bldY = 0x10 * a1->unk9D8 / 0xF;
     if (a1->unk9D8 > 0xE) {
@@ -4957,12 +4957,12 @@ static void MainMenuMainGameFadeOut(struct Unk_08138D64 *a1) {
     }
 }
 
-static void MainMenuMainGameWaitMusicStop(struct Unk_08138D64 *a1) {
+static void MainMenuMainGameWaitMusicStop(struct MainMenu *a1) {
     if (++a1->unk9D8 > 4)
         a1->unk9CC = MainMenuMainGameDestroyAnim;
 }
 
-static void MainMenuMainGameDestroyAnim(struct Unk_08138D64 *a1) {
+static void MainMenuMainGameDestroyAnim(struct MainMenu *a1) {
     if (a1->unkBEC) {
         sub_0802FBE0(a1->unkBEC);
         a1->unkBEC = NULL;
@@ -4970,16 +4970,16 @@ static void MainMenuMainGameDestroyAnim(struct Unk_08138D64 *a1) {
     a1->unk9CC = MainMenuMainGameWait;
 }
 
-static void MainMenuMainGameWait(struct Unk_08138D64 *a1) {
+static void MainMenuMainGameWait(struct MainMenu *a1) {
     a1->unk9CC = MainMenuMainGameStopMusic;
 }
 
-static void MainMenuMainGameStopMusic(struct Unk_08138D64 *a1) {
+static void MainMenuMainGameStopMusic(struct MainMenu *a1) {
     m4aMPlayAllStop();
     a1->unk9CC = MainMenuLaunchMainGame;
 }
 
-static void MainMenuLaunchMainGame(struct Unk_08138D64 *a1) {
+static void MainMenuLaunchMainGame(struct MainMenu *a1) {
     gBldRegs.bldCnt = 0;
     gBldRegs.bldAlpha = 0;
     gBldRegs.bldY = 0;
@@ -4994,7 +4994,7 @@ static void MainMenuLaunchMainGame(struct Unk_08138D64 *a1) {
     sub_08123FD4();
 }
 
-static void MainMenuStartFadeOutToLinkConnect(struct Unk_08138D64 *a1) {
+static void MainMenuStartFadeOutToLinkConnect(struct MainMenu *a1) {
     u8 i;
 
     gBldRegs.bldCnt = BLDCNT_TGT1_BG0 | BLDCNT_TGT1_BG1 | BLDCNT_TGT1_BG2 | BLDCNT_TGT1_OBJ | BLDCNT_EFFECT_LIGHTEN;
@@ -5009,12 +5009,12 @@ static void MainMenuStartFadeOutToLinkConnect(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unk37C);
 }
 
-static void MainMenuEndFadeOutToLinkConnect(struct Unk_08138D64 *a1) {
+static void MainMenuEndFadeOutToLinkConnect(struct MainMenu *a1) {
     MainMenuFreeSprites(a1);
     a1->unk9CC = LinkConnectStart;
 }
 
-static void MainMenuStartSlideOut(struct Unk_08138D64 *a1) {
+static void MainMenuStartSlideOut(struct MainMenu *a1) {
     u8 i;
 
     a1->unk9D8 = 0;
@@ -5028,7 +5028,7 @@ static void MainMenuStartSlideOut(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void MainMenuEndSlideOut(struct Unk_08138D64 *a1) {
+static void MainMenuEndSlideOut(struct MainMenu *a1) {
     a1->unk9D8 = 0;
     if (a1->unk2 == 7)
         a1->unk9CC = a1->unk9D0;
@@ -5037,13 +5037,13 @@ static void MainMenuEndSlideOut(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void MainMenuWaitAfterSlideOut(struct Unk_08138D64 *a1) {
+static void MainMenuWaitAfterSlideOut(struct MainMenu *a1) {
     if (++a1->unk9D8 == 5)
         a1->unk9CC = a1->unk9D0;
     a1->unkBDC(a1);
 }
 
-static void MainMenuCollectionRoomDestroyAnim(struct Unk_08138D64 *a1) {
+static void MainMenuCollectionRoomDestroyAnim(struct MainMenu *a1) {
     if (a1->unkBEC) {
         sub_0802FBE0(a1->unkBEC);
         a1->unkBEC = NULL;
@@ -5051,15 +5051,15 @@ static void MainMenuCollectionRoomDestroyAnim(struct Unk_08138D64 *a1) {
     a1->unk9CC = MainMenuCollectionRoomWait1;
 }
 
-static void MainMenuCollectionRoomWait1(struct Unk_08138D64 *a1) {
+static void MainMenuCollectionRoomWait1(struct MainMenu *a1) {
     a1->unk9CC = MainMenuCollectionRoomWait2;
 }
 
-static void MainMenuCollectionRoomWait2(struct Unk_08138D64 *a1) {
+static void MainMenuCollectionRoomWait2(struct MainMenu *a1) {
     a1->unk9CC = MainMenuEnterCollectionRoom;
 }
 
-static void MainMenuEnterCollectionRoom(struct Unk_08138D64 *a1) {
+static void MainMenuEnterCollectionRoom(struct MainMenu *a1) {
     m4aMPlayAllStop();
     if (WriteSaveSectionByID(SAVE_BUFFER_TYPE_WORLD_PROPS, a1->unkA)) {
         ClearSaveBuffer(SAVE_BUFFER_TYPE_WORLD_PROPS);
@@ -5072,12 +5072,12 @@ static void MainMenuEnterCollectionRoom(struct Unk_08138D64 *a1) {
     sub_081434F8();
 }
 
-static void EraseFileStartSlideInBanner(struct Unk_08138D64 *a1) {
+static void EraseFileStartSlideInBanner(struct MainMenu *a1) {
     a1->unk9D8 = 0;
     a1->unk9CC = EraseFileSlideInBanner;
 }
 
-static void EraseFileSlideInBanner(struct Unk_08138D64 *a1) {
+static void EraseFileSlideInBanner(struct MainMenu *a1) {
     ++a1->unk9D8;
     a1->unkC.x = 0x9C * a1->unk9D8 / 5 - 0x9C;
     if (a1->unk9D8 > 4)
@@ -5085,7 +5085,7 @@ static void EraseFileSlideInBanner(struct Unk_08138D64 *a1) {
     FileSelectDisplayCurFileSprites(a1);
 }
 
-static void EraseFileClearSave(struct Unk_08138D64 *a1) {
+static void EraseFileClearSave(struct MainMenu *a1) {
     u8 unkA = a1->unkA;
 
     gUnk_0203ACB0[unkA] = -1;
@@ -5099,7 +5099,7 @@ static void EraseFileClearSave(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unk3D0);
 }
 
-static void EraseFileWaitAfterErase(struct Unk_08138D64 *a1) {
+static void EraseFileWaitAfterErase(struct MainMenu *a1) {
     if (++a1->unk9D8 >= 0x1E || gPressedKeys & B_BUTTON) {
         m4aSongNumStart(SE_MAIN_MENU_BACK);
         a1->unk9CC = EraseFileStartSlideOut;
@@ -5110,7 +5110,7 @@ static void EraseFileWaitAfterErase(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unk3D0);
 }
 
-static void EraseFileStartSlideOut(struct Unk_08138D64 *a1) {
+static void EraseFileStartSlideOut(struct MainMenu *a1) {
     a1->unk9D8 = 0;
     a1->unk9CC = EraseFileSlideOut;
     if (!UpdateSpriteAnimation(GetUnk28C(a1)))
@@ -5118,7 +5118,7 @@ static void EraseFileStartSlideOut(struct Unk_08138D64 *a1) {
     FileSelectDisplaySprites(a1);
 }
 
-static void EraseFileEnd(struct Unk_08138D64 *a1) {
+static void EraseFileEnd(struct MainMenu *a1) {
     EraseFileFreeSprites(a1);
     if (a1->unk2 == 1)
         a1->unk9CC = FileSelectStart;
@@ -5126,17 +5126,17 @@ static void EraseFileEnd(struct Unk_08138D64 *a1) {
         a1->unk9CC = MainMenuStart;
 }
 
-static void LinkConnectWaitStart(struct Unk_08138D64 *a1) {
+static void LinkConnectWaitStart(struct MainMenu *a1) {
     a1->unk9CC = LinkConnectInitSprites;
 }
 
-static void LinkConnectInitSprites(struct Unk_08138D64 *a1) {
+static void LinkConnectInitSprites(struct MainMenu *a1) {
     LinkConnectCreateGbaSprites(a1);
     LinkConnectCreateTextSprites(a1);
     a1->unk9CC = LinkConnectStartFadeIn;
 }
 
-static void LinkErrorWaitInput(struct Unk_08138D64 *a1) {
+static void LinkErrorWaitInput(struct MainMenu *a1) {
     if (gPressedKeys & B_BUTTON) {
         m4aSongNumStart(SE_MAIN_MENU_BACK);
         a1->unk9CC = LinkErrorStartFadeOut;
@@ -5144,7 +5144,7 @@ static void LinkErrorWaitInput(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unkC);
 }
 
-static void LinkErrorStartFadeOut(struct Unk_08138D64 *a1) {
+static void LinkErrorStartFadeOut(struct MainMenu *a1) {
     gBldRegs.bldCnt = BLDCNT_TGT1_BG0 | BLDCNT_TGT1_BG1 | BLDCNT_TGT1_BG2 | BLDCNT_TGT1_OBJ | BLDCNT_EFFECT_LIGHTEN;
     gBldRegs.bldAlpha = 0;
     gBldRegs.bldY = 0;
@@ -5153,7 +5153,7 @@ static void LinkErrorStartFadeOut(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unkC);
 }
 
-static void LinkErrorFadeOut(struct Unk_08138D64 *a1) {
+static void LinkErrorFadeOut(struct MainMenu *a1) {
     ++a1->unk9D8;
     gBldRegs.bldY = 0x10 * a1->unk9D8 / 0xF;
     if (a1->unk9D8 > 0xE)
@@ -5161,7 +5161,7 @@ static void LinkErrorFadeOut(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unkC);
 }
 
-static void LinkConnectDestroyAnim(struct Unk_08138D64 *a1) {
+static void LinkConnectDestroyAnim(struct MainMenu *a1) {
     if (a1->unkBEC) {
         sub_0802FBE0(a1->unkBEC);
         a1->unkBEC = NULL;
@@ -5169,20 +5169,20 @@ static void LinkConnectDestroyAnim(struct Unk_08138D64 *a1) {
     a1->unk9CC = LinkConnectFadeOutWait1;
 }
 
-static void LinkConnectFadeOutWait1(struct Unk_08138D64 *a1) {
+static void LinkConnectFadeOutWait1(struct MainMenu *a1) {
     a1->unk9CC = LinkConnectFadeOutWait2;
 }
 
-static void LinkConnectFadeOutWait2(struct Unk_08138D64 *a1) {
+static void LinkConnectFadeOutWait2(struct MainMenu *a1) {
     a1->unk9CC = LinkConnectEnd;
 }
 
-static void LinkFileSelectStartWait(struct Unk_08138D64 *a1) {
+static void LinkFileSelectStartWait(struct MainMenu *a1) {
     a1->unk9D8 = 0;
     a1->unk9CC = LinkFileSelectWait;
 }
 
-static void LinkFileSelectWait(struct Unk_08138D64 *a1) {
+static void LinkFileSelectWait(struct MainMenu *a1) {
     if (++a1->unk9D8 > 0x3B) {
         if (a1->unkBE8.pat2->unk4[0] != -1) // TODO: pat1?
             a1->unk9CC = LinkFileSelectStart;
@@ -5193,12 +5193,12 @@ static void LinkFileSelectWait(struct Unk_08138D64 *a1) {
     }
 }
 
-static void LinkFileSelectStartSlideIn(struct Unk_08138D64 *a1) {
+static void LinkFileSelectStartSlideIn(struct MainMenu *a1) {
     a1->unk9D8 = 0;
     a1->unk9CC = LinkFileSelectSlideIn;
 }
 
-static void LinkFileSelectEndSlideIn(struct Unk_08138D64 *a1) {
+static void LinkFileSelectEndSlideIn(struct MainMenu *a1) {
     gBldRegs.bldCnt = 0;
     gBldRegs.bldAlpha = 0;
     gBldRegs.bldY = 0;
@@ -5208,7 +5208,7 @@ static void LinkFileSelectEndSlideIn(struct Unk_08138D64 *a1) {
     LinkFileSelectDisplaySprites(a1);
 }
 
-static void LinkFileSelectStartSlideOut(struct Unk_08138D64 *a1) {
+static void LinkFileSelectStartSlideOut(struct MainMenu *a1) {
     gBldRegs.bldCnt = BLDCNT_TGT1_ALL | BLDCNT_EFFECT_LIGHTEN;
     gBldRegs.bldAlpha = 0;
     gBldRegs.bldY = 0;
@@ -5220,7 +5220,7 @@ static void LinkFileSelectStartSlideOut(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void LinkFileSelectFreeGfx(struct Unk_08138D64 *a1) {
+static void LinkFileSelectFreeGfx(struct MainMenu *a1) {
     gDispCnt &= ~(DISPCNT_BG0_ON | DISPCNT_BG1_ON);
     if (a1->unk28C.tilesVram) {
         VramFree(a1->unk28C.tilesVram);
@@ -5236,19 +5236,19 @@ static void LinkFileSelectFreeGfx(struct Unk_08138D64 *a1) {
     a1->unk9CC = LinkFileSelectWaitFree;
 }
 
-static void LinkFileSelectWaitFree(struct Unk_08138D64 *a1) {
+static void LinkFileSelectWaitFree(struct MainMenu *a1) {
     if (++a1->unk9D8 > 4) {
         a1->unk9D8 = 0;
         a1->unk9CC = LinkFileSelectFadeIn;
     }
 }
 
-static void LinkFileSelectWaitGameStart(struct Unk_08138D64 *a1) {
+static void LinkFileSelectWaitGameStart(struct MainMenu *a1) {
     if (a1->unkBE8.pat2->unkE == 5 && a1->unkBEC->unk188 & 1)
         a1->unk9CC = LinkFileSelectStartFadeOut;
 }
 
-static void LinkFileSelectStartFadeOut(struct Unk_08138D64 *a1) {
+static void LinkFileSelectStartFadeOut(struct MainMenu *a1) {
     m4aMPlayFadeOut(&gMPlayInfo_0, 1);
     gBldRegs.bldCnt = BLDCNT_TGT1_ALL | BLDCNT_EFFECT_LIGHTEN;
     gBldRegs.bldAlpha = 0;
@@ -5257,7 +5257,7 @@ static void LinkFileSelectStartFadeOut(struct Unk_08138D64 *a1) {
     a1->unk9CC = LinkFileSelectFadeOut;
 }
 
-static void LinkFileSelectFadeOut(struct Unk_08138D64 *a1) {
+static void LinkFileSelectFadeOut(struct MainMenu *a1) {
     ++a1->unk9D8;
     gBldRegs.bldY = 0x10 * a1->unk9D8 / 0xF;
     if (a1->unk9D8 > 0xE) {
@@ -5266,12 +5266,12 @@ static void LinkFileSelectFadeOut(struct Unk_08138D64 *a1) {
     }
 }
 
-static void LinkFileSelectWaitFadeOut(struct Unk_08138D64 *a1) {
+static void LinkFileSelectWaitFadeOut(struct MainMenu *a1) {
     if (++a1->unk9D8 > 4)
         a1->unk9CC = LinkFileSelectDestroyAnim;
 }
 
-static void LinkFileSelectDestroyAnim(struct Unk_08138D64 *a1) {
+static void LinkFileSelectDestroyAnim(struct MainMenu *a1) {
     if (a1->unkBEC) {
         sub_0802FBE0(a1->unkBEC);
         a1->unkBEC = NULL;
@@ -5279,15 +5279,15 @@ static void LinkFileSelectDestroyAnim(struct Unk_08138D64 *a1) {
     a1->unk9CC = LinkFileSelectWait1;
 }
 
-static void LinkFileSelectWait1(struct Unk_08138D64 *a1) {
+static void LinkFileSelectWait1(struct MainMenu *a1) {
     a1->unk9CC = LinkFileSelectWait2;
 }
 
-static void LinkFileSelectWait2(struct Unk_08138D64 *a1) {
+static void LinkFileSelectWait2(struct MainMenu *a1) {
     a1->unk9CC = LinkFileSelectLaunchGame;
 }
 
-static void LinkFileSelectLaunchGame(struct Unk_08138D64 *a1) {
+static void LinkFileSelectLaunchGame(struct MainMenu *a1) {
     gBldRegs.bldCnt = 0;
     gBldRegs.bldAlpha = 0;
     gBldRegs.bldY = 0;
@@ -5298,19 +5298,19 @@ static void LinkFileSelectLaunchGame(struct Unk_08138D64 *a1) {
     sub_08032BD4(a1->unkBE8.pat2);
 }
 
-static void SubGameSelectWaitStart(struct Unk_08138D64 *a1) {
+static void SubGameSelectWaitStart(struct MainMenu *a1) {
     if (++a1->unk9D8 > 4)
         a1->unk9CC = SubGameSelectStartSlideInBanner;
     a1->unkBDC(a1);
 }
 
-static void SubGameSelectStartSlideInBanner(struct Unk_08138D64 *a1) {
+static void SubGameSelectStartSlideInBanner(struct MainMenu *a1) {
     a1->unk9D8 = 0;
     a1->unk9CC = SubGameSelectSlideInBanner;
     a1->unkBDC(a1);
 }
 
-static void SubGameSelectStartSlideInItems(struct Unk_08138D64 *a1) {
+static void SubGameSelectStartSlideInItems(struct MainMenu *a1) {
     u8 i;
 
     a1->unk9D8 = 0;
@@ -5324,7 +5324,7 @@ static void SubGameSelectStartSlideInItems(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void SubGameSelectStartSpreadItems(struct Unk_08138D64 *a1) {
+static void SubGameSelectStartSpreadItems(struct MainMenu *a1) {
     u8 i;
 
     a1->unk9D8 = 0;
@@ -5338,7 +5338,7 @@ static void SubGameSelectStartSpreadItems(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void SubGameSelectStartSlideOut(struct Unk_08138D64 *a1) {
+static void SubGameSelectStartSlideOut(struct MainMenu *a1) {
     u8 i;
 
     a1->unk9D8 = 0;
@@ -5352,13 +5352,13 @@ static void SubGameSelectStartSlideOut(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void SubGameSelectEnd(struct Unk_08138D64 *a1) {
+static void SubGameSelectEnd(struct MainMenu *a1) {
     SubGameSelectFreeSprites(a1);
     a1->unk9CC = MainMenuStart;
     a1->unkBDC(a1);
 }
 
-static void SubGameSelectStartFadeOut(struct Unk_08138D64 *a1) {
+static void SubGameSelectStartFadeOut(struct MainMenu *a1) {
     u8 i;
 
     gBldRegs.bldCnt = BLDCNT_TGT1_ALL | BLDCNT_EFFECT_LIGHTEN;
@@ -5373,7 +5373,7 @@ static void SubGameSelectStartFadeOut(struct Unk_08138D64 *a1) {
     DisplaySprite(&a1->unk37C);
 }
 
-static void SubGameSelectDestroyAnim(struct Unk_08138D64 *a1) {
+static void SubGameSelectDestroyAnim(struct MainMenu *a1) {
     if (a1->unkBEC) {
         sub_0802FBE0(a1->unkBEC);
         a1->unkBEC = NULL;
@@ -5381,15 +5381,15 @@ static void SubGameSelectDestroyAnim(struct Unk_08138D64 *a1) {
     a1->unk9CC = SubGameSelectFadeOutWait1;
 }
 
-static void SubGameSelectFadeOutWait1(struct Unk_08138D64 *a1) {
+static void SubGameSelectFadeOutWait1(struct MainMenu *a1) {
     a1->unk9CC = SubGameSelectFadeOutWait2;
 }
 
-static void SubGameSelectFadeOutWait2(struct Unk_08138D64 *a1) {
+static void SubGameSelectFadeOutWait2(struct MainMenu *a1) {
     a1->unk9CC = SubGameSelectLaunch;
 }
 
-static void MainMenuStartIdleTimeout(struct Unk_08138D64 *a1) {
+static void MainMenuStartIdleTimeout(struct MainMenu *a1) {
     a1->unk0 = a1->unk1;
     a1->unk9D8 = 0;
     m4aMPlayFadeOut(&gMPlayInfo_0, 2);
@@ -5401,7 +5401,7 @@ static void MainMenuStartIdleTimeout(struct Unk_08138D64 *a1) {
     a1->unk9CC = MainMenuIdleTimeoutFadeOut;
 }
 
-static void MainMenuIdleTimeoutFadeOut(struct Unk_08138D64 *a1) {
+static void MainMenuIdleTimeoutFadeOut(struct MainMenu *a1) {
     ++a1->unk9D8;
     gBldRegs.bldY = 0x10 * a1->unk9D8 / 0x1E;
     if (a1->unk9D8 >= 0x1E)
@@ -5410,18 +5410,18 @@ static void MainMenuIdleTimeoutFadeOut(struct Unk_08138D64 *a1) {
     a1->unkBDC(a1);
 }
 
-static void MainMenuIdleTimeoutStopMusic(struct Unk_08138D64 *a1) {
+static void MainMenuIdleTimeoutStopMusic(struct MainMenu *a1) {
     m4aMPlayAllStop();
     a1->unk9D8 = 0;
     a1->unk9CC = MainMenuIdleTimeoutWaitMusicStop;
 }
 
-static void MainMenuIdleTimeoutWaitMusicStop(struct Unk_08138D64 *a1) {
+static void MainMenuIdleTimeoutWaitMusicStop(struct MainMenu *a1) {
     if (++a1->unk9D8 > 4)
         a1->unk9CC = MainMenuIdleTimeoutDestroyAnim;
 }
 
-static void MainMenuIdleTimeoutDestroyAnim(struct Unk_08138D64 *a1) {
+static void MainMenuIdleTimeoutDestroyAnim(struct MainMenu *a1) {
     if (a1->unkBEC) {
         sub_0802FBE0(a1->unkBEC);
         a1->unkBEC = NULL;
@@ -5429,15 +5429,15 @@ static void MainMenuIdleTimeoutDestroyAnim(struct Unk_08138D64 *a1) {
     a1->unk9CC = MainMenuIdleTimeoutWait1;
 }
 
-static void MainMenuIdleTimeoutWait1(struct Unk_08138D64 *a1) {
+static void MainMenuIdleTimeoutWait1(struct MainMenu *a1) {
     a1->unk9CC = MainMenuIdleTimeoutWait2;
 }
 
-static void MainMenuIdleTimeoutWait2(struct Unk_08138D64 *a1) {
+static void MainMenuIdleTimeoutWait2(struct MainMenu *a1) {
     a1->unk9CC = MainMenuIdleTimeoutReturnToTitle;
 }
 
-static void MainMenuIdleTimeoutReturnToTitle(struct Unk_08138D64 *a1 __attribute__((unused))) {
+static void MainMenuIdleTimeoutReturnToTitle(struct MainMenu *a1 __attribute__((unused))) {
     TaskDestroy(gCurTask);
     CreateTitleScreen();
 }
