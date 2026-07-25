@@ -130,4 +130,8 @@ gUnk_082EA398:: @ 082EA398
 	.incbin "baserom.gba", 0x2EA398, 0x0000800
 
 gUnk_082EAB98:: @ 082EAB98
-	.incbin "baserom.gba", 0x2EAB98, 0x00001C8
+	.4byte gUnk_082DEB98
+	.4byte gUnk_082DF398
+	.4byte gUnk_082DFB98
+	.4byte gUnk_082E0398
+	.incbin "baserom.gba", 0x2EABA8, 0x1B8
