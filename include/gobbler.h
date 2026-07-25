@@ -18,7 +18,7 @@ void *CreateGobblerBaby(struct Object *, u8);
 
 void GobblerStartIdle(struct Gobbler *);
 void sub_080E79A4(struct Object2 *);
-bool8 sub_080E588C(struct Gobbler *, struct Kirby *);
+bool8 GobblerTryEatKirby(struct Gobbler *, struct Kirby *);
 bool8 sub_080E74E4(struct Object2 *, struct Kirby *);
 
 extern const struct AnimInfo gGobblerAnimInfo[];

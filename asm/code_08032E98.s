@@ -6486,7 +6486,7 @@ _08036B3A:
 _08036B44:
 	adds r0, r5, #0
 	adds r1, r4, #0
-	bl sub_080E588C
+	bl GobblerTryEatKirby
 	b _08036BAA
 _08036B4E:
 	ldr r0, [r4, #8]

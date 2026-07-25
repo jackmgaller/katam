@@ -12,14 +12,14 @@ static void GobblerStartBreach(struct Gobbler *);
 static void GobblerBreach(struct Gobbler *);
 static void sub_080E4BD0(struct Gobbler *);
 static void sub_080E4CAC(struct Gobbler *);
-static void sub_080E4E6C(struct Gobbler *);
-static void sub_080E4F0C(struct Gobbler *);
+static void GobblerStartDashCombo(struct Gobbler *);
+static void GobblerDashWindup(struct Gobbler *);
 static void GobblerStartDash(struct Gobbler *);
 static void GobblerDash(struct Gobbler *);
-static void sub_080E53E8(struct Gobbler *);
-static void sub_080E5488(struct Gobbler *);
-static void sub_080E5554(struct Gobbler *);
-static void sub_080E5644(struct Gobbler *);
+static void GobblerStartChargeCombo(struct Gobbler *);
+static void GobblerChargeWindup(struct Gobbler *);
+static void GobblerStartCharge(struct Gobbler *);
+static void GobblerCharge(struct Gobbler *);
 static void GobblerSpawnBabies(struct Gobbler *);
 static void sub_080E5E58(struct Gobbler *);
 static void sub_080E5F20(void);
@@ -36,7 +36,7 @@ static void sub_080E761C(struct Object2 *);
 static void sub_080E76FC(void);
 static void GobblerSpawnFish(struct Gobbler *, u8);
 static void GobblerStartWaitForKirby(struct Gobbler *);
-static void sub_080E79F8(struct Gobbler *);
+static void GobblerStartDashRecover(struct Gobbler *);
 static void GobblerStartEatKirby(struct Gobbler *);
 static void sub_080E7A38(struct Gobbler *);
 static void sub_080E7A50(struct Gobbler *);
@@ -240,9 +240,9 @@ static void GobblerChooseAttack(struct Gobbler *gobbler)
         gobbler->unkC1 = 0;
     }
     if (gobbler2->unkC0)
-        sub_080E4E6C(gobbler);
+        GobblerStartDashCombo(gobbler);
     else if (gobbler2->unkC1)
-        sub_080E53E8(gobbler);
+        GobblerStartChargeCombo(gobbler);
     else
     {
         if (gobbler2->babies[0] && gobbler2->babies[1] && gobbler2->babies[2])
@@ -281,9 +281,9 @@ static void GobblerChooseAttack(struct Gobbler *gobbler)
         else if ((r1 -= sl) < 0)
             sub_080E4BD0(gobbler);
         else if ((r1 -= sl) < 0)
-            sub_080E4E6C(gobbler);
+            GobblerStartDashCombo(gobbler);
         else if ((r1 -= unk) < 0)
-            sub_080E53E8(gobbler);
+            GobblerStartChargeCombo(gobbler);
         else
             GobblerStartIdle(gobbler);
     }
@@ -532,7 +532,7 @@ static void sub_080E4784(struct Gobbler *gobbler)
             if (Rand16() & 1)
                 GobblerStartDash(gobbler);
             else
-                sub_080E5554(gobbler);
+                GobblerStartCharge(gobbler);
         }
         else
         {
@@ -749,12 +749,14 @@ static void sub_080E4CAC(struct Gobbler *gobbler)
     }
 }
 
-static void sub_080E4E6C(struct Gobbler *gobbler)
+// Queues up a run of short dashes. unkC0 holds how many are left, and
+// GobblerDashRecover counts it down and goes round again.
+static void GobblerStartDashCombo(struct Gobbler *gobbler)
 {
     struct Gobbler *gobbler2 = gobbler;
     u8 r;
 
-    ObjectSetFunc(gobbler, 2, sub_080E4F0C);
+    ObjectSetFunc(gobbler, 2, GobblerDashWindup);
     gobbler->obj2.base.xspeed = 0;
     gobbler->obj2.base.yspeed = 0;
     gobbler->obj2.base.flags &= ~2;
@@ -777,7 +779,7 @@ static void sub_080E4E6C(struct Gobbler *gobbler)
         GobblerStartDash(gobbler);
 }
 
-static void sub_080E4F0C(struct Gobbler *gobbler)
+static void GobblerDashWindup(struct Gobbler *gobbler)
 {
     struct Gobbler *gobbler2 = gobbler;
 
@@ -937,16 +939,16 @@ static void GobblerDash(struct Gobbler *gobbler)
     if (gobbler->obj2.base.flags & 1)
     {
         if (gobbler->obj2.base.x < (gobbler->obj2.unkA4 + 0x48) * 0x100)
-            sub_080E79F8(gobbler);
+            GobblerStartDashRecover(gobbler);
     }
     else
     {
         if (gobbler->obj2.base.x > (gobbler->obj2.unkA8 - 0x48) * 0x100)
-            sub_080E79F8(gobbler);
+            GobblerStartDashRecover(gobbler);
     }
 }
 
-static void sub_080E5290(struct Gobbler *gobbler)
+static void GobblerDashRecover(struct Gobbler *gobbler)
 {
     struct Gobbler *gobbler2 = gobbler;
 
@@ -1008,12 +1010,14 @@ static void sub_080E5290(struct Gobbler *gobbler)
     }
 }
 
-static void sub_080E53E8(struct Gobbler *gobbler)
+// Queues up a run of full speed charges. unkC1 is the counter this time, and
+// GobblerEatKirby counts it down at the far wall.
+static void GobblerStartChargeCombo(struct Gobbler *gobbler)
 {
     struct Gobbler *gobbler2 = gobbler;
     u16 r;
 
-    ObjectSetFunc(gobbler, 0xD, sub_080E5488);
+    ObjectSetFunc(gobbler, 0xD, GobblerChargeWindup);
     gobbler->obj2.base.xspeed = 0;
     gobbler->obj2.base.yspeed = 0;
     gobbler->obj2.base.flags &= ~2;
@@ -1033,10 +1037,10 @@ static void sub_080E53E8(struct Gobbler *gobbler)
         }
     }
     else
-        sub_080E5554(gobbler);
+        GobblerStartCharge(gobbler);
 }
 
-static void sub_080E5488(struct Gobbler *gobbler)
+static void GobblerChargeWindup(struct Gobbler *gobbler)
 {
     struct Gobbler *gobbler2 = gobbler;
 
@@ -1083,12 +1087,12 @@ static void sub_080E5488(struct Gobbler *gobbler)
         }
     }
     if (gobbler->obj2.base.flags & 2)
-        sub_080E5554(gobbler);
+        GobblerStartCharge(gobbler);
 }
 
-static void sub_080E5554(struct Gobbler *gobbler)
+static void GobblerStartCharge(struct Gobbler *gobbler)
 {
-    ObjectSetFunc(gobbler, 0xE, sub_080E5644);
+    ObjectSetFunc(gobbler, 0xE, GobblerCharge);
     gobbler->obj2.base.yspeed = 0;
     PlaySfx(&gobbler->obj2.base, SE_GOBBLER_DASH_ATTACK);
     gobbler->obj2.unk85 = 0;
@@ -1100,7 +1104,9 @@ static void sub_080E5554(struct Gobbler *gobbler)
         gobbler->obj2.unk85 = 1;
 }
 
-static void sub_080E5644(struct Gobbler *gobbler)
+// Tears across the arena with its mouth open, more than twice dash speed, and
+// only stops once it comes within 0x50 of the near or far edge.
+static void GobblerCharge(struct Gobbler *gobbler)
 {
     gobbler->obj2.base.flags |= 4;
     if (gobbler->obj2.unk85 || gobbler->obj2.subtype)
@@ -1203,7 +1209,7 @@ static void GobblerEatKirby(struct Gobbler *gobbler)
     }
 }
 
-bool8 sub_080E588C(struct Gobbler *gobbler, struct Kirby *kirby)
+bool8 GobblerTryEatKirby(struct Gobbler *gobbler, struct Kirby *kirby)
 {
     if (gobbler->obj2.unk83 != 3
         || kirby->base.base.base.unk0
@@ -2413,9 +2419,9 @@ static void GobblerStartWaitForKirby(struct Gobbler *gobbler)
     gobbler->obj2.base.yspeed = 0;
 }
 
-static void sub_080E79F8(struct Gobbler *gobbler)
+static void GobblerStartDashRecover(struct Gobbler *gobbler)
 {
-    ObjectSetFunc(gobbler, 4, sub_080E5290);
+    ObjectSetFunc(gobbler, 4, GobblerDashRecover);
     gobbler->obj2.base.flags &= ~2;
 }
 
