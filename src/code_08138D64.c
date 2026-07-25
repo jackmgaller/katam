@@ -1400,47 +1400,47 @@ static void sub_0813AD2C(struct Unk_08138D64 *a1) {
 static void sub_0813AD9C(struct Unk_08138D64 *a1) {
     u8 i;
 
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk28C);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk28C);
     for (i = 0; i < 3; ++i) {
-        sub_0815604C(&a1->unk34[i]);
+        DisplaySprite(&a1->unk34[i]);
         if (sub_08143498(a1->unk7[i]))
-            sub_0815604C(&a1->unkAC[i]);
+            DisplaySprite(&a1->unkAC[i]);
         if (a1->unk7[i] == 100)
-            sub_0815604C(&a1->unk124[i][0]);
+            DisplaySprite(&a1->unk124[i][0]);
         if (a1->unk7[i] >= 10)
-            sub_0815604C(&a1->unk124[i][1]);
-        sub_0815604C(&a1->unk124[i][2]);
+            DisplaySprite(&a1->unk124[i][1]);
+        DisplaySprite(&a1->unk124[i][2]);
     }
 }
 
 static void sub_0813AE30(struct Unk_08138D64 *a1) {
     u8 var = a1->unkA;
 
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk28C);
-    sub_0815604C(&a1->unk34[var]);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk28C);
+    DisplaySprite(&a1->unk34[var]);
     if (sub_08143498(a1->unk7[var]))
-        sub_0815604C(&a1->unkAC[var]);
+        DisplaySprite(&a1->unkAC[var]);
     if (a1->unk7[var] == 100)
-        sub_0815604C(&a1->unk124[var][0]);
+        DisplaySprite(&a1->unk124[var][0]);
     if (a1->unk7[var] >= 10)
-        sub_0815604C(&a1->unk124[var][1]);
-    sub_0815604C(&a1->unk124[var][2]);
+        DisplaySprite(&a1->unk124[var][1]);
+    DisplaySprite(&a1->unk124[var][2]);
 }
 
 static void sub_0813AEC8(struct Unk_08138D64 *a1) {
     u8 i;
 
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk28C);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk28C);
     for (i = 0; i < a1->unk7D0; ++i) {
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
         if (a1->unk9C4[i] == 100)
-            sub_0815604C(&a1->unk7E4[i][0]);
+            DisplaySprite(&a1->unk7E4[i][0]);
         if (a1->unk9C4[i] >= 10)
-            sub_0815604C(&a1->unk7E4[i][1]);
-        sub_0815604C(&a1->unk7E4[i][2]);
+            DisplaySprite(&a1->unk7E4[i][1]);
+        DisplaySprite(&a1->unk7E4[i][2]);
     }
 }
 
@@ -1499,7 +1499,7 @@ static void sub_0813B26C(struct Unk_08138D64 *a1) {
 
     sprite = &a1->unk34[unkA];
     sprite->palId = 2;
-    sub_08155128(sprite);
+    UpdateSpriteAnimation(sprite);
     if (a1->unk7[unkA] < 10)
         r1 = FALSE;
     else
@@ -1507,24 +1507,24 @@ static void sub_0813B26C(struct Unk_08138D64 *a1) {
     if (r1) {
         sprite = &a1->unkAC[unkA];
         sprite->palId = unkA + 4;
-        sub_08155128(sprite);
+        UpdateSpriteAnimation(sprite);
     }
     if (a1->unk7[unkA] == 100) {
         sprite = &a1->unk124[unkA][0];
         sprite->palId = 2;
-        sub_08155128(sprite);
+        UpdateSpriteAnimation(sprite);
     }
     if (a1->unk7[unkA] >= 10) {
         sprite = &a1->unk124[unkA][1];
         sprite->palId = 2;
-        sub_08155128(sprite);
+        UpdateSpriteAnimation(sprite);
     }
     sprite = &a1->unk124[unkA][2];
     sprite->palId = 2;
-    sub_08155128(sprite);
+    UpdateSpriteAnimation(sprite);
     sprite = &a1->unk34[unkB];
     sprite->palId = 3;
-    sub_08155128(sprite);
+    UpdateSpriteAnimation(sprite);
     if (a1->unk7[unkB] < 10)
         r1_2 = FALSE;
     else
@@ -1532,21 +1532,21 @@ static void sub_0813B26C(struct Unk_08138D64 *a1) {
     if (r1_2) {
         sprite = &a1->unkAC[unkB];
         sprite->palId = 7;
-        sub_08155128(sprite);
+        UpdateSpriteAnimation(sprite);
     }
     if (a1->unk7[unkB] == 100) {
         sprite = &a1->unk124[unkB][0];
         sprite->palId = 3;
-        sub_08155128(sprite);
+        UpdateSpriteAnimation(sprite);
     }
     if (a1->unk7[unkB] >= 10) {
         sprite = &a1->unk124[unkB][1];
         sprite->palId = 3;
-        sub_08155128(sprite);
+        UpdateSpriteAnimation(sprite);
     }
     sprite = &a1->unk124[unkB][2];
     sprite->palId = 3;
-    sub_08155128(sprite);
+    UpdateSpriteAnimation(sprite);
 }
 
 static void sub_0813B3C8(struct Unk_08138D64 *a1) {
@@ -1556,28 +1556,28 @@ static void sub_0813B3C8(struct Unk_08138D64 *a1) {
 
     sprite = &a1->unk2DC[a];
     sprite->palId = 2;
-    sub_08155128(sprite);
+    UpdateSpriteAnimation(sprite);
     sprite = &a1->unk7E4[a][0];
     sprite->palId = 2;
-    sub_08155128(sprite);
+    UpdateSpriteAnimation(sprite);
     sprite = &a1->unk7E4[a][1];
     sprite->palId = 2;
-    sub_08155128(sprite);
+    UpdateSpriteAnimation(sprite);
     sprite = &a1->unk7E4[a][2];
     sprite->palId = 2;
-    sub_08155128(sprite);
+    UpdateSpriteAnimation(sprite);
     sprite = &a1->unk2DC[b];
     sprite->palId = 3;
-    sub_08155128(sprite);
+    UpdateSpriteAnimation(sprite);
     sprite = &a1->unk7E4[b][0];
     sprite->palId = 3;
-    sub_08155128(sprite);
+    UpdateSpriteAnimation(sprite);
     sprite = &a1->unk7E4[b][1];
     sprite->palId = 3;
-    sub_08155128(sprite);
+    UpdateSpriteAnimation(sprite);
     sprite = &a1->unk7E4[b][2];
     sprite->palId = 3;
-    sub_08155128(sprite);
+    UpdateSpriteAnimation(sprite);
 }
 
 static u8 sub_0813B484(void) {
@@ -1699,14 +1699,14 @@ static void sub_0813B7E0(struct Unk_08138D64 *a1, u8 a2) {
         r5->y = a1->unk7C0[i][1];
         r5->unk14 = gUnk_08386512[i] << 6;
         r4->unk14 = (gUnk_08386512[i] - 1) << 6;
-        sub_0815604C(r5);
-        sub_0815604C(r4);
+        DisplaySprite(r5);
+        DisplaySprite(r4);
     }
     sub_0813BCA0(a1, 2);
     r0 = &a1->unk630[a1->unk7D1];
     r0->x = a1->unk7C0[a1->unk7D1][0];
     r0->y = a1->unk7C0[a1->unk7D1][1] + 0x10;
-    sub_0815604C(r0);
+    DisplaySprite(r0);
 }
 
 static void sub_0813B8B0(struct Unk_08138D64 *a1, s16 a2, u8 a3) {
@@ -1738,18 +1738,18 @@ static void sub_0813B9C0(struct Unk_08138D64 *a1, u8 a2) {
         r5->y = a1->unk7C0[i][1];
         r5->unk14 = gUnk_08386512[i] << 6;
         r4->unk14 = (gUnk_08386512[i] - 1) << 6;
-        sub_0815604C(r5);
-        sub_0815604C(r4);
+        DisplaySprite(r5);
+        DisplaySprite(r4);
     }
     sub_0813BCA0(a1, 3);
     r0 = &a1->unk630[a1->unk7D1];
     r0->x = a1->unk7C0[a1->unk7D1][0];
     r0->y = a1->unk7C0[a1->unk7D1][1] + 0x10;
-    sub_0815604C(r0);
+    DisplaySprite(r0);
     if (a2 == 1)
-        sub_0815604C(&a1->unk5B8);
+        DisplaySprite(&a1->unk5B8);
     else
-        sub_0815604C(&a1->unk590);
+        DisplaySprite(&a1->unk590);
 }
 
 static void sub_0813BA90(struct Unk_08138D64 *a1, s16 a2, u8 a3) {
@@ -1791,18 +1791,18 @@ static void sub_0813BBA0(struct Unk_08138D64 *a1, u8 a2) {
         r5->y = a1->unk7C0[i][1];
         r5->unk14 = gUnk_08386512[i] << 6;
         r4->unk14 = (gUnk_08386512[i] - 1) << 6;
-        sub_0815604C(r5);
-        sub_0815604C(r4);
+        DisplaySprite(r5);
+        DisplaySprite(r4);
     }
     if (a2 == 1)
-        sub_0815604C(&a1->unk5E0);
+        DisplaySprite(&a1->unk5E0);
     else
-        sub_0815604C(&a1->unk5B8);
+        DisplaySprite(&a1->unk5B8);
     sub_0813BCA0(a1, 4);
     r0 = &a1->unk630[a1->unk7D1];
     r0->x = a1->unk7C0[a1->unk7D1][0];
     r0->y = a1->unk7C0[a1->unk7D1][1] + 0x10;
-    sub_0815604C(r0);
+    DisplaySprite(r0);
 }
 
 static bool32 sub_0813BCA0(struct Unk_08138D64 *a1, u8 a2) {
@@ -1839,8 +1839,8 @@ static bool32 sub_0813BCA0(struct Unk_08138D64 *a1, u8 a2) {
             }
             sub_08155604(&a1->unk6D0[j][0], sp00.unk0);
             sub_08155604(&a1->unk6D0[j][1], sp00.unk0);
-            sub_0815604C(&a1->unk6D0[j][0]);
-            sub_0815604C(&a1->unk6D0[j][1]);
+            DisplaySprite(&a1->unk6D0[j][0]);
+            DisplaySprite(&a1->unk6D0[j][1]);
         }
     }
     return TRUE;
@@ -2083,7 +2083,7 @@ static void sub_0813C5D0(struct Unk_08138D64 *a1) {
         a1->unk9CC = sub_0813C6A0;
     if (!a1->unk0 && ++a1->unkBE4 <= a1->unkBE3)
         gBldRegs.bldY = 0x10 - (0x10 * a1->unkBE4 / a1->unkBE3);
-    if (!sub_08155128(&a1->unk28C))
+    if (!UpdateSpriteAnimation(&a1->unk28C))
         a1->unk28C.unk1B = 0xFF;
     sub_0813AD9C(a1);
     a1->unkBDC(a1);
@@ -2092,7 +2092,7 @@ static void sub_0813C5D0(struct Unk_08138D64 *a1) {
 static void sub_0813C6A0(struct Unk_08138D64 *a1) {
     a1->unk9D8 = 0;
     a1->unk9CC = sub_0813C734;
-    if (!sub_08155128(&a1->unk28C))
+    if (!UpdateSpriteAnimation(&a1->unk28C))
         a1->unk28C.unk1B = 0xFF;
     sub_0813AD9C(a1);
     if (!a1->unk0 && ++a1->unkBE4 <= a1->unkBE3)
@@ -2117,7 +2117,7 @@ static void sub_0813C734(struct Unk_08138D64 *a1) {
         a1->unk9CC = sub_0813C844;
     if (!a1->unk0 && ++a1->unkBE4 <= a1->unkBE3)
         gBldRegs.bldY = 0x10 - (0x10 * a1->unkBE4 / a1->unkBE3);
-    if (!sub_08155128(&a1->unk28C))
+    if (!UpdateSpriteAnimation(&a1->unk28C))
         a1->unk28C.unk1B = 0xFF;
     sub_0813AD9C(a1);
     a1->unkBDC(a1);
@@ -2128,7 +2128,7 @@ static void sub_0813C844(struct Unk_08138D64 *a1) {
     a1->unk9CC = sub_0813C8D8;
     if (!a1->unk0 && ++a1->unkBE4 <= a1->unkBE3)
         gBldRegs.bldY = 0x10 - (0x10 * a1->unkBE4 / a1->unkBE3);
-    if (!sub_08155128(&a1->unk28C))
+    if (!UpdateSpriteAnimation(&a1->unk28C))
         a1->unk28C.unk1B = 0xFF;
     sub_0813AD9C(a1);
     a1->unkBDC(a1);
@@ -2153,7 +2153,7 @@ static void sub_0813C8D8(struct Unk_08138D64 *a1) {
         a1->unk9CC = sub_08141FC4;
     if (!a1->unk0 && ++a1->unkBE4 <= a1->unkBE3)
         gBldRegs.bldY = 0x10 - (0x10 * a1->unkBE4 / a1->unkBE3);
-    if (!sub_08155128(&a1->unk28C))
+    if (!UpdateSpriteAnimation(&a1->unk28C))
         a1->unk28C.unk1B = 0xFF;
     sub_0813AD9C(a1);
     a1->unkBDC(a1);
@@ -2200,9 +2200,9 @@ static void sub_0813CA24(struct Unk_08138D64 *a1) {
     if (a1->unkA != a1->unkB) {
         sub_0813B26C(a1);
         a1->unk28C.y = gUnk_08386504[a1->unkA];
-        sub_08155128(&a1->unk28C);
+        UpdateSpriteAnimation(&a1->unk28C);
     }
-    if (!sub_08155128(&a1->unk28C))
+    if (!UpdateSpriteAnimation(&a1->unk28C))
         a1->unk28C.unk1B = 0xFF;
     sub_0813AD9C(a1);
     a1->unkBDC(a1);
@@ -2228,7 +2228,7 @@ static void sub_0813CB78(struct Unk_08138D64 *a1) {
         a1->unk9CC = sub_0813CDE4;
         a1->unkBDC(a1);
     } else {
-        if (!sub_08155128(&a1->unk28C))
+        if (!UpdateSpriteAnimation(&a1->unk28C))
             a1->unk28C.unk1B = 0xFF;
         sub_0813AD9C(a1);
         a1->unkBDC(a1);
@@ -2254,7 +2254,7 @@ static void sub_0813CCA8(struct Unk_08138D64 *a1) {
     gBgScrollRegs[1][1] = 0x18 * a1->unk9D8 / 0xA;
     if (a1->unk9D8 > 9)
         a1->unk9CC = sub_081420EC;
-    if (!sub_08155128(&a1->unk28C))
+    if (!UpdateSpriteAnimation(&a1->unk28C))
         a1->unk28C.unk1B = 0xFF;
     sub_0813AD9C(a1);
     a1->unkBDC(a1);
@@ -2302,25 +2302,25 @@ static void sub_0813CDE4(struct Unk_08138D64 *a1) {
         a1->unk3A4 = a1->unk3A5 = 0;
         sprite = &GetUnk2DC(a1)[0];
         sprite->palId = 2;
-        sub_08155128(sprite);
+        UpdateSpriteAnimation(sprite);
         for (j = 1; j < 4; ++j) {
             sprite = &a1->unk2DC[j];
             sprite->palId = 3;
-            sub_08155128(sprite);
+            UpdateSpriteAnimation(sprite);
         }
         a1->unk28C.y = 0x10;
-        sub_08155128(&a1->unk28C);
+        UpdateSpriteAnimation(&a1->unk28C);
         a1->unk9CC = sub_081421B8;
         break;
     case 3:
         a1->unk28C.y = gUnk_0838650A[a1->unk3A4];
-        sub_08155128(&a1->unk28C);
+        UpdateSpriteAnimation(&a1->unk28C);
         a1->unk9CC = sub_081421B8;
         break;
     case 4:
         a1->unkBEC = sub_0802E57C();
         a1->unk28C.y = gUnk_0838650A[a1->unk3A4];
-        sub_08155128(&a1->unk28C);
+        UpdateSpriteAnimation(&a1->unk28C);
         a1->unk9CC = sub_0813D364;
         break;
     case 7:
@@ -2344,7 +2344,7 @@ static void sub_0813CDE4(struct Unk_08138D64 *a1) {
                 CpuCopy16(tilemap + i * 0x1E, vram + i * 0x20, 0x20 * sizeof(u16));
         }
         a1->unk28C.y = gUnk_0838650A[a1->unk3A4];
-        sub_08155128(&a1->unk28C);
+        UpdateSpriteAnimation(&a1->unk28C);
         a1->unk9CC = sub_081421B8;
         break;
     case 0xA:
@@ -2361,12 +2361,12 @@ static void sub_0813D0DC(struct Unk_08138D64 *a1) {
     a1->unkC.x = 0x9C * a1->unk9D8 / 5 - 0x9C;
     if (a1->unk9D8 > 4)
         a1->unk9CC = sub_08142228;
-    if (!sub_08155128(&a1->unk28C))
+    if (!UpdateSpriteAnimation(&a1->unk28C))
         a1->unk28C.unk1B = 0xFF;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk28C);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk28C);
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
     a1->unkBDC(a1);
 }
 
@@ -2377,12 +2377,12 @@ static void sub_0813D178(struct Unk_08138D64 *a1) {
     a1->unk2DC[0].x = a1->unk2DC[1].x = a1->unk2DC[2].x = a1->unk2DC[3].x = (-0xD0 * a1->unk9D8) / 5 + 0xF0;
     if (a1->unk9D8 > 4)
         a1->unk9CC = sub_081422A8;
-    if (!sub_08155128(&a1->unk28C))
+    if (!UpdateSpriteAnimation(&a1->unk28C))
         a1->unk28C.unk1B = 0xFF;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk28C);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk28C);
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
     a1->unkBDC(a1);
 }
 
@@ -2401,12 +2401,12 @@ static void sub_0813D234(struct Unk_08138D64 *a1) {
         a1->unkBF0 = 0;
         a1->unk9CC = sub_0813D784;
     }
-    if (!sub_08155128(&a1->unk28C))
+    if (!UpdateSpriteAnimation(&a1->unk28C))
         a1->unk28C.unk1B = 0xFF;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk28C);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk28C);
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
     a1->unkBDC(a1);
 }
 
@@ -2443,13 +2443,13 @@ static void sub_0813D364(struct Unk_08138D64 *a1) {
     a1->unk2DC[3].y = 0x5A;
     a1->unk37C.y = 0x15 * a1->unk3A4 + 0x25;
     a1->unk28C.unk1B = 0xFF;
-    sub_08155128(&a1->unk28C);
+    UpdateSpriteAnimation(&a1->unk28C);
     sprite = &a1->unk2DC[a1->unk3A4];
     sprite->palId = 4;
     sprite->unk8 = 0;
-    sub_08155128(sprite);
+    UpdateSpriteAnimation(sprite);
     a1->unk37C.palId = 6;
-    sub_08155128(&a1->unk37C);
+    UpdateSpriteAnimation(&a1->unk37C);
     a1->unk9D8 = 0;
     a1->unk9CC = sub_0813D4CC;
 }
@@ -2461,11 +2461,11 @@ static void sub_0813D4CC(struct Unk_08138D64 *a1) {
     gBldRegs.bldY = 0x10 - 0x10 * a1->unk9D8 / 0xA;
     if (a1->unk9D8 > 9)
         a1->unk9CC = sub_08142328;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk28C);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk28C);
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
-    sub_0815604C(&a1->unk37C);
+        DisplaySprite(&a1->unk2DC[i]);
+    DisplaySprite(&a1->unk37C);
 }
 
 static void sub_0813D550(struct Unk_08138D64 *a1) {
@@ -2513,12 +2513,12 @@ static void sub_0813D674(struct Unk_08138D64 *a1) {
     gBldRegs.bldY = 0x10 - 0x10 * a1->unkBE4 / a1->unkBE3;
     if (a1->unkBE4 > 9)
         a1->unk9CC = sub_0813D70C;
-    if (!sub_08155128(&a1->unk28C))
+    if (!UpdateSpriteAnimation(&a1->unk28C))
         a1->unk28C.unk1B = 0xFF;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk28C);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk28C);
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
 }
 
 static void sub_0813D70C(struct Unk_08138D64 *a1) {
@@ -2529,12 +2529,12 @@ static void sub_0813D70C(struct Unk_08138D64 *a1) {
     gBldRegs.bldY = 0;
     a1->unkBF0 = 0;
     a1->unk9CC = sub_0813D784;
-    if (!sub_08155128(&a1->unk28C))
+    if (!UpdateSpriteAnimation(&a1->unk28C))
         a1->unk28C.unk1B = 0xFF;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk28C);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk28C);
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
 }
 
 static inline u8 GetUnk3A4(struct Unk_08138D64 *a1) {
@@ -2626,20 +2626,20 @@ static void sub_0813D784(struct Unk_08138D64 *a1) {
                 CpuCopy16(tilemap + i * 0x1E, vram + i * 0x20, 0x20 * sizeof(u16));
             sprite = GetUnk2DCSub(a1, GetUnk3A4(a1));
             sprite->palId = 2;
-            sub_08155128(sprite);
+            UpdateSpriteAnimation(sprite);
             sprite = GetUnk2DCSub(a1, GetUnk3A5(a1));
             sprite->palId = 3;
-            sub_08155128(sprite);
+            UpdateSpriteAnimation(sprite);
             a1->unk28C.y = gUnk_0838650A[a1->unk3A4];
-            sub_08155128(&a1->unk28C);
+            UpdateSpriteAnimation(&a1->unk28C);
         }
     } while (0);
-    if (!sub_08155128(GetUnk28C(a1)))
+    if (!UpdateSpriteAnimation(GetUnk28C(a1)))
         a1->unk28C.unk1B = 0xFF;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(GetUnk28C(a1));
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(GetUnk28C(a1));
     for (j = 0; j < 4; ++j)
-        sub_0815604C(&a1->unk2DC[j]);
+        DisplaySprite(&a1->unk2DC[j]);
     a1->unkBDC(a1);
 }
 
@@ -2651,9 +2651,9 @@ static void sub_0813DA34(struct Unk_08138D64 *a1) {
     a1->unk37C.y = 0x15 * a1->unk3A4 + 0x25;
     a1->unk3A6 = 0;
     a1->unk37C.palId = 5;
-    sub_08155128(&a1->unk37C);
+    UpdateSpriteAnimation(&a1->unk37C);
     a1->unk28C.unk1B = 0xFF;
-    sub_08155128(&a1->unk28C);
+    UpdateSpriteAnimation(&a1->unk28C);
     {
         const struct TiledBg_082D7850 *ptr;
         const u16 *tilemap;
@@ -2676,14 +2676,14 @@ static void sub_0813DA34(struct Unk_08138D64 *a1) {
     sprite = &a1->unk2DC[a1->unk3A4];
     sprite->palId = 4;
     sprite->unk8 = 0;
-    sub_08155128(sprite);
+    UpdateSpriteAnimation(sprite);
     a1->unkBF0 = 0;
     a1->unk9CC = sub_0813DB74;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk28C);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk28C);
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
-    sub_0815604C(&a1->unk37C);
+        DisplaySprite(&a1->unk2DC[i]);
+    DisplaySprite(&a1->unk37C);
 }
 
 static void sub_0813DB74(struct Unk_08138D64 *a1) {
@@ -2714,7 +2714,7 @@ static void sub_0813DB74(struct Unk_08138D64 *a1) {
             m4aSongNumStart(SE_MAIN_MENU_CURSOR);
         a1->unk3A6 = 0;
         a1->unk37C.palId = 5;
-        sub_08155128(&a1->unk37C);
+        UpdateSpriteAnimation(&a1->unk37C);
         {
             const struct TiledBg_082D7850 *ptr;
             const u16 *tilemap;
@@ -2740,7 +2740,7 @@ static void sub_0813DB74(struct Unk_08138D64 *a1) {
             m4aSongNumStart(SE_MAIN_MENU_CURSOR);
         a1->unk3A6 = 1;
         a1->unk37C.palId = 6;
-        sub_08155128(&a1->unk37C);
+        UpdateSpriteAnimation(&a1->unk37C);
         {
             const struct TiledBg_082D7850 *ptr;
             const u16 *tilemap;
@@ -2762,11 +2762,11 @@ static void sub_0813DB74(struct Unk_08138D64 *a1) {
         }
         break;
     }
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk28C);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk28C);
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
-    sub_0815604C(&a1->unk37C);
+        DisplaySprite(&a1->unk2DC[i]);
+    DisplaySprite(&a1->unk37C);
 }
 
 static void sub_0813DDA8(struct Unk_08138D64 *a1) {
@@ -2775,7 +2775,7 @@ static void sub_0813DDA8(struct Unk_08138D64 *a1) {
 
     sprite->palId = 2;
     sprite->unk8 = 0;
-    sub_08155128(sprite);
+    UpdateSpriteAnimation(sprite);
     {
         const struct TiledBg_082D7850 *ptr;
         const u16 *tilemap;
@@ -2796,10 +2796,10 @@ static void sub_0813DDA8(struct Unk_08138D64 *a1) {
             CpuCopy16(tilemap + i * 0x1E, vram + i * 0x20, 0x20 * sizeof(u16));
     }
     a1->unk9CC = sub_0813D784;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk28C);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk28C);
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
 }
 
 static void sub_0813DE7C(struct Unk_08138D64 *a1) {
@@ -2809,10 +2809,10 @@ static void sub_0813DE7C(struct Unk_08138D64 *a1) {
     gBldRegs.bldY = 0x10 * a1->unk9D8 / 0xF;
     if (a1->unk9D8 > 0xE)
         a1->unk9CC = sub_081423F0;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk28C);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk28C);
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
 }
 
 static void sub_0813DEF0(struct Unk_08138D64 *a1) {
@@ -2834,11 +2834,11 @@ static void sub_0813DF4C(struct Unk_08138D64 *a1) {
     gBldRegs.bldY = 0x10 * a1->unk9D8 / 0xF;
     if (a1->unk9D8 > 0xE)
         a1->unk9CC = sub_0814271C;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk28C);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk28C);
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
-    sub_0815604C(&a1->unk37C);
+        DisplaySprite(&a1->unk2DC[i]);
+    DisplaySprite(&a1->unk37C);
 }
 
 static void sub_0813DFCC(struct Unk_08138D64 *a1) {
@@ -2856,12 +2856,12 @@ static void sub_0813DFCC(struct Unk_08138D64 *a1) {
         a1->unkBDC(a1);
         return;
     }
-    if (!sub_08155128(&a1->unk28C))
+    if (!UpdateSpriteAnimation(&a1->unk28C))
         a1->unk28C.unk1B = 0xFF;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk28C);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk28C);
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
     a1->unkBDC(a1);
 }
 
@@ -2874,11 +2874,11 @@ static void sub_0813E0F8(struct Unk_08138D64 *a1) {
     gBldRegs.bldY = 0;
     a1->unk9D8 = 0;
     a1->unk9CC = sub_0813E184;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk28C);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk28C);
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
-    if (!sub_08155128(&a1->unk28C))
+        DisplaySprite(&a1->unk2DC[i]);
+    if (!UpdateSpriteAnimation(&a1->unk28C))
         a1->unk28C.unk1B = 0xFF;
 }
 
@@ -2894,12 +2894,12 @@ static void sub_0813E184(struct Unk_08138D64 *a1) {
     gBldRegs.bldY = 0x10 * a1->unk9D8 / 0xA;
     if (a1->unk9D8 > 9)
         a1->unk9CC = sub_08142848;
-    sub_0815604C(&a1->unkC);
+    DisplaySprite(&a1->unkC);
     sprite = &a1->unk28C;
-    sub_0815604C(sprite);
+    DisplaySprite(sprite);
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
-    if (!sub_08155128(sprite))
+        DisplaySprite(&a1->unk2DC[i]);
+    if (!UpdateSpriteAnimation(sprite))
         a1->unk28C.unk1B = 0xFF;
 }
 
@@ -2914,7 +2914,7 @@ static void sub_0813E210(struct Unk_08138D64 *a1) {
     SpriteInitNoPointer2(sprite, sprite->tilesVram, 0x780, gUnk_08385CD4[gLanguage][4].animId, gUnk_08385CD4[gLanguage][4].variant, 0, 0xFF, 0x10,
         0, -0x9C, 0, 0x40000);
     a1->unk28C.unk1B = 0xFF;
-    sub_08155128(&a1->unk28C);
+    UpdateSpriteAnimation(&a1->unk28C);
     a1->unk9CC = sub_0814291C;
 }
 
@@ -2954,14 +2954,14 @@ static void sub_0813E3F4(struct Unk_08138D64 *a1) {
     a1->unk470 = 1;
     a1->unk3A7 = 0;
     a1->unk3D0.palId = 7;
-    sub_08155128(&a1->unk3D0);
+    UpdateSpriteAnimation(&a1->unk3D0);
     sprite = &a1->unk3A8;
     sprite->animId = gUnk_08385CD4[gLanguage][0x18].animId;
     sprite->variant = gUnk_08385CD4[gLanguage][0x18].variant;
-    sub_08155128(&a1->unk3A8);
+    UpdateSpriteAnimation(&a1->unk3A8);
     sub_0813AE30(a1);
-    sub_0815604C(&a1->unk3A8);
-    sub_0815604C(&a1->unk3D0);
+    DisplaySprite(&a1->unk3A8);
+    DisplaySprite(&a1->unk3D0);
     a1->unkBF0 = 0;
     a1->unk9CC = sub_0813E554;
 }
@@ -2972,14 +2972,14 @@ static void sub_0813E4A4(struct Unk_08138D64 *a1) {
     a1->unk470 = 2;
     a1->unk3A7 = 0;
     a1->unk3D0.palId = 7;
-    sub_08155128(&a1->unk3D0);
+    UpdateSpriteAnimation(&a1->unk3D0);
     sprite = &a1->unk3A8;
     sprite->animId = gUnk_08385CD4[gLanguage][0x19].animId;
     sprite->variant = gUnk_08385CD4[gLanguage][0x19].variant;
-    sub_08155128(&a1->unk3A8);
+    UpdateSpriteAnimation(&a1->unk3A8);
     sub_0813AE30(a1);
-    sub_0815604C(&a1->unk3A8);
-    sub_0815604C(&a1->unk3D0);
+    DisplaySprite(&a1->unk3A8);
+    DisplaySprite(&a1->unk3D0);
     a1->unkBF0 = 0;
     a1->unk9CC = sub_0813E554;
 }
@@ -3013,19 +3013,19 @@ static void sub_0813E554(struct Unk_08138D64 *a1) {
             m4aSongNumStart(SE_MAIN_MENU_CURSOR);
         a1->unk3A7 = 1;
         a1->unk3D0.palId = 6;
-        sub_08155128(&a1->unk3D0);
+        UpdateSpriteAnimation(&a1->unk3D0);
         break;
     case 6:
         if (a1->unk3A7)
             m4aSongNumStart(SE_MAIN_MENU_CURSOR);
         a1->unk3A7 = 0;
         a1->unk3D0.palId = 7;
-        sub_08155128(&a1->unk3D0);
+        UpdateSpriteAnimation(&a1->unk3D0);
         break;
     }
     sub_0813AE30(a1);
-    sub_0815604C(&a1->unk3A8);
-    sub_0815604C(&a1->unk3D0);
+    DisplaySprite(&a1->unk3A8);
+    DisplaySprite(&a1->unk3D0);
 }
 
 static void sub_0813E680(struct Unk_08138D64 *a1) {
@@ -3035,15 +3035,15 @@ static void sub_0813E680(struct Unk_08138D64 *a1) {
     a1->unk9D8 = 0;
     a1->unk9CC = sub_0813E788;
     sub_0813AE30(a1);
-    sub_0815604C(&a1->unk3A8);
-    sub_0815604C(&a1->unk3D0);
+    DisplaySprite(&a1->unk3A8);
+    DisplaySprite(&a1->unk3D0);
     m4aSongNumStart(SE_MAIN_MENU_DELETE_SAVE);
     for (i = 0; i < 3; ++i) {
         a1->unk3F8[i].x = (Rand32() % 0x80) + 0x4B;
         a1->unk3F8[i].y = (Rand32() % 0x20) + 0x1B;
         var = Rand32() & 0xF;
         for (j = 0; j < var; ++j)
-            sub_08155128(&a1->unk3F8[i]);
+            UpdateSpriteAnimation(&a1->unk3F8[i]);
     }
     a1->unk473 = 0;
     a1->unk474 = (Rand32() & 7) + 5;
@@ -3073,11 +3073,11 @@ static void sub_0813E788(struct Unk_08138D64 *a1) {
         sprite_r1 = &a1->unk124[idx][1];
         sprite_r1->animId = gUnk_083864B4[r5].animId;
         sprite_r1->variant = gUnk_083864B4[r5].variant;
-        sub_08155128(sprite_r1);
+        UpdateSpriteAnimation(sprite_r1);
         sprite_r1 = &a1->unk124[idx][2];
         sprite_r1->animId = gUnk_083864B4[r6].animId;
         sprite_r1->variant = gUnk_083864B4[r6].variant;
-        sub_08155128(sprite_r1);
+        UpdateSpriteAnimation(sprite_r1);
         tmp = a1->unk7[idx];
         if (tmp < 10)
             b = FALSE;
@@ -3088,7 +3088,7 @@ static void sub_0813E788(struct Unk_08138D64 *a1) {
             sprite_r1 = &a1->unkAC[idx];
             sprite_r1->animId = sp04.animId;
             sprite_r1->variant = sp04.variant;
-            sub_08155128(sprite_r1);
+            UpdateSpriteAnimation(sprite_r1);
         }
     }
     a1->unk3A8.y = sp0C + 0x5C;
@@ -3101,7 +3101,7 @@ static void sub_0813E788(struct Unk_08138D64 *a1) {
     a1->unk28C.y = gUnk_08386504[0] + sp0C;
     gBgScrollRegs[2][1] = sp0C;
     for (i = 0; i < 3; ++i) {
-        if (!sub_08155128(&a1->unk3F8[i])) {
+        if (!UpdateSpriteAnimation(&a1->unk3F8[i])) {
             a1->unk3F8[i].x = (Rand32() % 0x80) + 0x4B;
             a1->unk3F8[i].y = (Rand32() % 0x20) + 0x1B;
             a1->unk3F8[i].unk1B = 0xFF;
@@ -3114,16 +3114,16 @@ static void sub_0813E788(struct Unk_08138D64 *a1) {
     }
     if (a1->unk471) {
         a1->unk34[idx].palId = 3;
-        sub_08155128(&a1->unk34[idx]);
+        UpdateSpriteAnimation(&a1->unk34[idx]);
     } else {
         a1->unk34[idx].palId = 2;
-        sub_08155128(&a1->unk34[idx]);
+        UpdateSpriteAnimation(&a1->unk34[idx]);
     }
     sub_0813AE30(a1);
-    sub_0815604C(&a1->unk3A8);
-    sub_0815604C(&a1->unk3D0);
+    DisplaySprite(&a1->unk3A8);
+    DisplaySprite(&a1->unk3D0);
     for (i = 0; i < 3; ++i)
-        sub_0815604C(&a1->unk3F8[i]);
+        DisplaySprite(&a1->unk3F8[i]);
 }
 
 static void sub_0813EAC0(struct Unk_08138D64 *a1) {
@@ -3135,15 +3135,15 @@ static void sub_0813EAC0(struct Unk_08138D64 *a1) {
     sprite = &a1->unk124[idx][0];
     sprite->animId = gUnk_083864B4[0].animId;
     sprite->variant = gUnk_083864B4[0].variant;
-    sub_08155128(sprite);
+    UpdateSpriteAnimation(sprite);
     sprite = &a1->unk124[idx][1];
     sprite->animId = gUnk_083864B4[0].animId;
     sprite->variant = gUnk_083864B4[0].variant;
-    sub_08155128(sprite);
+    UpdateSpriteAnimation(sprite);
     sprite = &a1->unk124[idx][2];
     sprite->animId = gUnk_083864B4[0].animId;
     sprite->variant = gUnk_083864B4[0].variant;
-    sub_08155128(sprite);
+    UpdateSpriteAnimation(sprite);
     a1->unk28C.y = gUnk_08386504[0];
     a1->unkC.y = 0;
     a1->unk34[idx].y = 0x1B;
@@ -3155,10 +3155,10 @@ static void sub_0813EAC0(struct Unk_08138D64 *a1) {
     gBgScrollRegs[1][1] = 0;
     gBgScrollRegs[0][1] = 0x18;
     a1->unk34[idx].palId = 2;
-    sub_08155128(&a1->unk34[idx]);
+    UpdateSpriteAnimation(&a1->unk34[idx]);
     sub_0813AE30(a1);
-    sub_0815604C(&a1->unk3A8);
-    sub_0815604C(&a1->unk3D0);
+    DisplaySprite(&a1->unk3A8);
+    DisplaySprite(&a1->unk3D0);
 }
 
 static void sub_0813EBDC(struct Unk_08138D64 *a1) {
@@ -3239,9 +3239,9 @@ static void sub_0813EE48(struct Unk_08138D64 *a1) {
         gObjPalette[i + 0x35] = gObjPalette[i + 0x34];
     gObjPalette[0x35] = var;
     gMainFlags |= MAIN_FLAG_OBJ_PALETTE_SYNC_ENABLE;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk478);
-    sub_0815604C(&a1->unk4A0);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk478);
+    DisplaySprite(&a1->unk4A0);
 }
 
 static void sub_0813EED0(struct Unk_08138D64 *a1) {
@@ -3254,10 +3254,10 @@ static void sub_0813EED0(struct Unk_08138D64 *a1) {
         a1->unk7D2 = 0;
         sub_081434AC();
     }
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk478);
-    sub_0815604C(&a1->unk4A0);
-    sub_0815604C(&a1->unk568);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk478);
+    DisplaySprite(&a1->unk4A0);
+    DisplaySprite(&a1->unk568);
 }
 
 static void sub_0813EF78(struct Unk_08138D64 *a1) {
@@ -3270,10 +3270,10 @@ static void sub_0813EF78(struct Unk_08138D64 *a1) {
         a1->unk7D2 = 0;
         sub_081434AC();
     }
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk478);
-    sub_0815604C(&a1->unk4A0);
-    sub_0815604C(&a1->unk568);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk478);
+    DisplaySprite(&a1->unk4A0);
+    DisplaySprite(&a1->unk568);
 }
 
 static void sub_0813EFF0(struct Unk_08138D64 *a1) {
@@ -3290,10 +3290,10 @@ static void sub_0813EFF0(struct Unk_08138D64 *a1) {
     }
     a1->unk7DE = 0;
     a1->unk7E0 = 0;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk478);
-    sub_0815604C(&a1->unk4A0);
-    sub_0815604C(&a1->unk568);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk478);
+    DisplaySprite(&a1->unk4A0);
+    DisplaySprite(&a1->unk568);
 }
 
 static void sub_0813F098(struct Unk_08138D64 *a1) {
@@ -3321,10 +3321,10 @@ static void sub_0813F098(struct Unk_08138D64 *a1) {
         a1->unk7D2 = 0;
         sub_081434AC();
     }
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk478);
-    sub_0815604C(&a1->unk4A0);
-    sub_0815604C(&a1->unk568);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk478);
+    DisplaySprite(&a1->unk4A0);
+    DisplaySprite(&a1->unk568);
 }
 
 static void sub_0813F1D4(struct Unk_08138D64 *a1) {
@@ -3350,7 +3350,7 @@ static void sub_0813F1D4(struct Unk_08138D64 *a1) {
         sub_081434AC();
     }
     sub_0813B7E0(a1, 0);
-    sub_0815604C(&a1->unkC);
+    DisplaySprite(&a1->unkC);
 }
 
 static void sub_0813F294(struct Unk_08138D64 *a1) {
@@ -3378,7 +3378,7 @@ static void sub_0813F294(struct Unk_08138D64 *a1) {
         sub_081434AC();
     }
     sub_0813B7E0(a1, 0);
-    sub_0815604C(&a1->unkC);
+    DisplaySprite(&a1->unkC);
 }
 
 static inline struct Multi_08032B0C *GetUnkBE8(struct Unk_08138D64 *a1) {
@@ -3436,10 +3436,10 @@ static void sub_0813F380(struct Unk_08138D64 *a1) {
         sub_081434AC();
     }
     sub_0813B7E0(a1, 1);
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk590);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk590);
     if (!a1->unk7D1)
-        sub_0815604C(&a1->unk608);
+        DisplaySprite(&a1->unk608);
 }
 
 static void sub_0813F4D8(struct Unk_08138D64 *a1) {
@@ -3460,7 +3460,7 @@ static void sub_0813F4D8(struct Unk_08138D64 *a1) {
         sub_081434AC();
     }
     sub_0813B7E0(a1, 2);
-    sub_0815604C(&a1->unkC);
+    DisplaySprite(&a1->unkC);
 }
 
 static void sub_0813F56C(struct Unk_08138D64 *a1) {
@@ -3480,7 +3480,7 @@ static void sub_0813F56C(struct Unk_08138D64 *a1) {
         sub_081434AC();
     }
     sub_0813B7E0(a1, 2);
-    sub_0815604C(&a1->unkC);
+    DisplaySprite(&a1->unkC);
 }
 
 static void sub_0813F61C(struct Unk_08138D64 *a1) {
@@ -3504,7 +3504,7 @@ static void sub_0813F61C(struct Unk_08138D64 *a1) {
         sub_081434AC();
     }
     sub_0813B9C0(a1, 0);
-    sub_0815604C(&a1->unkC);
+    DisplaySprite(&a1->unkC);
 }
 
 static void sub_0813F6CC(struct Unk_08138D64 *a1) {
@@ -3532,7 +3532,7 @@ static void sub_0813F6CC(struct Unk_08138D64 *a1) {
         sub_081434AC();
     }
     sub_0813B9C0(a1, 0);
-    sub_0815604C(&a1->unkC);
+    DisplaySprite(&a1->unkC);
 }
 
 static void sub_0813F7BC(struct Unk_08138D64 *a1) {
@@ -3587,9 +3587,9 @@ static void sub_0813F7BC(struct Unk_08138D64 *a1) {
         sub_081434AC();
     }
     sub_0813B9C0(a1, 1);
-    sub_0815604C(&a1->unkC);
+    DisplaySprite(&a1->unkC);
     if (!a1->unk7D1)
-        sub_0815604C(&a1->unk608);
+        DisplaySprite(&a1->unk608);
 }
 
 static void sub_0813F914(struct Unk_08138D64 *a1) {
@@ -3610,7 +3610,7 @@ static void sub_0813F914(struct Unk_08138D64 *a1) {
         sub_081434AC();
     }
     sub_0813B9C0(a1, 2);
-    sub_0815604C(&a1->unkC);
+    DisplaySprite(&a1->unkC);
 }
 
 static void sub_0813F9A8(struct Unk_08138D64 *a1) {
@@ -3652,7 +3652,7 @@ static void sub_0813F9A8(struct Unk_08138D64 *a1) {
         sub_081434AC();
     }
     sub_0813B9C0(a1, 2);
-    sub_0815604C(&a1->unkC);
+    DisplaySprite(&a1->unkC);
 }
 
 static void sub_0813FB18(struct Unk_08138D64 *a1) {
@@ -3676,7 +3676,7 @@ static void sub_0813FB18(struct Unk_08138D64 *a1) {
         sub_081434AC();
     }
     sub_0813BBA0(a1, 0);
-    sub_0815604C(&a1->unkC);
+    DisplaySprite(&a1->unkC);
 }
 
 static void sub_0813FBC8(struct Unk_08138D64 *a1) {
@@ -3701,7 +3701,7 @@ static void sub_0813FBC8(struct Unk_08138D64 *a1) {
         sub_081434AC();
     }
     sub_0813BBA0(a1, 0);
-    sub_0815604C(&a1->unkC);
+    DisplaySprite(&a1->unkC);
 }
 
 static void sub_0813FC9C(struct Unk_08138D64 *a1) {
@@ -3747,9 +3747,9 @@ static void sub_0813FC9C(struct Unk_08138D64 *a1) {
         sub_081434AC();
     }
     sub_0813BBA0(a1, 1);
-    sub_0815604C(&a1->unkC);
+    DisplaySprite(&a1->unkC);
     if (!a1->unk7D1)
-        sub_0815604C(&a1->unk608);
+        DisplaySprite(&a1->unk608);
 }
 
 static void sub_0813FDC4(struct Unk_08138D64 *a1) {
@@ -3770,7 +3770,7 @@ static void sub_0813FDC4(struct Unk_08138D64 *a1) {
         sub_081434AC();
     }
     sub_0813BBA0(a1, 2);
-    sub_0815604C(&a1->unkC);
+    DisplaySprite(&a1->unkC);
 }
 
 static void sub_0813FE58(struct Unk_08138D64 *a1) {
@@ -3807,7 +3807,7 @@ static void sub_0813FE58(struct Unk_08138D64 *a1) {
         sub_081434AC();
     }
     sub_0813BBA0(a1, 2);
-    sub_0815604C(&a1->unkC);
+    DisplaySprite(&a1->unkC);
 }
 
 static inline void LoadBgPaletteWithTransformation2(const u16 *src, u8 offset, u16 size) {
@@ -3852,7 +3852,7 @@ static void sub_0813FF6C(struct Unk_08138D64 *a1) {
     DmaCopy16(3, a1->unk9DA, gBgPalette, 0x120);
     gMainFlags |= MAIN_FLAG_BG_PALETTE_SYNC_ENABLE;
     a1->unk9CC = sub_08142B0C;
-    sub_0815604C(&a1->unkC);
+    DisplaySprite(&a1->unkC);
 }
 
 static void sub_081400BC(struct Unk_08138D64 *a1) {
@@ -3885,13 +3885,13 @@ static void sub_08140198(struct Unk_08138D64 *a1) {
     switch (a1->unk7D0) {
     case 0:
     case 1:
-        sub_0815604C(&a1->unk478);
-        sub_0815604C(&a1->unk4A0);
-        sub_0815604C(&a1->unk568);
+        DisplaySprite(&a1->unk478);
+        DisplaySprite(&a1->unk4A0);
+        DisplaySprite(&a1->unk568);
         break;
     case 2:
         sub_0813B7E0(a1, 1);
-        sub_0815604C(&a1->unk590);
+        DisplaySprite(&a1->unk590);
         break;
     case 3:
         sub_0813B9C0(a1, 1);
@@ -3900,9 +3900,9 @@ static void sub_08140198(struct Unk_08138D64 *a1) {
         sub_0813BBA0(a1, 1);
         break;
     }
-    sub_0815604C(&a1->unkC);
+    DisplaySprite(&a1->unkC);
     if (a1->unk7D1 == 0 && a1->unk7D0 > 1)
-        sub_0815604C(&a1->unk608);
+        DisplaySprite(&a1->unk608);
 }
 
 static void sub_08140284(struct Unk_08138D64 *a1) {
@@ -3921,13 +3921,13 @@ static void sub_08140284(struct Unk_08138D64 *a1) {
     switch (a1->unk7D0) {
     case 0:
     case 1:
-        sub_0815604C(&a1->unk478);
-        sub_0815604C(&a1->unk4A0);
-        sub_0815604C(&a1->unk568);
+        DisplaySprite(&a1->unk478);
+        DisplaySprite(&a1->unk4A0);
+        DisplaySprite(&a1->unk568);
         break;
     case 2:
         sub_0813B7E0(a1, 1);
-        sub_0815604C(&a1->unk590);
+        DisplaySprite(&a1->unk590);
         break;
     case 3:
         sub_0813B9C0(a1, 1);
@@ -3936,9 +3936,9 @@ static void sub_08140284(struct Unk_08138D64 *a1) {
         sub_0813BBA0(a1, 1);
         break;
     }
-    sub_0815604C(&a1->unkC);
+    DisplaySprite(&a1->unkC);
     if (a1->unk7D1 == 0 && a1->unk7D0 > 1)
-        sub_0815604C(&a1->unk608);
+        DisplaySprite(&a1->unk608);
 }
 
 static void sub_08140380(struct Unk_08138D64 *a1) {
@@ -4020,7 +4020,7 @@ static void sub_081404AC(struct Unk_08138D64 *a1) {
     a1->unk28C.x = 0x48;
     a1->unk28C.y = 0x10;
     a1->unk28C.unk1B = 0xFF;
-    sub_08155128(&a1->unk28C);
+    UpdateSpriteAnimation(&a1->unk28C);
     sub_0813A464(a1);
     a1->unk9CC = sub_08142C9C;
 }
@@ -4041,7 +4041,7 @@ static void sub_0814069C(struct Unk_08138D64 *a1) {
     gBgScrollRegs[0][1] = 0x18 * a1->unk9D8 / 0xF;
     if (a1->unk9D8 > 0xE)
         a1->unk9CC = sub_08142CBC;
-    if (!sub_08155128(&a1->unk28C))
+    if (!UpdateSpriteAnimation(&a1->unk28C))
         a1->unk28C.unk1B = 0xFF;
     sub_0813AEC8(a1);
 }
@@ -4057,9 +4057,9 @@ static void sub_081407B4(struct Unk_08138D64 *a1) {
         m4aSongNumStart(SE_MAIN_MENU_CURSOR);
         sub_0813B3C8(a1);
         a1->unk28C.y = 0x15 * a1->unk9C8[0] + 0x10;
-        sub_08155128(&a1->unk28C);
+        UpdateSpriteAnimation(&a1->unk28C);
     }
-    if (!sub_08155128(&a1->unk28C))
+    if (!UpdateSpriteAnimation(&a1->unk28C))
         a1->unk28C.unk1B = 0xFF;
     sub_0813AEC8(a1);
     a1->unkBDC(a1);
@@ -4084,7 +4084,7 @@ static void sub_0814086C(struct Unk_08138D64 *a1) {
         a1->unk9CC = sub_08142D68;
         a1->unkBDC(a1);
     } else {
-        if (!sub_08155128(&a1->unk28C))
+        if (!UpdateSpriteAnimation(&a1->unk28C))
             a1->unk28C.unk1B = 0xFF;
         sub_0813AEC8(a1);
         a1->unkBDC(a1);
@@ -4136,7 +4136,7 @@ static void sub_08140A1C(struct Unk_08138D64 *a1) {
             CpuCopy16(tilemap + i * 0x1E, vram + i * 0x20, 0x20 * sizeof(u16));
     }
     a1->unk28C.y = !a1->unk4[a1->unkA] ? 0x20 : 0x10;
-    sub_08155128(&a1->unk28C);
+    UpdateSpriteAnimation(&a1->unk28C);
     a1->unk9CC = sub_08142FD0;
     a1->unkBDC(a1);
 }
@@ -4148,12 +4148,12 @@ static void sub_08140B4C(struct Unk_08138D64 *a1) {
     a1->unkC.x = 0x9C * a1->unk9D8 / 5 - 0x9C;
     if (a1->unk9D8 > 4)
         a1->unk9CC = sub_08143040;
-    if (!sub_08155128(&a1->unk28C))
+    if (!UpdateSpriteAnimation(&a1->unk28C))
         a1->unk28C.unk1B = 0xFF;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk28C);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk28C);
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
     a1->unkBDC(a1);
 }
 
@@ -4170,12 +4170,12 @@ static void sub_08140BE8(struct Unk_08138D64 *a1) {
         a1->unk2DC[j].x = -0xD0 * a1->unk9D8 / 5 + 0xF0;
     if (a1->unk9D8 > 4)
         a1->unk9CC = sub_081430C0;
-    if (!sub_08155128(sprite1))
+    if (!UpdateSpriteAnimation(sprite1))
         a1->unk28C.unk1B = 0xFF;
-    sub_0815604C(sprite2);
-    sub_0815604C(sprite1);
+    DisplaySprite(sprite2);
+    DisplaySprite(sprite1);
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
     a1->unkBDC(a1);
 }
 
@@ -4201,12 +4201,12 @@ static void sub_08140CD0(struct Unk_08138D64 *a1) {
         a1->unkBF0 = 0;
         a1->unk9CC = sub_08141300;
     }
-    if (!sub_08155128(sprite1))
+    if (!UpdateSpriteAnimation(sprite1))
         a1->unk28C.unk1B = 0xFF;
-    sub_0815604C(sprite2);
-    sub_0815604C(sprite1);
+    DisplaySprite(sprite2);
+    DisplaySprite(sprite1);
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
     a1->unkBDC(a1);
 }
 
@@ -4261,7 +4261,7 @@ static void sub_08140E40(struct Unk_08138D64 *a1) {
         a1->unk37C.y = !r7 ? 21 * a1->unk9CA + 0x35 : 21 * a1->unk9CA + 0x25;
         a1->unk3A6 = 1;
         a1->unk37C.palId = 6;
-        sub_08155128(&a1->unk37C);
+        UpdateSpriteAnimation(&a1->unk37C);
         if (a1->unk9CA != 3) {
             const struct TiledBg_082D7850 *ptr;
             const u16 *tilemap;
@@ -4302,7 +4302,7 @@ static void sub_08140E40(struct Unk_08138D64 *a1) {
         sprite = &a1->unk2DC[a1->unk9CA];
         sprite->palId = 4;
         sprite->unk8 = 0;
-        sub_08155128(sprite);
+        UpdateSpriteAnimation(sprite);
     }
     a1->unk9D8 = 0;
     a1->unk9CC = sub_081411A4;
@@ -4317,13 +4317,13 @@ static void sub_081411A4(struct Unk_08138D64 *a1) {
         a1->unk9CC = sub_08141258;
     gBgScrollRegs[0][1] = 0x18;
     if (a1->unk0 == 5)
-        sub_0815604C(&a1->unk37C);
-    else if (!sub_08155128(GetUnk28C(a1)))
+        DisplaySprite(&a1->unk37C);
+    else if (!UpdateSpriteAnimation(GetUnk28C(a1)))
         a1->unk28C.unk1B = 0xFF;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(GetUnk28C(a1));
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(GetUnk28C(a1));
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
 }
 
 static void sub_08141258(struct Unk_08138D64 *a1) {
@@ -4338,13 +4338,13 @@ static void sub_08141258(struct Unk_08138D64 *a1) {
     else
         a1->unk9CC = sub_08141300;
     if (a1->unk0 == 5)
-        sub_0815604C(&a1->unk37C);
-    else if (!sub_08155128(GetUnk28C(a1)))
+        DisplaySprite(&a1->unk37C);
+    else if (!UpdateSpriteAnimation(GetUnk28C(a1)))
         a1->unk28C.unk1B = 0xFF;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(GetUnk28C(a1));
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(GetUnk28C(a1));
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
 }
 
 static inline u8 GetUnk9CA(struct Unk_08138D64 *a1) {
@@ -4411,25 +4411,25 @@ static void sub_08141300(struct Unk_08138D64 *a1) {
                 CpuCopy16(tilemap + i * 0x1E, vram + i * 0x20, 0x20 * sizeof(u16));
             sprite = GetUnk2DCSub(a1, GetUnk9CA(a1));
             sprite->palId = 2;
-            sub_08155128(sprite);
+            UpdateSpriteAnimation(sprite);
             sprite = GetUnk2DCSub(a1, GetUnk9CB(a1));
             sprite->palId = 3;
-            sub_08155128(sprite);
+            UpdateSpriteAnimation(sprite);
             a1->unk28C.y = !r7 ? 21 * a1->unk9CA + 0x20 : 21 * a1->unk9CA + 0x10;
-            sub_08155128(&a1->unk28C);
+            UpdateSpriteAnimation(&a1->unk28C);
         }
     } while (0);
-    if (!sub_08155128(GetUnk28C(a1)))
+    if (!UpdateSpriteAnimation(GetUnk28C(a1)))
         a1->unk28C.unk1B = 0xFF;
-    sub_0815604C(&a1->unkC);
+    DisplaySprite(&a1->unkC);
 #ifdef NONMATCHING
-    sub_0815604C(GetUnk28C(a1));
+    DisplaySprite(GetUnk28C(a1));
 #else
     asm("ldr r0, [sp, #4]\n"
-        "bl sub_0815604C\n"); // does not work
+        "bl DisplaySprite\n"); // does not work
 #endif
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
     a1->unkBDC(a1);
 }
 
@@ -4447,9 +4447,9 @@ static void sub_0814155C(struct Unk_08138D64 *a1) {
     a1->unk37C.y = !r7 ? 21 * a1->unk9CA + 0x35 : 21 * a1->unk9CA + 0x25;
     a1->unk3A6 = 0;
     a1->unk37C.palId = 5;
-    sub_08155128(&a1->unk37C);
+    UpdateSpriteAnimation(&a1->unk37C);
     a1->unk28C.unk1B = 0xFF;
-    sub_08155128(&a1->unk28C);
+    UpdateSpriteAnimation(&a1->unk28C);
     {
         const struct TiledBg_082D7850 *ptr;
         const u16 *tilemap;
@@ -4472,14 +4472,14 @@ static void sub_0814155C(struct Unk_08138D64 *a1) {
     sprite = GetUnk2DCSub(a1, a1->unk9CA);
     sprite->palId = 4;
     sprite->unk8 = 0;
-    sub_08155128(sprite);
+    UpdateSpriteAnimation(sprite);
     SetUnkBF0(a1);
     a1->unk9CC = sub_081416DC;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(GetUnk28C(a1));
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(GetUnk28C(a1));
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
-    sub_0815604C(&a1->unk37C);
+        DisplaySprite(&a1->unk2DC[i]);
+    DisplaySprite(&a1->unk37C);
 }
 
 static void sub_081416DC(struct Unk_08138D64 *a1) {
@@ -4510,7 +4510,7 @@ static void sub_081416DC(struct Unk_08138D64 *a1) {
             m4aSongNumStart(SE_MAIN_MENU_CURSOR);
         a1->unk3A6 = 0;
         a1->unk37C.palId = 5;
-        sub_08155128(&a1->unk37C);
+        UpdateSpriteAnimation(&a1->unk37C);
         {
             const struct TiledBg_082D7850 *ptr;
             const u16 *tilemap;
@@ -4536,7 +4536,7 @@ static void sub_081416DC(struct Unk_08138D64 *a1) {
             m4aSongNumStart(SE_MAIN_MENU_CURSOR);
         a1->unk3A6 = 1;
         a1->unk37C.palId = 6;
-        sub_08155128(&a1->unk37C);
+        UpdateSpriteAnimation(&a1->unk37C);
         if (a1->unk9CA != 3) {
             const struct TiledBg_082D7850 *ptr;
             const u16 *tilemap;
@@ -4576,11 +4576,11 @@ static void sub_081416DC(struct Unk_08138D64 *a1) {
         }
         break;
     }
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(GetUnk28C(a1));
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(GetUnk28C(a1));
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
-    sub_0815604C(&a1->unk37C);
+        DisplaySprite(&a1->unk2DC[i]);
+    DisplaySprite(&a1->unk37C);
 }
 
 static void sub_08141964(struct Unk_08138D64 *a1) {
@@ -4589,7 +4589,7 @@ static void sub_08141964(struct Unk_08138D64 *a1) {
 
     sprite->palId = 2;
     sprite->unk8 = 0;
-    sub_08155128(sprite);
+    UpdateSpriteAnimation(sprite);
     {
         const struct TiledBg_082D7850 *ptr;
         const u16 *tilemap;
@@ -4610,10 +4610,10 @@ static void sub_08141964(struct Unk_08138D64 *a1) {
             CpuCopy16(tilemap + i * 0x1E, vram + i * 0x20, 0x20 * sizeof(u16));
     }
     a1->unk9CC = sub_08141300;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(GetUnk28C(a1));
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(GetUnk28C(a1));
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
 }
 
 static void sub_08141A3C(struct Unk_08138D64 *a1) {
@@ -4629,12 +4629,12 @@ static void sub_08141A3C(struct Unk_08138D64 *a1) {
     gBgScrollRegs[0][1] = -0x18 * a1->unk9D8 / 5 + 0x18;
     if (a1->unk9D8 > 4)
         a1->unk9CC = sub_081431C0;
-    if (!sub_08155128(GetUnk28C(a1)))
+    if (!UpdateSpriteAnimation(GetUnk28C(a1)))
         a1->unk28C.unk1B = 0xFF;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(GetUnk28C(a1));
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(GetUnk28C(a1));
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
     a1->unkBDC(a1);
 }
 
@@ -4648,11 +4648,11 @@ static void sub_08141B78(struct Unk_08138D64 *a1) {
     var = a1->unk9D8;
     if (var >= var2)
         a1->unk9CC = sub_08143260;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(&a1->unk28C);
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(&a1->unk28C);
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
-    sub_0815604C(&a1->unk37C);
+        DisplaySprite(&a1->unk2DC[i]);
+    DisplaySprite(&a1->unk37C);
 }
 
 static void sub_08141BF8(struct Unk_08138D64 *a1) {
@@ -4695,38 +4695,38 @@ static void sub_08141CDC(struct Unk_08138D64 *a1) {
 
     switch (a1->unk0) {
     case 1:
-        if (!sub_08155128(GetUnk28C(a1)))
+        if (!UpdateSpriteAnimation(GetUnk28C(a1)))
             a1->unk28C.unk1B = 0xFF;
         sub_0813AD9C(a1);
         break;
     case 2:
         if (a1->unkBE5)
-            sub_0815604C(&a1->unk37C);
+            DisplaySprite(&a1->unk37C);
         else {
-            if (!sub_08155128(GetUnk28C(a1)))
+            if (!UpdateSpriteAnimation(GetUnk28C(a1)))
                 a1->unk28C.unk1B = 0xFF;
         }
-        sub_0815604C(&a1->unkC);
-        sub_0815604C(GetUnk28C(a1));
+        DisplaySprite(&a1->unkC);
+        DisplaySprite(GetUnk28C(a1));
         for (i = 0; i < 4; ++i)
-            sub_0815604C(&a1->unk2DC[i]);
+            DisplaySprite(&a1->unk2DC[i]);
         break;
     case 3:
-        sub_0815604C(&a1->unk3A8);
-        sub_0815604C(&a1->unk3D0);
+        DisplaySprite(&a1->unk3A8);
+        DisplaySprite(&a1->unk3D0);
         sub_0813AE30(a1);
         break;
     case 7:
         if (a1->unkBE5)
-            sub_0815604C(&a1->unk37C);
+            DisplaySprite(&a1->unk37C);
         else {
-            if (!sub_08155128(GetUnk28C(a1)))
+            if (!UpdateSpriteAnimation(GetUnk28C(a1)))
                 a1->unk28C.unk1B = 0xFF;
         }
-        sub_0815604C(&a1->unkC);
-        sub_0815604C(GetUnk28C(a1));
+        DisplaySprite(&a1->unkC);
+        DisplaySprite(GetUnk28C(a1));
         for (i = 0; i < 4; ++i)
-            sub_0815604C(&a1->unk2DC[i]);
+            DisplaySprite(&a1->unk2DC[i]);
         break;
     case 4 ... 6:
         break;
@@ -4773,7 +4773,7 @@ static void sub_08141FA4(struct Unk_08138D64 *a1) {
 
 static void sub_08141FC4(struct Unk_08138D64 *a1) {
     a1->unkBF0 = 0;
-    if (!sub_08155128(GetUnk28C(a1)))
+    if (!UpdateSpriteAnimation(GetUnk28C(a1)))
         a1->unk28C.unk1B = 0xFF;
     sub_0813AD9C(a1);
     a1->unkBDC(a1);
@@ -4784,7 +4784,7 @@ static void sub_08142018(struct Unk_08138D64 *a1) {
     gUnk_0203ADE0 = -1;
     a1->unk9D8 = 0;
     a1->unk9CC = sub_0813CB78;
-    if (!sub_08155128(GetUnk28C(a1)))
+    if (!UpdateSpriteAnimation(GetUnk28C(a1)))
         a1->unk28C.unk1B = 0xFF;
     sub_0813AD9C(a1);
     a1->unkBDC(a1);
@@ -4796,7 +4796,7 @@ static void sub_0814207C(struct Unk_08138D64 *a1) {
     gBldRegs.bldCnt = BLDCNT_TGT1_ALL | BLDCNT_EFFECT_LIGHTEN;
     gBldRegs.bldAlpha = 0;
     gBldRegs.bldY = 0;
-    if (!sub_08155128(GetUnk28C(a1)))
+    if (!UpdateSpriteAnimation(GetUnk28C(a1)))
         a1->unk28C.unk1B = 0xFF;
     sub_0813AD9C(a1);
     a1->unkBDC(a1);
@@ -4852,12 +4852,12 @@ static void sub_08142228(struct Unk_08138D64 *a1) {
 
     a1->unk9D8 = 0;
     a1->unk9CC = sub_0813D178;
-    if (!sub_08155128(GetUnk28C(a1)))
+    if (!UpdateSpriteAnimation(GetUnk28C(a1)))
         a1->unk28C.unk1B = 0xFF;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(GetUnk28C(a1));
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(GetUnk28C(a1));
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
     a1->unkBDC(a1);
 }
 
@@ -4866,12 +4866,12 @@ static void sub_081422A8(struct Unk_08138D64 *a1) {
 
     a1->unk9D8 = 0;
     a1->unk9CC = sub_0813D234;
-    if (!sub_08155128(GetUnk28C(a1)))
+    if (!UpdateSpriteAnimation(GetUnk28C(a1)))
         a1->unk28C.unk1B = 0xFF;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(GetUnk28C(a1));
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(GetUnk28C(a1));
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
     a1->unkBDC(a1);
 }
 
@@ -4882,11 +4882,11 @@ static void sub_08142328(struct Unk_08138D64 *a1) {
     gBldRegs.bldAlpha = 0;
     gBldRegs.bldY = 0;
     a1->unk9CC = sub_0813DB74;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(GetUnk28C(a1));
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(GetUnk28C(a1));
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
-    sub_0815604C(&a1->unk37C);
+        DisplaySprite(&a1->unk2DC[i]);
+    DisplaySprite(&a1->unk37C);
 }
 
 static void sub_0814238C(struct Unk_08138D64 *a1) {
@@ -4897,10 +4897,10 @@ static void sub_0814238C(struct Unk_08138D64 *a1) {
     gBldRegs.bldY = 0;
     a1->unk9D8 = 0;
     a1->unk9CC = sub_0813DE7C;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(GetUnk28C(a1));
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(GetUnk28C(a1));
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
 }
 
 static void sub_081423F0(struct Unk_08138D64 *a1) {
@@ -5002,11 +5002,11 @@ static void sub_081426AC(struct Unk_08138D64 *a1) {
     gBldRegs.bldY = 0;
     a1->unk9D8 = 0;
     a1->unk9CC = sub_0813DF4C;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(GetUnk28C(a1));
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(GetUnk28C(a1));
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
-    sub_0815604C(&a1->unk37C);
+        DisplaySprite(&a1->unk2DC[i]);
+    DisplaySprite(&a1->unk37C);
 }
 
 static void sub_0814271C(struct Unk_08138D64 *a1) {
@@ -5019,12 +5019,12 @@ static void sub_0814273C(struct Unk_08138D64 *a1) {
 
     a1->unk9D8 = 0;
     a1->unk9CC = sub_0813DFCC;
-    if (!sub_08155128(GetUnk28C(a1)))
+    if (!UpdateSpriteAnimation(GetUnk28C(a1)))
         a1->unk28C.unk1B = 0xFF;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(GetUnk28C(a1));
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(GetUnk28C(a1));
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
     a1->unkBDC(a1);
 }
 
@@ -5095,8 +5095,8 @@ static void sub_08142984(struct Unk_08138D64 *a1) {
     UpdateSaveBufferByOffset(SAVE_BUFFER_TYPE_WORLD_PROPS, a1->unkA);
     a1->unk9CC = sub_081429EC;
     sub_0813AE30(a1);
-    sub_0815604C(&a1->unk3A8);
-    sub_0815604C(&a1->unk3D0);
+    DisplaySprite(&a1->unk3A8);
+    DisplaySprite(&a1->unk3D0);
 }
 
 static void sub_081429EC(struct Unk_08138D64 *a1) {
@@ -5106,14 +5106,14 @@ static void sub_081429EC(struct Unk_08138D64 *a1) {
         a1->unk2 = 1;
     }
     sub_0813AE30(a1);
-    sub_0815604C(&a1->unk3A8);
-    sub_0815604C(&a1->unk3D0);
+    DisplaySprite(&a1->unk3A8);
+    DisplaySprite(&a1->unk3D0);
 }
 
 static void sub_08142A54(struct Unk_08138D64 *a1) {
     a1->unk9D8 = 0;
     a1->unk9CC = sub_0813EBDC;
-    if (!sub_08155128(GetUnk28C(a1)))
+    if (!UpdateSpriteAnimation(GetUnk28C(a1)))
         a1->unk28C.unk1B = 0xFF;
     sub_0813AD9C(a1);
 }
@@ -5141,7 +5141,7 @@ static void sub_08142B0C(struct Unk_08138D64 *a1) {
         m4aSongNumStart(SE_MAIN_MENU_BACK);
         a1->unk9CC = sub_08142B48;
     }
-    sub_0815604C(&a1->unkC);
+    DisplaySprite(&a1->unkC);
 }
 
 static void sub_08142B48(struct Unk_08138D64 *a1) {
@@ -5150,7 +5150,7 @@ static void sub_08142B48(struct Unk_08138D64 *a1) {
     gBldRegs.bldY = 0;
     a1->unk9D8 = 0;
     a1->unk9CC = sub_08142B80;
-    sub_0815604C(&a1->unkC);
+    DisplaySprite(&a1->unkC);
 }
 
 static void sub_08142B80(struct Unk_08138D64 *a1) {
@@ -5158,7 +5158,7 @@ static void sub_08142B80(struct Unk_08138D64 *a1) {
     gBldRegs.bldY = 0x10 * a1->unk9D8 / 0xF;
     if (a1->unk9D8 > 0xE)
         a1->unk9CC = sub_081400BC;
-    sub_0815604C(&a1->unkC);
+    DisplaySprite(&a1->unkC);
 }
 
 static void sub_08142BCC(struct Unk_08138D64 *a1) {
@@ -5203,7 +5203,7 @@ static void sub_08142CBC(struct Unk_08138D64 *a1) {
     gBldRegs.bldAlpha = 0;
     gBldRegs.bldY = 0;
     a1->unk9CC = sub_081407B4;
-    if (!sub_08155128(GetUnk28C(a1)))
+    if (!UpdateSpriteAnimation(GetUnk28C(a1)))
         a1->unk28C.unk1B = 0xFF;
     sub_0813AEC8(a1);
 }
@@ -5214,7 +5214,7 @@ static void sub_08142D04(struct Unk_08138D64 *a1) {
     gBldRegs.bldY = 0;
     a1->unk9D8 = 0;
     a1->unk9CC = sub_0814086C;
-    if (!sub_08155128(GetUnk28C(a1)))
+    if (!UpdateSpriteAnimation(GetUnk28C(a1)))
         a1->unk28C.unk1B = 0xFF;
     sub_0813AEC8(a1);
     a1->unkBDC(a1);
@@ -5315,12 +5315,12 @@ static void sub_08143040(struct Unk_08138D64 *a1) {
 
     a1->unk9D8 = 0;
     a1->unk9CC = sub_08140BE8;
-    if (!sub_08155128(GetUnk28C(a1)))
+    if (!UpdateSpriteAnimation(GetUnk28C(a1)))
         a1->unk28C.unk1B = 0xFF;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(GetUnk28C(a1));
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(GetUnk28C(a1));
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
     a1->unkBDC(a1);
 }
 
@@ -5329,12 +5329,12 @@ static void sub_081430C0(struct Unk_08138D64 *a1) {
 
     a1->unk9D8 = 0;
     a1->unk9CC = sub_08140CD0;
-    if (!sub_08155128(GetUnk28C(a1)))
+    if (!UpdateSpriteAnimation(GetUnk28C(a1)))
         a1->unk28C.unk1B = 0xFF;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(GetUnk28C(a1));
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(GetUnk28C(a1));
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
     a1->unkBDC(a1);
 }
 
@@ -5343,12 +5343,12 @@ static void sub_08143140(struct Unk_08138D64 *a1) {
 
     a1->unk9D8 = 0;
     a1->unk9CC = sub_08141A3C;
-    if (!sub_08155128(GetUnk28C(a1)))
+    if (!UpdateSpriteAnimation(GetUnk28C(a1)))
         a1->unk28C.unk1B = 0xFF;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(GetUnk28C(a1));
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(GetUnk28C(a1));
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
+        DisplaySprite(&a1->unk2DC[i]);
     a1->unkBDC(a1);
 }
 
@@ -5366,11 +5366,11 @@ static void sub_081431F0(struct Unk_08138D64 *a1) {
     gBldRegs.bldY = 0;
     a1->unk9D8 = 0;
     a1->unk9CC = sub_08141B78;
-    sub_0815604C(&a1->unkC);
-    sub_0815604C(GetUnk28C(a1));
+    DisplaySprite(&a1->unkC);
+    DisplaySprite(GetUnk28C(a1));
     for (i = 0; i < 4; ++i)
-        sub_0815604C(&a1->unk2DC[i]);
-    sub_0815604C(&a1->unk37C);
+        DisplaySprite(&a1->unk2DC[i]);
+    DisplaySprite(&a1->unk37C);
 }
 
 static void sub_08143260(struct Unk_08138D64 *a1) {

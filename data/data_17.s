@@ -73,7 +73,16 @@ gUnk_082EB740:: @ 082EB740
 	.incbin "baserom.gba", 0x2EB740, 0x0000090
 
 gUnk_082EB7D0:: @ 082EB7D0
-	.incbin "baserom.gba", 0x2EB7D0, 0x0000028
+	.4byte sub_0802FC08
+	.4byte sub_0802F088
+	.4byte sub_0802FC14
+	.4byte sub_0802FC64
+	.4byte sub_0802F1C4
+	.4byte sub_0802F2D0
+	.4byte sub_0802FCB4
+	.4byte sub_0802F4BC
+	.4byte sub_0802FCDC
+	.4byte sub_0802FD00
 
 gUnk_082EB7F8:: @ 082EB7F8
 	.incbin "baserom.gba", 0x2EB7F8, 0x0000008

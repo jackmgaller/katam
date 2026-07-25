@@ -1186,10 +1186,41 @@ gUnk_0834BD84:: @ 0834BD84
 	.incbin "baserom.gba", 0x34BD84, 0x0000004
 
 gUnk_0834BD88:: @ 0834BD88
-	.incbin "baserom.gba", 0x34BD88, 0x000000C
+	.4byte sub_080364E4
+	.4byte sub_080365C8
+	.4byte sub_0803699C
 
 gUnk_0834BD94:: @ 0834BD94
-	.incbin "baserom.gba", 0x34BD94, 0x000008C
+	.4byte CreatePauseMenu
+	.4byte sub_0801D618
+	.4byte sub_0801D624
+	.4byte sub_0801D630
+	.4byte sub_0801D63C
+	.4byte sub_0801D648
+	.4byte sub_0801D654
+	.4byte sub_0801D660
+	.4byte sub_0801D66C
+	.4byte sub_0801DFE8
+	.4byte WorldMapUnlockMoonlightMansion
+	.4byte WorldMapUnlockRainbowRouteEast
+	.4byte WorldMapUnlockRainbowRouteSouth
+	.4byte WorldMapUnlockCabbageCavernCenter
+	.4byte WorldMapUnlockRainbowRouteWest
+	.4byte WorldMapUnlockCarrotCastle
+	.4byte WorldMapUnlockRainbowRouteNorth
+	.4byte WorldMapUnlockMustardMountain
+	.4byte WorldMapUnlockCabbageCavernWest
+	.4byte WorldMapUnlockRadishRuins
+	.4byte WorldMapUnlockPeppermintPalaceEast
+	.4byte WorldMapUnlockPeppermintPalaceWest
+	.4byte WorldMapUnlockCabbageCavernEast
+	.4byte WorldMapUnlockOliveOcean
+	.4byte WorldMapUnlockCandyConstellation
+	.4byte sub_0802E16C
+	.4byte sub_0814A828
+
+	@ not part of the table above
+	.incbin "baserom.gba", 0x34BE00, 0x0000020
 
 gUnk_0834BE20:: @ 0834BE20
 	.incbin "baserom.gba", 0x34BE20, 0x0000080
@@ -1210,4 +1241,8 @@ gUnk_0834C0A0:: @ 0834C0A0
 	.incbin "baserom.gba", 0x34C0A0, 0x0000080
 
 gUnk_0834C120:: @ 0834C120
-	.incbin "baserom.gba", 0x34C120, 0x0000014
+	.4byte sub_0803A450
+	.4byte sub_0803AFE8
+	.4byte sub_0803B788
+	.4byte sub_0803BF68
+	.4byte sub_0803C748

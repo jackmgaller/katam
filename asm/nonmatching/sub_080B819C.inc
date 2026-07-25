@@ -99,14 +99,14 @@ _080B81C4:
 	lsrs r1, r0, #0x10
 	lsrs r2, r2, #0x10
 	adds r0, r6, #0
-	bl sub_080023E4
+	bl GetCollisionTile
 	lsls r0, r0, #0x18
 	lsrs r0, r0, #0x18
 	str r0, [sp, #8]
 _080B8260:
 	ldr r1, [sp, #8]
 	lsls r0, r1, #2
-	ldr r1, _080B8370 @ =gUnk_082D88B8
+	ldr r1, _080B8370 @ =gCollisionAttributes
 	adds r0, r1, r0
 	ldr r2, [r0]
 	movs r0, #0xf0
@@ -164,7 +164,7 @@ _080B8276:
 	lsrs r1, r6, #0x10
 	lsrs r2, r2, #0x10
 	adds r0, r5, #0
-	bl sub_080023E4
+	bl GetCollisionTile
 	lsls r0, r0, #0x18
 	lsrs r7, r0, #0x18
 _080B82DE:
@@ -176,7 +176,7 @@ _080B82DE:
 	ands r0, r2
 	cmp r0, #0
 	bne _080B8374
-	ldr r0, _080B8370 @ =gUnk_082D88B8
+	ldr r0, _080B8370 @ =gCollisionAttributes
 	mov sl, r0
 	movs r1, #0
 	mov sb, r1
@@ -222,7 +222,7 @@ _080B82DE:
 	lsrs r1, r6, #0x10
 	lsrs r2, r5, #0x10
 	adds r0, r7, #0
-	bl sub_080023E4
+	bl GetCollisionTile
 	lsls r0, r0, #0x18
 	lsrs r0, r0, #0x18
 	mov sb, r0
@@ -242,7 +242,7 @@ _080B8368:
 	b _080B8376
 	.align 2, 0
 _080B836C: .4byte gCurLevelInfo
-_080B8370: .4byte gUnk_082D88B8
+_080B8370: .4byte gCollisionAttributes
 _080B8374:
 	mov r1, sl
 _080B8376:
@@ -328,14 +328,14 @@ _080B8384:
 	lsrs r1, r0, #0x10
 	lsrs r2, r2, #0x10
 	adds r0, r6, #0
-	bl sub_080023E4
+	bl GetCollisionTile
 	lsls r0, r0, #0x18
 	lsrs r0, r0, #0x18
 	str r0, [sp, #0xc]
 _080B8420:
 	ldr r1, [sp, #0xc]
 	lsls r0, r1, #2
-	ldr r1, _080B8530 @ =gUnk_082D88B8
+	ldr r1, _080B8530 @ =gCollisionAttributes
 	adds r0, r1, r0
 	ldr r2, [r0]
 	movs r0, #0xf0
@@ -393,7 +393,7 @@ _080B8436:
 	lsrs r1, r6, #0x10
 	lsrs r2, r2, #0x10
 	adds r0, r5, #0
-	bl sub_080023E4
+	bl GetCollisionTile
 	lsls r0, r0, #0x18
 	lsrs r7, r0, #0x18
 _080B849E:
@@ -405,7 +405,7 @@ _080B849E:
 	ands r0, r2
 	cmp r0, #0
 	bne _080B8534
-	ldr r0, _080B8530 @ =gUnk_082D88B8
+	ldr r0, _080B8530 @ =gCollisionAttributes
 	mov sl, r0
 	movs r1, #0
 	mov sb, r1
@@ -451,7 +451,7 @@ _080B849E:
 	lsrs r1, r6, #0x10
 	lsrs r2, r5, #0x10
 	adds r0, r7, #0
-	bl sub_080023E4
+	bl GetCollisionTile
 	lsls r0, r0, #0x18
 	lsrs r0, r0, #0x18
 	mov sb, r0
@@ -471,7 +471,7 @@ _080B8528:
 	b _080B8536
 	.align 2, 0
 _080B852C: .4byte gCurLevelInfo
-_080B8530: .4byte gUnk_082D88B8
+_080B8530: .4byte gCollisionAttributes
 _080B8534:
 	mov r1, sl
 _080B8536:
@@ -570,14 +570,14 @@ _080B855E:
 	lsrs r1, r0, #0x10
 	lsrs r2, r2, #0x10
 	adds r0, r6, #0
-	bl sub_080023E4
+	bl GetCollisionTile
 	lsls r0, r0, #0x18
 	lsrs r0, r0, #0x18
 	str r0, [sp, #0x10]
 _080B85F6:
 	ldr r1, [sp, #0x10]
 	lsls r0, r1, #2
-	ldr r1, _080B8720 @ =gUnk_082D88B8
+	ldr r1, _080B8720 @ =gCollisionAttributes
 	adds r0, r1, r0
 	ldr r2, [r0]
 	movs r0, #0xf0
@@ -634,14 +634,14 @@ _080B860C:
 	lsrs r1, r5, #0x10
 	lsrs r2, r2, #0x10
 	adds r0, r6, #0
-	bl sub_080023E4
+	bl GetCollisionTile
 	lsls r0, r0, #0x18
 	lsrs r0, r0, #0x18
 	mov sb, r0
 _080B8674:
 	mov r1, sb
 	lsls r0, r1, #2
-	ldr r1, _080B8720 @ =gUnk_082D88B8
+	ldr r1, _080B8720 @ =gCollisionAttributes
 	adds r0, r1, r0
 	ldr r2, [r0]
 	movs r0, #0xf0
@@ -698,7 +698,7 @@ _080B8674:
 	lsrs r1, r5, #0x10
 	lsrs r2, r2, #0x10
 	adds r0, r6, #0
-	bl sub_080023E4
+	bl GetCollisionTile
 	lsls r0, r0, #0x18
 	lsrs r0, r0, #0x18
 	mov sb, r0
@@ -725,7 +725,7 @@ _080B8708:
 	b _080B893C
 	.align 2, 0
 _080B871C: .4byte gCurLevelInfo
-_080B8720: .4byte gUnk_082D88B8
+_080B8720: .4byte gCollisionAttributes
 _080B8724:
 	asrs r0, r5, #4
 	b _080B893E
@@ -830,14 +830,14 @@ _080B8758:
 	lsrs r1, r6, #0x10
 	lsrs r2, r2, #0x10
 	mov r0, sb
-	bl sub_080023E4
+	bl GetCollisionTile
 	lsls r0, r0, #0x18
 	lsrs r0, r0, #0x18
 	str r0, [sp, #0x14]
 _080B87F0:
 	ldr r1, [sp, #0x14]
 	lsls r0, r1, #2
-	ldr r1, _080B8918 @ =gUnk_082D88B8
+	ldr r1, _080B8918 @ =gCollisionAttributes
 	adds r0, r1, r0
 	ldr r2, [r0]
 	movs r0, #0xf0
@@ -895,14 +895,14 @@ _080B8806:
 	lsrs r1, r0, #0x10
 	lsrs r2, r2, #0x10
 	adds r0, r5, #0
-	bl sub_080023E4
+	bl GetCollisionTile
 	lsls r0, r0, #0x18
 	lsrs r0, r0, #0x18
 	str r0, [sp, #0x18]
 _080B8870:
 	ldr r1, [sp, #0x18]
 	lsls r0, r1, #2
-	ldr r1, _080B8918 @ =gUnk_082D88B8
+	ldr r1, _080B8918 @ =gCollisionAttributes
 	adds r0, r1, r0
 	ldr r2, [r0]
 	movs r0, #0xf0
@@ -959,14 +959,14 @@ _080B8870:
 	lsrs r1, r0, #0x10
 	lsrs r2, r2, #0x10
 	mov r0, r8
-	bl sub_080023E4
+	bl GetCollisionTile
 	lsls r0, r0, #0x18
 	lsrs r0, r0, #0x18
 	mov sl, r0
 _080B88F0:
 	mov r1, sl
 	lsls r0, r1, #2
-	ldr r1, _080B8918 @ =gUnk_082D88B8
+	ldr r1, _080B8918 @ =gCollisionAttributes
 	adds r0, r1, r0
 	ldr r2, [r0]
 	movs r0, #0xf0
@@ -984,7 +984,7 @@ _080B88F0:
 	b _080B893C
 	.align 2, 0
 _080B8914: .4byte gCurLevelInfo
-_080B8918: .4byte gUnk_082D88B8
+_080B8918: .4byte gCollisionAttributes
 _080B891C: .4byte 0xFFFFF000
 _080B8920:
 	asrs r0, r6, #4

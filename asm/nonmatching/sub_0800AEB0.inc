@@ -64,7 +64,7 @@ _0800AEE8:
 	subs r0, r0, r2
 	lsls r7, r0, #8
 	movs r2, #0
-	ldr r0, _0800AF98 @ =gUnk_0203AD30
+	ldr r0, _0800AF98 @ =gNumPlayers
 	ldrb r0, [r0]
 	cmp r2, r0
 	bhs _0800AFB4
@@ -117,7 +117,7 @@ _0800AF3E:
 	.align 2, 0
 _0800AF90: .4byte gCurLevelInfo
 _0800AF94: .4byte gKirbys
-_0800AF98: .4byte gUnk_0203AD30
+_0800AF98: .4byte gNumPlayers
 _0800AF9C: .4byte sub_0800AFC8
 _0800AFA0:
 	adds r0, r2, #1
@@ -126,7 +126,7 @@ _0800AFA0:
 	movs r0, #0xd4
 	lsls r0, r0, #1
 	add sb, r0
-	ldr r0, _0800AFC4 @ =gUnk_0203AD30
+	ldr r0, _0800AFC4 @ =gNumPlayers
 	ldrb r0, [r0]
 	cmp r2, r0
 	blo _0800AF3E
@@ -140,6 +140,6 @@ _0800AFB4:
 	pop {r0}
 	bx r0
 	.align 2, 0
-_0800AFC4: .4byte gUnk_0203AD30
+_0800AFC4: .4byte gNumPlayers
 
 	.syntax divided

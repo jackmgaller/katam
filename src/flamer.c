@@ -20,7 +20,7 @@ void sub_080BA9F0(struct Object2 *);
 void sub_080BAA78(struct Object2 *);
 void sub_080BAAF8(struct Object2 *);
 
-const struct AnimInfo gUnk_08354670[] = {
+const struct AnimInfo gFlamerAnimInfo[] = {
     { 0x31E,   0, 0 },
     { 0x31E,   1, 0 },
     { 0x31E,   2, 0 },
@@ -36,7 +36,7 @@ const struct AnimInfo gUnk_08354670[] = {
     { 0x31E, 0xB, 0 },
 };
 
-const struct Unk_08353510 gUnk_083546A4[] = {
+const struct MoveStep gUnk_083546A4[] = {
     { -0x80, 0x300, 0, 0,    8, 4 },
     { -0x80, 0x200, 0, 0,    8, 4 },
     { -0x80, 0x180, 0, 0,    8, 4 },
@@ -48,13 +48,13 @@ const struct Unk_08353510 gUnk_083546A4[] = {
     { 0 },
 };
 
-const struct Unk_08353510 gUnk_08354710[] = {
+const struct MoveStep gUnk_08354710[] = {
     { -0x180, 0, 0, 0, 8, 7 },
     {  -0xC0, 0, 0, 0, 8, 7 },
     { 0 },
 };
 
-const struct Unk_08353510 gUnk_08354734[] = {
+const struct MoveStep gUnk_08354734[] = {
     { 0x300, 0x100, 0, 0, 6, 9 },
     { 0x200, 0x200, 0, 0, 6, 9 },
     { 0x100, 0x300, 0, 0, 6, 9 },
@@ -63,7 +63,7 @@ const struct Unk_08353510 gUnk_08354734[] = {
     { 0 },
 };
 
-const struct Unk_08353510 gUnk_0835477C[] = {
+const struct MoveStep gUnk_0835477C[] = {
     { 0x300, 0x100, 0, 0, 6, 9 },
     { 0x200, 0x200, 0, 0, 6, 9 },
     { 0x100, 0x300, 0, 0, 6, 9 },
@@ -97,8 +97,8 @@ void *CreateFlamer(struct Object *template, u8 a2)
     flamer->base.x += 0x100;
     if (flamer->object->subtype1 == 1)
         flamer->base.unkC |= 0x100;
-    sub_0803E2B0(&flamer->base, -5, 0, 5, 8);
-    sub_0803E308(&flamer->base, -4, -4, 4, 4);
+    ObjectSetHitbox(&flamer->base, -5, 0, 5, 8);
+    ObjectSetBounds(&flamer->base, -4, -4, 4, 4);
     if (flamer->base.x > flamer->kirby3->base.base.base.x)
         flamer->base.flags |= 1;
     else
@@ -227,7 +227,7 @@ NAKED u32 sub_080B819C(struct Object2 *flamer) {
         && (_x) >= gCurLevelInfo[(_flamer)->base.unk56].levelMinPosition.x >> 12 \
         && (_y) <= gCurLevelInfo[(_flamer)->base.unk56].levelMaxPosition.y >> 12 \
         && (_y) >= gCurLevelInfo[(_flamer)->base.unk56].levelMinPosition.y >> 12) \
-        _var = sub_080023E4((_flamer)->base.unk56, _x, _y); \
+        _var = GetCollisionTile((_flamer)->base.unk56, _x, _y); \
     _var; \
 })
 
@@ -244,11 +244,11 @@ u32 sub_080B819C(struct Object2 *flamer)
             b = (flamer->base.y + flamer->base.unk3F * 0x100) >> 12;
             cy = (flamer->base.y + (flamer->base.unk3F + 3) * 0x100) >> 12;
             dy = (flamer->base.y + (flamer->base.unk3F - 3) * 0x100) >> 12;
-            if (!((ret = gUnk_082D88B8[Macro_080B819C(flamer, a, b)]) & 0xF0000000))
+            if (!((ret = gCollisionAttributes[Macro_080B819C(flamer, a, b)]) & 0xF0000000))
             {
-                if (!((ret = gUnk_082D88B8[Macro_080B819C(flamer, a, cy)]) & 0xF0000000))
+                if (!((ret = gCollisionAttributes[Macro_080B819C(flamer, a, cy)]) & 0xF0000000))
                 {
-                    if ((ret = gUnk_082D88B8[Macro_080B819C(flamer, a, dy)]) & 0xF0000000)
+                    if ((ret = gCollisionAttributes[Macro_080B819C(flamer, a, dy)]) & 0xF0000000)
                         flamer->base.y = dy * 0x1000;
                 }
                 else
@@ -261,11 +261,11 @@ u32 sub_080B819C(struct Object2 *flamer)
             b = (flamer->base.y + flamer->base.unk3D * 0x100) >> 12;
             cy = (flamer->base.y + (flamer->base.unk3D + 3) * 0x100) >> 12;
             dy = (flamer->base.y + (flamer->base.unk3D - 3) * 0x100) >> 12;
-            if (!((ret = gUnk_082D88B8[Macro_080B819C(flamer, a, b)]) & 0xF0000000))
+            if (!((ret = gCollisionAttributes[Macro_080B819C(flamer, a, b)]) & 0xF0000000))
             {
-                if (!((ret = gUnk_082D88B8[Macro_080B819C(flamer, a, cy)]) & 0xF0000000))
+                if (!((ret = gCollisionAttributes[Macro_080B819C(flamer, a, cy)]) & 0xF0000000))
                 {
-                    if ((ret = gUnk_082D88B8[Macro_080B819C(flamer, a, dy)]) & 0xF0000000)
+                    if ((ret = gCollisionAttributes[Macro_080B819C(flamer, a, dy)]) & 0xF0000000)
                         flamer->base.y = dy * 0x1000 + 0x1000;
                 }
                 else
@@ -279,11 +279,11 @@ u32 sub_080B819C(struct Object2 *flamer)
             b = flamer->base.y >> 12;
             cx = (flamer->base.x + (e + 3) * 0x100) >> 12;
             dx = (flamer->base.x + (e - 3) * 0x100) >> 12;
-            if (!((ret = gUnk_082D88B8[Macro_080B819C(flamer, a, b)]) & 0xF0000000))
+            if (!((ret = gCollisionAttributes[Macro_080B819C(flamer, a, b)]) & 0xF0000000))
             {
-                if (!((ret = gUnk_082D88B8[Macro_080B819C(flamer, cx, b)]) & 0xF0000000))
+                if (!((ret = gCollisionAttributes[Macro_080B819C(flamer, cx, b)]) & 0xF0000000))
                 {
-                    if ((ret = gUnk_082D88B8[Macro_080B819C(flamer, dx, b)]) & 0xF0000000)
+                    if ((ret = gCollisionAttributes[Macro_080B819C(flamer, dx, b)]) & 0xF0000000)
                     {
                         if (flamer->base.flags & 1)
                             flamer->base.x = dx * 0x1000 + 0x1000;
@@ -307,11 +307,11 @@ u32 sub_080B819C(struct Object2 *flamer)
             b = flamer->base.y >> 12;
             cx = (flamer->base.x + (e + 3) * 0x100) >> 12;
             dx = (flamer->base.x + (e - 3) * 0x100) >> 12;
-            if (!((ret = gUnk_082D88B8[Macro_080B819C(flamer, a, b)]) & 0xF0000000))
+            if (!((ret = gCollisionAttributes[Macro_080B819C(flamer, a, b)]) & 0xF0000000))
             {
-                if (!((ret = gUnk_082D88B8[Macro_080B819C(flamer, cx, b)]) & 0xF0000000))
+                if (!((ret = gCollisionAttributes[Macro_080B819C(flamer, cx, b)]) & 0xF0000000))
                 {
-                    if ((ret = gUnk_082D88B8[Macro_080B819C(flamer, dx, b)]) & 0xF0000000)
+                    if ((ret = gCollisionAttributes[Macro_080B819C(flamer, dx, b)]) & 0xF0000000)
                     {
                         if (flamer->base.flags & 1)
                             flamer->base.x = a * 0x1000 - 0x1000;
