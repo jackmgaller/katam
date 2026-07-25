@@ -466,7 +466,16 @@ gUnk_083B66EC:: @ 083B66EC
 	.incbin "baserom.gba", 0x3B66EC, 0x0000008
 
 gUnk_083B66F4:: @ 083B66F4
-	.incbin "baserom.gba", 0x3B66F4, 0x0000028
+	.4byte gUnk_083B5D68
+	.4byte gUnk_083B5E18
+	.4byte gUnk_083B5F58
+	.4byte gUnk_083B6098
+	.4byte gUnk_083B613C
+	.4byte gUnk_083B627C
+	.4byte gUnk_083B63BC
+	.4byte gUnk_083B64FC
+	.4byte gUnk_083B663C
+	.4byte gUnk_083B66EC
 
 gUnk_083B671C:: @ 083B671C
 	.incbin "baserom.gba", 0x3B671C, 0x0000020

@@ -167,7 +167,10 @@ gUnk_08D60F8C:: @ 08D60F8C
 	.incbin "baserom.gba", 0xD60F8C, 0x0000018
 
 gUnk_08D60FA4:: @ 08D60FA4
-	.incbin "baserom.gba", 0xD60FA4, 0x0000010
+	.4byte gMPlayInfo_0
+	.4byte gMPlayInfo_1
+	.4byte gMPlayInfo_2
+	.4byte gMPlayInfo_3
 
 gKirbyHatAnims:: @ 08D60FB4
 	.incbin "baserom.gba", 0xD60FB4, 0x0000028
@@ -179,7 +182,14 @@ gUnk_08D61048:: @ 08D61048
 	.incbin "baserom.gba", 0xD61048, 0x000006C
 
 gUnk_08D610B4:: @ 08D610B4
-	.incbin "baserom.gba", 0xD610B4, 0x0000020
+	.4byte gMrFrostyAnimInfo4
+	.4byte gBonkersAnimInfo4
+	.4byte gPhanPhanAnimInfo2
+	.4byte gBatafireAnimInfo4
+	.4byte gBoxBoxerAnimInfo4
+	.4byte gBoxyAnimInfo4
+	.4byte gMasterHandAnimInfo2
+	.4byte gBombarAnimInfo5
 
 gUnk_08D610D4:: @ 08D610D4
 	.incbin "baserom.gba", 0xD610D4, 0x000004C
@@ -188,7 +198,10 @@ gUnk_08D61120:: @ 08D61120
 	.incbin "baserom.gba", 0xD61120, 0x000000C
 
 gUnk_08D6112C:: @ 08D6112C
-	.incbin "baserom.gba", 0xD6112C, 0x0000010
+	.4byte gDarkMindMoveSteps3
+	.4byte gDarkMindMoveSteps4
+	.4byte gDarkMindMoveSteps5
+	.4byte gDarkMindMoveSteps6
 
 gHelpMenuButtonTileAddresses:: @ 08D6113C
 	.word gHelpMenuButtonTilesB
@@ -300,7 +313,12 @@ gUnk_08D62511:: @ 08D62511
 	.incbin "baserom.gba", 0xD62511, 0x0000007
 
 gUnk_08D62518:: @ 08D62518
-	.incbin "baserom.gba", 0xD62518, 0x0000018
+	.4byte gUnk_083B6804
+	.4byte gUnk_083B6ED4
+	.4byte gUnk_083B75C4
+	.4byte gUnk_083B7CB4
+	.4byte gUnk_083B83A4
+	.4byte gUnk_083B8A94
 
 gUnk_08D62530:: @ 08D62530
 	.incbin "baserom.gba", 0xD62530, 0x00001A4
@@ -312,7 +330,18 @@ gUnk_08D626E0:: @ 08D626E0
 	.incbin "baserom.gba", 0xD626E0, 0x0000010
 
 gUnk_08D626F0:: @ 08D626F0
-	.incbin "baserom.gba", 0xD626F0, 0x0000030
+	.4byte gUnk_083B69D0
+	.4byte gUnk_083B6DE8
+	.4byte gUnk_083B70C0
+	.4byte gUnk_083B74D8
+	.4byte gUnk_083B77B0
+	.4byte gUnk_083B7BC8
+	.4byte gUnk_083B7EA0
+	.4byte gUnk_083B82B8
+	.4byte gUnk_083B8590
+	.4byte gUnk_083B89A8
+	.4byte gUnk_083B8C80
+	.4byte gUnk_083B9098
 
 gUnk_08D62720:: @ 08D62720
 	.incbin "baserom.gba", 0xD62720, 0x000002A
