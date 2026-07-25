@@ -130,8 +130,81 @@ gUnk_082EA398:: @ 082EA398
 	.incbin "baserom.gba", 0x2EA398, 0x0000800
 
 gUnk_082EAB98:: @ 082EAB98
-	.4byte gUnk_082DEB98
-	.4byte gUnk_082DF398
-	.4byte gUnk_082DFB98
-	.4byte gUnk_082E0398
-	.incbin "baserom.gba", 0x2EABA8, 0x1B8
+    @ demo 0
+    .4byte gUnk_082DEB98
+    .4byte gUnk_082DF398
+    .4byte gUnk_082DFB98
+    .4byte gUnk_082E0398
+    .4byte 0x00000000
+    .2byte 804, 804, 804, 804
+    .4byte 81920, 16384
+    .4byte 4096, 16384
+    .4byte 4096, 16384
+    .4byte 4096, 16384
+    .4byte 0, 0, 0, 0
+
+    @ demo 1
+    .4byte gUnk_082E0B98
+    .4byte gUnk_082E1398
+    .4byte gUnk_082E1B98
+    .4byte gUnk_082E2398
+    .4byte 0x00000000
+    .2byte 146, 146, 146, 146
+    .4byte 16384, 20480
+    .4byte 16384, 20480
+    .4byte 16384, 20480
+    .4byte 16384, 20480
+    .4byte 0, 0, 0, 0
+
+    @ demo 2
+    .4byte gUnk_082E2B98
+    .4byte gUnk_082E3398
+    .4byte gUnk_082E3B98
+    .4byte gUnk_082E4398
+    .4byte 0x00000000
+    .2byte 706, 706, 706, 706
+    .4byte 16384, 12288
+    .4byte 16384, 12288
+    .4byte 16384, 12288
+    .4byte 16384, 12288
+    .4byte 0, 0, 0, 0
+
+    @ demo 3
+    .4byte gUnk_082E4B98
+    .4byte gUnk_082E5398
+    .4byte gUnk_082E5B98
+    .4byte gUnk_082E6398
+    .4byte 0x00000000
+    .2byte 120, 801, 801, 801
+    .4byte 24576, 90112
+    .4byte 16384, 16384
+    .4byte 16384, 16384
+    .4byte 16384, 16384
+    .4byte 0, 0, 0, 0
+
+    @ demo 4
+    .4byte gUnk_082E6B98
+    .4byte gUnk_082E7398
+    .4byte gUnk_082E7B98
+    .4byte gUnk_082E8398
+    .4byte 0x00000000
+    .2byte 404, 404, 404, 404
+    .4byte 163840, 20480
+    .4byte 184320, 24576
+    .4byte 176128, 32768
+    .4byte 106496, 20480
+    .4byte 0, 0, 0, 0
+
+    @ demo 5
+    .4byte gUnk_082E8B98
+    .4byte gUnk_082E9398
+    .4byte gUnk_082E9B98
+    .4byte gUnk_082EA398
+    .4byte 0x00000000
+    .2byte 554, 801, 801, 801
+    .4byte 16384, 16384
+    .4byte 16384, 16384
+    .4byte 16384, 16384
+    .4byte 16384, 16384
+    .4byte 0, 0, 0, 0
+

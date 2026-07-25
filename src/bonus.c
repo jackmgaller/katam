@@ -11,8 +11,8 @@
 static void BonusAddHpOrBattery(struct Object2*);
 static void BonusGiveInvincibility(struct Object2*);
 static void BonusAddLives(struct Object2*);
-static void BonusSetFunc(struct Object2*);
-static void sub_08123780(struct Object2*);
+void BonusSetFunc(struct Object2*);
+void sub_08123780(struct Object2*);
 static void sub_08123814(struct Object2*);
 static void sub_081238D0(struct Object2*);
 static void sub_08123924(struct Object2*);
@@ -142,7 +142,7 @@ static void sub_08122ED4(struct Object2* arg0) {
     }
 }
 
-static void BonusSetFunc(struct Object2* arg0) {
+void BonusSetFunc(struct Object2* arg0) {
     struct Kirby* kirby = arg0->base.unk6C;
     if (kirby->hp > 0) {
         if (!Macro_0810B1F4(&arg0->base)) {
@@ -325,7 +325,7 @@ void BonusCreateRandom(struct ObjectBase* arg0, u8 arg1) {
     }
 }
 
-static void sub_08123780(struct Object2* arg0) {
+void sub_08123780(struct Object2* arg0) {
     arg0->base.counter = 0;
     arg0->base.xspeed = 0;
     arg0->base.yspeed = 0;

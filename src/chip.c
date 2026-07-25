@@ -14,7 +14,7 @@ static void sub_080AB428(struct Object2*);
 static void sub_080AB4A4(struct Object2*);
 static void ChipJump(struct Object2*);
 static void sub_080AB5F8(struct Object2*);
-static void sub_080AB720(struct Object2*);
+void sub_080AB720(struct Object2*);
 static void sub_080AB734(struct Object2*);
 static void sub_080AB754(struct Object2*);
 static u8 sub_080AB78C(struct Object2*);
@@ -513,7 +513,7 @@ static void sub_080AB5F8(struct Object2* arg0) {
     }
 }
 
-static void sub_080AB720(struct Object2* arg0) {
+void sub_080AB720(struct Object2* arg0) {
     ObjectSetFunc(arg0, 0, sub_080AB374);
 }
 

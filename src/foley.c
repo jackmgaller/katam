@@ -210,7 +210,7 @@ void sub_080C0C6C(struct Object2 *r4) {
         r4->base.flags &= ~0x100;
 }
 
-static void sub_080C0CBC(struct Object2 *r4) {
+void sub_080C0CBC(struct Object2 *r4) {
     ObjectSetFunc(r4, 2, sub_080C0D68);
     r4->base.flags &= ~0x140;
     r4->base.unkC &= -2;
