@@ -1520,8 +1520,6 @@ void sub_081564D8(struct Sprite *sprite) {
                 register u32 _sp2C asm("r0") = sp2C;
                 register u32 _sp30 asm("r1") = sp30;
 
-                _sp2C = sp2C;
-                _sp30 = sp30;
                 asm("":::"r2");
                 if (_sp2C | _sp30) {
 #else
