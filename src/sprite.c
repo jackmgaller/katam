@@ -251,6 +251,13 @@ struct Unk_08154EA8 {
 
 /* Scratch area shared by the sub_08155604/sub_081558A0/sub_08155C38
  * OAM-affine positioning functions. */
+/* PROMOTE_MODE widens a bare s16 local to int; wrapping it in a two-byte
+ * aggregate keeps the value 16 bits wide, which is what this function's
+ * sy sign checks need. */
+struct RawS16 {
+    /* 0x00 */ s16 v;
+} __attribute__((packed, aligned(2))); /* size = 2 */
+
 struct AffineScratch {
     /* 0x00 */ u16 m[4];    // local rotation/scale matrix
     /* 0x08 */ u16 trig[4]; // cos, sin, xscale, yscale
@@ -953,11 +960,6 @@ void sub_08155544(u16 angle, s16 sx, s16 sy, u16 idx) {
     affine[12] = (( gSineTable[angle + 0x100] >> 6) * res) >> 8;
 }
 
-#ifndef NONMATCHING
-NAKED void sub_08155604(struct Sprite *sprite, s16 *p) {
-    asm(".include \"asm/nonmatching/sub_08155604.inc\"");
-}
-#else
 void sub_08155604(struct Sprite *sprite, s16 *p) {
     struct AffineScratch v;
     union SpriteAttributes attr;
@@ -969,7 +971,7 @@ void sub_08155604(struct Sprite *sprite, s16 *p) {
     s32 scale;
     vu16 *qm3;
     u16 *pgm, *pgm2;
-    u16 syRaw;
+    struct RawS16 syRaw;
     s32 sxRaw;
     u16 sx2;
     s32 sy2;
@@ -1015,9 +1017,9 @@ void sub_08155604(struct Sprite *sprite, s16 *p) {
     if (sxRaw < 0)
         *pSx = -sx2;
     sy2 = p[2];
-    syRaw = p[2];
+    syRaw.v = p[2];
     if (sy2 < 0)
-        *pSy = -syRaw;
+        *pSy = -syRaw.v;
     pm0 = &v.m[0];
     *pm0 = ((s16)*pCos * (s16)*pSx) >> 8;
     pm1 = &v.m[1];
@@ -1049,7 +1051,7 @@ void sub_08155604(struct Sprite *sprite, s16 *p) {
         dx = w2 - attr.sub->offsetX;
         w = attr.sub->width;
     }
-    if ((s16)syRaw > 0) {
+    if (syRaw.v > 0) {
         dy = attr.sub->offsetY;
         h = attr.sub->height;
     } else {
@@ -1064,7 +1066,6 @@ void sub_08155604(struct Sprite *sprite, s16 *p) {
     sprite->x = *(vs32 *)&v.x;
     sprite->y = *(vs32 *)&v.y;
 }
-#endif
 
 void sub_081558A0(struct Sprite *sprite, s16 *p) {
     struct AffineScratch v;
