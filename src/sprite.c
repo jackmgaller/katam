@@ -328,7 +328,6 @@ u32 sub_0815436C(void) {
                 sp08 = 0;
                 if (sp08 >= attr.sub->numSubframes)
                     continue;
-                rowStrideU = (u8)stride;
                 do {
                     u8 *dst;
 
@@ -341,6 +340,7 @@ u32 sub_0815436C(void) {
                     x &= -16;
                     dst = (u8 *)(screenBase + ((y + (oam[0] & 0xFF)) >> 3) * stride);
                     tile = (((sprite->tilesVram - charBase) >> shift) + (oam[2] & 0x3FF)) & 0xFF;
+                    rowStrideU = (u8)stride;
                     ajrow = h;
                     h = (u8)(h - 1);
                     jNext = sp08 + 1;
