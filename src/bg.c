@@ -404,8 +404,7 @@ bool32 sub_08153184(void) {
                                 //void* r2;
                                 //r2 = ((struct Background*)r6_2)->unk10;
                                 //r2 += (sp14_unk20_displaced + r5 - 1) * r6->unk14 * sp8;
-                                r2 = (void*)r6->unk10 + (sp14_unk20_displaced + r5 - 1) * r6->unk14 * sp8;
-                                r2 += (r8 - 1) * sp8;
+                                r2 = (void*)r6->unk10 + (sp14_unk20_displaced + r5 - 1) * r6->unk14 * sp8 + (r8 - 1) * sp8;
                                 while (r5-- != 0) {
                                     //@824
                                     u16 r3;
@@ -419,8 +418,7 @@ bool32 sub_08153184(void) {
                             else {
                                 //@87c
                                 //void* r2;
-                                r2 = (void*)r6->unk10 + sp14_unk20_displaced * r6->unk14 * sp8;
-                                r2 += (r8 - 1) * sp8;
+                                r2 = (void*)r6->unk10 + sp14_unk20_displaced * r6->unk14 * sp8 + (r8 - 1) * sp8;
                                 while (r5-- != 0) {
                                     //@8a0
                                     u16 r3;
@@ -441,7 +439,9 @@ bool32 sub_08153184(void) {
                                 while (r5-- != 0) {
                                     u16 r3;
                                     for (r3 = 0; r3 < r8; r3++) {
-                                        *((u16*)r4 + r3) = *((u16*)r2 + r3) ^ 0x800;
+                                        u16* d = (u16*)r4 + r3;
+                                        u16 v = *((u16*)r2 + r3) ^ 0x800;
+                                        *d = v;
                                     }
                                     r4 += sp0C_destmult;
                                     r2 -= sp00_unk14 * sp8;
