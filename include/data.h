@@ -275,11 +275,11 @@ struct ObjectTemplate {
     u16 unk22;
 };
 
-// The first four bytes of struct ObjectBase and struct EffectObject, which are
-// the only bytes the two layouts genuinely share -- ObjectBase continues with
-// s16 counter and a u32 flags at 0x08, EffectObject with s16 unk4 and a u16
-// flags at 0x06. A task's struct pointer may only be read through this header
-// until kind says which of the two it really is.
+// The 4-byte prefix that struct ObjectBase and struct EffectObject share, and
+// the only bytes they do: ObjectBase continues with s16 counter and a u32 flags
+// at 0x08, EffectObject with s16 unk4 and a u16 flags at 0x06. A pointer of
+// unknown kind may be read through this prefix and no further, until kind says
+// which longer prefix it is.
 struct ObjectHeader {
     // A layout family, not an exact struct id: it names the prefix a reader may
     // assume at offset 0. The allocation is often a larger struct that embeds

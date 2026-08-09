@@ -5658,9 +5658,8 @@ void EffectObjectDisplaySprite(struct EffectObject *r8)
 
 void ObjectBaseDestroy(struct Task *t)
 {
-    // Only the shared header may be read before kind says which layout this
-    // task really has; the concrete pointer is picked afterwards. The h/header
-    // pair is the original inherited alias -- dropping it costs 2 instructions.
+    // Only the shared prefix may be read until kind says which longer prefix
+    // this task has, so the concrete pointer is picked inside the branch.
     struct ObjectHeader *h = TaskGetStructPtr(t), *header = h;
     struct EffectObject *effectObject = TaskGetStructPtr(t);
 
