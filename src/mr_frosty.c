@@ -963,10 +963,16 @@ static void sub_080CD588(struct Task *t)
 
 static void sub_080CD594(struct Object *mf)
 {
-    if (mf->kirby3->base.header.kind == 1
-      && (((struct Object *)mf->kirby3)->type == OBJ_MR_FROSTY_ICE_CUBE_SMALL
-            || ((struct Object *)mf->kirby3)->type == OBJ_MR_FROSTY_ICE_CUBE_LARGE)
-      && mf->kirby3->base.flags & 0x1000)
+    // kirby3 holds the ice cube here, not a Kirby: every site that installs
+    // this as unk7C (sub_080CD47C, sub_080CD4D0, sub_080CD524) calls
+    // sub_080CCEE0 first, and that is what stores the cube. Same field, same
+    // (void *) hand-off as gobbler.c and mega_titan.c.
+    struct Object *ic = (struct Object *)mf->kirby3;
+
+    if (ic->base.header.kind == 1
+      && (ic->type == OBJ_MR_FROSTY_ICE_CUBE_SMALL
+            || ic->type == OBJ_MR_FROSTY_ICE_CUBE_LARGE)
+      && ic->base.flags & 0x1000)
     {
         mf->kirby3 = NULL;
         mf->unk7C = NULL;
