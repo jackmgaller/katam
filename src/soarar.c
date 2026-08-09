@@ -507,11 +507,17 @@ void sub_080AC45C(struct Object *obj) {
     }
 }
 
-bool32 sub_080AC5E0(struct Object *obj, struct Kirby *kirby) {
+// a2 is a tagged pointer: a struct Kirby when kind is 0, and something with a
+// struct Object prefix otherwise. kirby and obj2 are the two views of it; only
+// the one the kind check selects may be read past the header.
+bool32 sub_080AC5E0(struct Object *obj, struct ObjectHeader *a2) {
+    struct Kirby *kirby = (struct Kirby *)a2;
+    struct Object *obj2 = (struct Object *)a2;
+
     if (obj->unk83 > 1) {
         return FALSE;
     }
-    if (kirby->base.header.kind == 0) {
+    if (a2->kind == 0) {
         if (kirby->hp > 0
             && kirby->animationIndex != 0x27
             && kirby->animationIndex <= 0x7A
@@ -527,11 +533,10 @@ bool32 sub_080AC5E0(struct Object *obj, struct Kirby *kirby) {
         }
     }
     else {
-        // Not a Kirby -- the parameter is a tagged pointer. The guard only
-        // rules out kind 0, and sub_0803699C's kind-2 dispatch can reach here,
-        // so this read of ->type is the original's and is not proven safe by
-        // the tag alone.
-        if ((u8)(((struct Object *)kirby)->type - 0x5E) > 0xE) {
+        // The guard only rules out kind 0, and sub_0803699C's kind-2 dispatch
+        // can reach here, so this read of ->type is the original's and is not
+        // proven safe by the tag alone.
+        if (!ObjType5ETo6C(obj2)) {
             return FALSE;
         }
         ObjectSetFunc(obj, 2, sub_080AC824);
@@ -539,7 +544,7 @@ bool32 sub_080AC5E0(struct Object *obj, struct Kirby *kirby) {
     obj->base.xspeed = 0;
     obj->base.yspeed = 0;
     obj->base.counter = obj->unk80;
-    obj->base.unk6C = kirby;
+    obj->base.unk6C = a2;
     PlaySfx(&obj->base, SE_FROSTY_SWALLOW_KIRBY);
     return TRUE;
 }
