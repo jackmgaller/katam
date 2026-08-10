@@ -634,15 +634,20 @@ extern u16 gUnk_02023510[];
 extern u16 gUnk_02023518[];
 extern u16 gUnk_02023520[][2];
 
-extern u8 gUnk_02024ED0[][1950];
-extern u16 gUnk_02026D50[];
-extern u8 gUnk_02026D60[][1954];
+extern u8 gUnk_02024ED0[4][1950];
+extern u16 gUnk_02026D50[4];
+extern u8 gUnk_02026D60[4][1954];
 
 extern u8 gUnk_02028BF0[0x20];
 extern u32 gUnk_02028C10[0x20];
 extern u16 gVisitedDoors[0x120];
 
-extern u8 gUnk_02028EE0[][1950 * 8];
+union Unk_02028EE0 {
+    u8 affine[1950 * 8];
+    u16 text[1950 * 4];
+};
+
+extern union Unk_02028EE0 gUnk_02028EE0[4];
 
 extern u32 gUnk_020229D4;
 extern struct Object gUnk_020229E0[];
@@ -655,7 +660,6 @@ extern u16 gUnk_020382C8[5][4];
 extern u32 gUnk_02038580;
 extern struct Unk_02038590 gUnk_02038590[4];
 
-extern u16 gUnk_02038990[][2];
 extern s16 gUnk_0203ACB0[];
 extern u32 gUnk_0203AD10; // bit3: Instead of buttons in the help menu, display a kirby drawing
 extern u8 gUnk_0203AD14;
@@ -674,10 +678,10 @@ extern u8 gUnk_0203AD50; // playerId of kirby who opened the menu
 extern s16 gUnk_0203ADE0;
 extern void *ewram_end;
 
-enum SUB_08002888_ENUM {
-    SUB_08002888_ENUM_UNK_1 = 0,
-    SUB_08002888_ENUM_UNK_2 = 1,
-    SUB_08002888_ENUM_UNK_3 = 2,
+enum StateSlotScope {
+    STATE_SLOT_ROOM = 0,
+    STATE_SLOT_SESSION = 1,
+    STATE_SLOT_WORLD = 2,
 };
 
 enum __attribute__ ((__packed__)) AIKirbyState {
@@ -714,6 +718,7 @@ union __attribute__((transparent_union)) Unk_03002E60 {
 };
 
 extern const union Unk_03002E60 *gUnk_03002E60; // see gUnk_082D8D74
+extern struct RoomTiledBG *const gUnk_082D8D74[];
 
 extern struct Sprite *gUnk_03006030[];
 
@@ -854,9 +859,13 @@ extern const struct SolidityMap *const gSolidityMaps[];
 
 
 struct Unk_08002E48 {
-    u8 unk0;
-    u8 filler[0x23];
-    union Unk_03002E60 *unk24;
+    /* 0x00 */ u8 unk0;
+    /* 0x02 */ u16 unk2; // saved gDispCnt
+    /* 0x04 */ u16 unk4[4]; // saved gBgCntRegs
+    /* 0x0C */ s16 unkC[4][2]; // saved gBgScrollRegs
+    /* 0x1C */ u16 unk1C[2]; // saved gBldRegs.bldCnt/bldAlpha
+    /* 0x20 */ u8 filler20[4];
+    /* 0x24 */ const union Unk_03002E60 *unk24; // saved gUnk_03002E60
 }; /* size = 0x28 */
 
 

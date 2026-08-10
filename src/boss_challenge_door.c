@@ -42,14 +42,14 @@ static void sub_08118C18(struct BossChallengeDoor *door) {
 
     d2 = door;
     sub_08119094(d2);
-    bossIdx = (*sub_08002888(1, 9, 0xFF) & 0xF0000) >> 16;
+    bossIdx = (*GetStateSlot(STATE_SLOT_SESSION, 9, 0xFF) & 0xF0000) >> 16;
     if (bossIdx != 0xC) {
         if (d2->obj2.object->unk22 & 0x100)
             d2->unkB4 = sub_08092944(&d2->obj2.base, 0, 0x294, 10);
         else
             d2->unkB4 = sub_08092944(&d2->obj2.base, 0, 0x294, 3);
         door->unkB4->sprite.unk14 = 0x780;
-        bossIdx =(*sub_08002888(1, 9, 0xFF) & 0xF0000) >> 16;
+        bossIdx =(*GetStateSlot(STATE_SLOT_SESSION, 9, 0xFF) & 0xF0000) >> 16;
         sign = sub_0808B62C(&d2->obj2.base, gUnk_08357B3E[bossIdx][2], gUnk_08357B3E[bossIdx][0], gUnk_08357B3E[bossIdx][1], 0);
         door->unkB8 = sign;
         sign->sprite.palId = 0;
@@ -76,7 +76,7 @@ static void sub_08118D80(struct BossChallengeDoor *door) {
 
     d2 = door;
     door->obj2.base.flags |= 4;
-    bossIdx = (*sub_08002888(1, 9, 0xFF) & 0xF0000) >> 16;
+    bossIdx = (*GetStateSlot(STATE_SLOT_SESSION, 9, 0xFF) & 0xF0000) >> 16;
     if (gCurLevelInfo[door->obj2.base.unk56].currentRoom == gCurLevelInfo[gLocalPlayerId].currentRoom) {
         if (d2->unkB8->sprite.palId == 0) {
             Macro_081050E8(d2->unkB8, &d2->unkB8->sprite, gUnk_08357B3E[bossIdx][0], gUnk_08357B3E[bossIdx][1], 1);
@@ -124,7 +124,7 @@ static void sub_08118D80(struct BossChallengeDoor *door) {
         u32 tmp;
         for (j = 0; j < gNumHumanPlayers; j++)
             ;
-        tmp = (*sub_08002888(1, 9, gCurLevelInfo[door->obj2.base.unk56].unk65E) & 0xF0000) >> 16;
+        tmp = (*GetStateSlot(STATE_SLOT_SESSION, 9, gCurLevelInfo[door->obj2.base.unk56].unk65E) & 0xF0000) >> 16;
         for (i = 0; i < 4; i++) {
             struct Kirby *kirby = &gKirbys[i];
             if (kirby->hp <= 0)
@@ -144,7 +144,7 @@ static void sub_08119094(struct BossChallengeDoor *door) {
     u32 *ptr;
     u32 field;
 
-    ptr = sub_08002888(1, 9, gCurLevelInfo[door->obj2.base.unk56].unk65E);
+    ptr = GetStateSlot(STATE_SLOT_SESSION, 9, gCurLevelInfo[door->obj2.base.unk56].unk65E);
     field = (*ptr & 0xF0000) >> 16;
     if (field == 0)
         *ptr |= 0x80000000;

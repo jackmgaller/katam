@@ -11,9 +11,6 @@ struct Sprite;
 
 void IntrMain(void);
 
-void FillLevelInfo(u8, u16, const u16 **, const u16 **);
-
-void sub_08000460(void);
 void sub_08001358(u8 playerId);
 void sub_08001408(u8 playerId, union LevelInfo_1E0, void *, u8 *);
 void sub_080015A8(u8 playerId, u16, u16, void *);
@@ -47,7 +44,7 @@ void sub_080027C8(void);
 u32 sub_080027E8(u32 arg0, u16 arg1, u8 arg2);
 void sub_08002848(void);
 void sub_08002868(void);
-u32 *sub_08002888(u32 arg0, u8 index, u8 subindex);
+u32 *GetStateSlot(enum StateSlotScope scope, u8 id, u8 roomSlot);
 void sub_080028CC(u8 playerId, struct Unk_02023720 *arg1);
 void sub_08002918(u8 playerId, struct Unk_02023720 *arg1);
 struct Unk_02023720 *sub_08002958(u8 playerId);
@@ -56,8 +53,8 @@ u16 sub_080029BC(u8 arg0);
 void sub_080029CC(u8 arg0, u16 arg1);
 u16 sub_080029E4(u8 arg0);
 void sub_080029F4(u8 arg0, u16 arg1);
-u16 sub_08002A0C(u8 arg0);
-void sub_08002A1C(u8 arg0, u16 arg1);
+u16 GetRoomMusicId(u8 roomSlot);
+void SetRoomMusicId(u8 roomSlot, u16 musicId);
 u16 sub_08002A2C(u8 arg0, u8 arg1);
 void sub_08002A44(u8 arg0, u16 arg1, u8 arg2);
 u32 sub_08002A5C(u16 arg0);
@@ -71,7 +68,7 @@ void sub_08002C98(u16, u16 *, bool32 *, s32 *);
 void sub_08002D40(u16, u8 *, u8 *); // TODO: a2 and a3 are not consistent with Kirby::unkF2/Kirby::unkF3/sub_080534D0
 
 void sub_08002D40(u16, u8 *, u8 *);
-void sub_08002E3C(void);
+void sub_08002E3C(struct Task *);
 void sub_08002E48(struct Task *);
 
 void sub_08002EC4(u8 playerId, bool32);
@@ -131,10 +128,6 @@ void sub_0800A8F8(u8 arg0, u8 arg1, u8 arg2);
 void sub_0800EE04(u8, u32);
 u8 sub_0800EEBC(struct ObjectBase *);
 
-void sub_08020428(void (*)(void));
-void sub_08020490(void);
-void sub_080204B0(u16, void *, u32);
-u16 sub_0802055C(u16);
 void sub_08025650(u8);
 void sub_08025A80(void);
 void sub_08025AD0(void);

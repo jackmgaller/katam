@@ -530,7 +530,7 @@ _08033C96:
 	movs r0, #1
 	adds r1, r4, #0
 	movs r2, #0
-	bl sub_08002888
+	bl GetStateSlot
 	ldr r0, [r0]
 	cmp r0, #0
 	beq _08033C90
@@ -560,7 +560,7 @@ _08033CCA:
 	lsrs r1, r1, #0x18
 	movs r0, #1
 	movs r2, #0
-	bl sub_08002888
+	bl GetStateSlot
 	ldr r0, [r0]
 	cmp r0, #0
 	beq _08033CC4
@@ -1205,7 +1205,7 @@ _080341EA:
 	movs r0, #1
 	adds r1, r4, #0
 	movs r2, #0
-	bl sub_08002888
+	bl GetStateSlot
 	ldr r0, [r0]
 	cmp r0, #0
 	beq _080341E4
@@ -1233,7 +1233,7 @@ _08034218:
 	lsrs r1, r1, #0x18
 	movs r0, #1
 	movs r2, #0
-	bl sub_08002888
+	bl GetStateSlot
 	ldr r0, [r0]
 	cmp r0, #0
 	beq _08034212
@@ -4511,7 +4511,7 @@ _08035C1E:
 	movs r0, #1
 	adds r1, r4, #0
 	movs r2, #0
-	bl sub_08002888
+	bl GetStateSlot
 	ldr r0, [r0]
 	cmp r0, #0
 	beq _08035C18
@@ -4538,7 +4538,7 @@ _08035C4A:
 	lsrs r1, r1, #0x18
 	movs r0, #1
 	movs r2, #0
-	bl sub_08002888
+	bl GetStateSlot
 	ldr r0, [r0]
 	cmp r0, #0
 	beq _08035C44
@@ -13422,7 +13422,7 @@ sub_08039ED4: @ 0x08039ED4
 	adds r4, r0, #0
 	bl sub_08020220
 	bl sub_0803D2D0
-	bl sub_080006EC
+	bl SaveDisplayState
 	ldr r1, _08039EFC @ =gUnk_0834BD94
 	ldrh r0, [r4, #8]
 	lsls r0, r0, #2
@@ -13471,7 +13471,7 @@ sub_08039F38: @ 0x08039F38
 	adds r4, r0, #0
 	bl sub_08020370
 	bl sub_0803D2EC
-	bl sub_08000798
+	bl RestoreDisplayState
 	ldr r0, _08039F68 @ =gLocalPlayerId
 	ldrb r1, [r0]
 	movs r0, #0xd4

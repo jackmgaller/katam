@@ -224,7 +224,7 @@ SECTIONS {
     .text : ALIGN(4) {
         asm/crt0.o(.text);
         src/init.o(.text);
-        asm/code.o(.text);
+        src/level.o(.text);
         src/code_080023A4.o(.text);
         src/save.o(.text);
         src/chest.o(.text);
@@ -241,7 +241,7 @@ SECTIONS {
         src/code_0801DA58.o(.text);
         src/special_hub_mirror.o(.text);
         src/subgame_menu.o(.text);
-        asm/code_08020220.o(.text);
+        src/code_08020220.o(.text);
         asm/cutscene_trigger.o(.text);
         src/shadow_kirby.o(.text);
         src/hammer_peg.o(.text);

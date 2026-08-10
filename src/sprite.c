@@ -947,7 +947,7 @@ s32 sub_08155494(union AnimCmd cursor, struct Sprite *sprite) {
 }
 
 void sub_08155544(u16 angle, s16 sx, s16 sy, u16 idx) {
-    u16 *affine = &gOamBuffer[idx * 4].all.affineParam;
+    u16 *affine = &gOamBuffer[idx * 16 + 3];
     s16 res;
 
     res = Div(0x10000, sx);
@@ -1740,7 +1740,7 @@ OamData *sub_08156D84(u8 r5) {
 }
 
 void DrawToOamBuffer(void) {
-    OamData *oam = gOamBuffer;
+    u16 *oam = gOamBuffer;
     u8 j = 0;
     s32 i;
     s8 r0;
@@ -1750,7 +1750,7 @@ void DrawToOamBuffer(void) {
         for (r0 = gUnk_03002450[i]; r0 != -1; r0 = gUnk_030031C0[r0].all.affineParam) {
             unused = gUnk_030035F0;
             DmaCopy16(3, gUnk_030031C0 + r0, oam, 6);
-            oam++;
+            oam += 4;
             gUnk_030035F0[r0] = j++;
             unused++; unused--;
         }
@@ -1758,22 +1758,22 @@ void DrawToOamBuffer(void) {
 
     if (gMainFlags & 0x800) {
         i = gUnk_030024F0;
-        oam = gOamBuffer + gUnk_030024F0;
+        oam = gOamBuffer + gUnk_030024F0 * 4;
         for (; i < gUnk_03003A00; i++) {
             DmaFill16(3, 0x200, oam, 0x6);
-            oam++;
+            oam += 4;
         }
     } else {
         if (gMainFlags & 0x400) {
             s32 j;
             i = gUnk_030024F0 - 1;
-            oam = gOamBuffer + i; // not used, but can force oam to be preloaded
+            oam = gOamBuffer + i * 4; // not used, but can force oam to be preloaded
             for (j = 0; i >= 0; i--, j++) {
-                DmaCopy16(3, gOamBuffer + i, gOamBuffer + (0x7f - j), 6);
+                DmaCopy16(3, gOamBuffer + i * 4, gOamBuffer + (0x7f - j) * 4, 6);
             }
             gUnk_03003A00 = 0x80 - gUnk_030024F0;
             for (i = 0; i < gUnk_03003A00; i++) {
-                DmaFill16(3, 0x200, gOamBuffer + i, 6);
+                DmaFill16(3, 0x200, gOamBuffer + i * 4, 6);
                 unused++; unused--;
             }
         } else {
