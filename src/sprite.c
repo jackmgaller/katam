@@ -280,6 +280,7 @@ u32 sub_0815436C(void) {
     u32 screenBase;
     u32 pair;
     u32 shift = 5;
+    u32 sz;
     u32 colStep;
     u32 colOff;
     u32 jNext;
@@ -329,7 +330,8 @@ u32 sub_0815436C(void) {
                 /* affine (8bpp, byte map entries) */
                 u32 ajrow;
 
-                stride = (0x100000u << (bgcnt >> 14)) >> 16;
+                sz = bgcnt >> 14;
+                stride = (0x100000u << sz) >> 16;
                 src = (uintptr_t)gSpriteTables->oamData[sprite->animId];
                 src += (attr.sub->bitfield & 0x3FFF) * 3 * 2;
                 sp08 = 0;
@@ -385,7 +387,8 @@ u32 sub_0815436C(void) {
                 s16 xoam, yoam;
 
                 stride = 0x20;
-                if ((u8)((gBgCntRegs[bg] >> 14) - 2) <= 1)
+                sz = gBgCntRegs[bg] >> 14;
+                if ((u8)(sz - 2) <= 1)
                     stride = 0x40;
                 src = (uintptr_t)gSpriteTables->oamData[sprite->animId];
                 src += (attr.sub->bitfield & 0x3FFF) * 3 * 2;
