@@ -507,9 +507,11 @@ void sub_080AC45C(struct Object *obj) {
     }
 }
 
-// a2 is a tagged pointer: a struct Kirby when kind is 0, and something with a
-// struct Object prefix otherwise. kirby and obj2 are the two views of it; only
-// the one the kind check selects may be read past the header.
+// a2 is a tagged pointer. kind 0 is a struct Kirby; any other kind guarantees
+// only the struct ObjectHeader -- in particular kind 2 is frequently a bare
+// struct ObjectBase, which ends at 0x78. kirby and obj2 are views of it, each
+// valid only inside the branch the kind check selects, and the obj2 view is not
+// actually sound on the else arm -- see the note there.
 bool32 sub_080AC5E0(struct Object *obj, struct ObjectHeader *a2) {
     struct Kirby *kirby = (struct Kirby *)a2;
     struct Object *obj2 = (struct Object *)a2;
@@ -533,9 +535,14 @@ bool32 sub_080AC5E0(struct Object *obj, struct ObjectHeader *a2) {
         }
     }
     else {
-        // The guard only rules out kind 0, and sub_0803699C's kind-2 dispatch
-        // can reach here, so this read of ->type is the original's and is not
-        // proven safe by the tag alone.
+        // Out-of-bounds in the original, transcribed rather than guarded.
+        // ObjType5ETo6C reads Object::type at +0x82, but the guard above rules
+        // out only kind 0, and a kind-2 operand need not have a struct Object
+        // prefix. sub_0803699C passes its own first operand as a2, and the bomb
+        // created by sub_08082380 is exactly such an operand: TaskCreate with
+        // sizeof(struct ObjectBase) = 0x78, header.kind = 2, registered on the
+        // kind-2 interaction list. Reaching this line with that bomb reads 11
+        // bytes past the end of its task struct.
         if (!ObjType5ETo6C(obj2)) {
             return FALSE;
         }
