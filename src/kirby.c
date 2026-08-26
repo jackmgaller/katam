@@ -6324,13 +6324,13 @@ void sub_0803EE18(void)
                     if (kirby->base.flags & 0x2000)
                     {
                         kirby->unk11A = 0;
-                        ((void (*)(struct Kirby *))kirby->stateFn)(kirby);
+                        kirby->stateFn(kirby);
                     }
                 }
                 else
                 {
                     kirby->unk11A = 0;
-                    ((void (*)(struct Kirby *))kirby->stateFn)(kirby);
+                    kirby->stateFn(kirby);
                 }
             }
         }
