@@ -1192,6 +1192,11 @@ void sub_0809C380(struct Object *r3) {
     r3->base.unkC |= 0x400;
 }
 
+// unk6C is a tagged pointer, but its writers always set unk78 alongside it, so
+// the callback identifies the tag. sub_080365C8 (asm/code_08032E98.s) is the
+// only path that installs this one, and it does so only on the kind != 1 arm --
+// a kind-1 unk6C is paired with nullsub_123 through sub_0809CFC4 instead. So the
+// kind == 1 arm below is the original's own dead code, kept as it stands.
 static void sub_0809C48C(struct Object *r5) {
     struct Kirby *r6 = r5->base.unk6C;
     struct ThrowAbilityObject *r1;
