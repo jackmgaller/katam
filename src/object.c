@@ -1192,14 +1192,12 @@ void sub_0809C380(struct Object *r3) {
     r3->base.unkC |= 0x400;
 }
 
-// unk6C is a tagged pointer, but reaching this callback means it is a Kirby.
-// sub_0809C380 is its only installer -- 0x0809C48D occurs once in the whole ROM,
-// in that function's literal pool -- and sub_0809C380's only caller is
-// sub_080365C8 = gUnk_0834BD88[1] (asm/code_08032E98.s), which gets there only
-// when the other participant has unk68 & 0x20. Every setter of that bit in the
-// tree is a kind-2 inhale zone whose parent is fixed at creation to either a
-// Kirby or a struct Object, and the struct Object half is diverted to
-// sub_0809CFC4. So the kind == 1 arm below is the original's own dead code.
+// The known installer pairs this callback only with the kind != 1 arm;
+// kind 1 is instead paired with nullsub_123 through sub_0809CFC4.
+// TODO: Prove that unk6C is always kind 0 when this callback runs.
+// The known install path excludes kind 1, but has not been shown to
+// exclude kinds 2 or 3, while Kirby-only fields are read below before
+// the later tag check.
 static void sub_0809C48C(struct Object *r5) {
     struct Kirby *r6 = r5->base.unk6C;
     struct ThrowAbilityObject *r1;
