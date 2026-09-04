@@ -4,11 +4,11 @@
 #include "data.h"
 
 struct BossChallengeDoor {
-    struct Object2 obj2;
-    /* 0xB4 */ struct Object4 *unkB4;
-    /* 0xB8 */ struct Object4 *unkB8;
+    struct Object obj2;
+    /* 0xB4 */ struct EffectObject *unkB4;
+    /* 0xB8 */ struct EffectObject *unkB8;
 }; /* size = 0xBC */
 
-void *CreateBossChallengeDoor(struct Object *, u8);
+void *CreateBossChallengeDoor(struct ObjectTemplate *, u8);
 
 #endif

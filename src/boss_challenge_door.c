@@ -17,7 +17,7 @@ static void nullsub_126(struct BossChallengeDoor *);
 extern const u16 gUnk_08357B24[];
 extern const u16 gUnk_08357B3E[][3];
 
-void *CreateBossChallengeDoor(struct Object *template, u8 a2) {
+void *CreateBossChallengeDoor(struct ObjectTemplate *template, u8 a2) {
     struct BossChallengeDoor *door;
     struct Task *t = TaskCreate(ObjectMain, sizeof(struct BossChallengeDoor), 0x1000, TASK_USE_IWRAM, ObjectDestroy);
 
@@ -37,14 +37,14 @@ void *CreateBossChallengeDoor(struct Object *template, u8 a2) {
 
 static void sub_08118C18(struct BossChallengeDoor *door) {
     s32 bossIdx;
-    struct Object4 *sign;
+    struct EffectObject *sign;
     struct BossChallengeDoor *d2;
 
     d2 = door;
     sub_08119094(d2);
     bossIdx = (*GetStateSlot(STATE_SLOT_SESSION, 9, 0xFF) & 0xF0000) >> 16;
     if (bossIdx != 0xC) {
-        if (d2->obj2.object->unk22 & 0x100)
+        if (d2->obj2.objTemplate->unk22 & 0x100)
             d2->unkB4 = sub_08092944(&d2->obj2.base, 0, 0x294, 10);
         else
             d2->unkB4 = sub_08092944(&d2->obj2.base, 0, 0x294, 3);
@@ -106,15 +106,15 @@ static void sub_08118D80(struct BossChallengeDoor *door) {
                 continue;
             if (!(kirby->movementState & 0x40))
                 continue;
-            if (!(kirby->base.base.base.unkC & 0x1000))
+            if (!(kirby->base.unkC & 0x1000))
                 continue;
-            if (pos.x > kirby->base.base.base.x)
+            if (pos.x > kirby->base.x)
                 continue;
-            if (pos.x + measure.x < kirby->base.base.base.x)
+            if (pos.x + measure.x < kirby->base.x)
                 continue;
-            if (pos.y > kirby->base.base.base.y)
+            if (pos.y > kirby->base.y)
                 continue;
-            if (pos.y + measure.y >= kirby->base.base.base.y) {
+            if (pos.y + measure.y >= kirby->base.y) {
                 touched = TRUE;
                 break;
             }
@@ -129,10 +129,10 @@ static void sub_08118D80(struct BossChallengeDoor *door) {
             struct Kirby *kirby = &gKirbys[i];
             if (kirby->hp <= 0)
                 continue;
-            if (level->currentRoom != kirby->base.base.base.roomId)
+            if (level->currentRoom != kirby->base.roomId)
                 continue;
             sub_08002D40(gUnk_08357B24[tmp], &sp28, &sp29);
-            gKirbys[i].base.base.base.unkC |= 0x800000;
+            gKirbys[i].base.unkC |= 0x800000;
             sub_0805BDF4(kirby, gUnk_08357B24[tmp], sp28, sp29);
         }
         door->obj2.unk78 = sub_081191B4;
