@@ -1072,7 +1072,7 @@ void sub_081558A0(struct Sprite *sprite, s16 *p) {
     u16 *pIdx;
     vu16 *pCos, *pSin, *pSx, *pSy;
     s32 sxRaw;
-    vu16 *pm1, *pm2, *pm3;
+    u16 *pm1, *pm2, *pm3;
     vu16 *pgm0, *pgm1, *pgm2, *pgm3;
     u16 w, h;
     u16 w2, h2;
@@ -1179,7 +1179,7 @@ void sub_08155C38(struct Sprite *sprite, s16 *p) {
     vu16 *pSin;
     vu16 *pSx, *pSy;
     s32 sxRaw;
-    vu16 *pm1, *pm2, *pm3;
+    u16 *pm1, *pm2, *pm3;
     vu16 *pgm0, *pgm1, *pgm2, *pgm3;
     u16 w, h;
     u16 w2, h2;
