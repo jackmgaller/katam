@@ -1728,17 +1728,15 @@ void DrawToOamBuffer(void) {
     u8 j = 0;
     s32 i;
     s8 r0;
-    // TODO: Matching: removing this pointer and its dummy updates swaps the
-    // OAM and index-table base loads and their registers in the first loop.
-    u8 *unused;
 
     for (i = 0; i < 0x20; i++) {
         for (r0 = gUnk_03002450[i]; r0 != -1; r0 = gUnk_030031C0[r0].all.affineParam) {
-            unused = gUnk_030035F0;
+            u8 *oamIndex = gUnk_030035F0;
+
             DmaCopy16(3, gUnk_030031C0 + r0, oam, 6);
             oam += 4;
-            gUnk_030035F0[r0] = j++;
-            unused++; unused--;
+            oamIndex += r0;
+            *oamIndex = j++;
         }
     }
 
