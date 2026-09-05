@@ -267,43 +267,41 @@ struct AffineScratch {
     /* 0x20 */ u16 idx;
 };
 
-#ifndef NONMATCHING
-NAKED u32 sub_0815436C(void) {
-    asm(".include \"asm/nonmatching/sub_0815436C.inc\"");
-}
-#else
 u32 sub_0815436C(void) {
     u16 oam[3];
+    u8 i;
     u8 sp08;
     struct Sprite *sprite;
+    u32 stride;
     u32 charBase;
     u32 screenBase;
+    const u16 *src;
+    u8 w;
     u32 pair;
     u32 shift = 5;
     u32 sz;
     u32 colStep;
-    u32 colOff;
-    u32 jNext;
-    u8 i;
     u8 j;
-    s32 aRowStrideS;
-    u32 cols;
+    u8 cols;
     u32 acol;
     u32 jrow;
-    u32 stride;
-    u32 src;
-    u8 w;
+    u8 *dst;
     u32 rowStrideU;
+    s32 aRowStrideS;
+    u32 colOff;
     s32 x, y;
     u32 rows2;
     u8 h;
+    // TODO: Matching: retain this local one-bit mask. Replacing it with literal
+    // 1 removes the target's register copy before the affine trailing-byte test.
+    u32 bitMask = 1;
 
     if (!(REG_DISPSTAT & 1))
         return 0;
 
     if (gUnk_030068B0 != 0) {
         for (i = 0; i < gUnk_030068B0; i++) {
-            union SpriteAttributes attr;
+            const struct SpriteAttributes_Sub *attr;
             u32 frame;
             u32 bg;
             u32 bgcnt;
@@ -315,9 +313,9 @@ u32 sub_0815436C(void) {
                 continue;
 
             if (!(frame >> 28))
-                attr.sub = &gSpriteTables->attrs[sprite->animId].sub[frame];
+                attr = &gSpriteTables->attrs[sprite->animId].sub[frame];
             else
-                attr.full = &gSpriteTables->attrs[sprite->animId].full[frame];
+                attr = &gSpriteTables->attrs[sprite->animId].full[frame].sub;
 
             bg = (sprite->unk8 & 0x18000) >> 15;
             bgcnt = gBgCntRegs[bg];
@@ -332,33 +330,30 @@ u32 sub_0815436C(void) {
 
                 sz = bgcnt >> 14;
                 stride = (0x100000u << sz) >> 16;
-                src = (uintptr_t)gSpriteTables->oamData[sprite->animId];
-                src += (attr.sub->bitfield & 0x3FFF) * 3 * 2;
+                src = gSpriteTables->oamData[sprite->animId];
+                src += (attr->bitfield & 0x3FFF) * 3;
                 sp08 = 0;
-                if (sp08 >= attr.sub->numSubframes)
+                if (sp08 >= attr->numSubframes)
                     continue;
                 do {
-                    u8 *dst;
 
                     DmaCopy16(3, src, oam, 6);
-                    src += 6;
+                    src += 3;
                     w = (u8)(gUnk_08D6084C[((oam[0] & 0xC000) >> 12) | ((oam[1] & 0xC000) >> 14)][0]) >> 3;
                     h = (u8)(gUnk_08D6084C[((oam[0] & 0xC000) >> 12) | ((oam[1] & 0xC000) >> 14)][1]) >> 3;
-                    y = sprite->y - attr.sub->offsetY;
-                    x = sprite->x - attr.sub->offsetX;
+                    y = sprite->y - attr->offsetY;
+                    x = sprite->x - attr->offsetX;
                     x &= -16;
                     dst = (u8 *)(screenBase + ((y + (oam[0] & 0xFF)) >> 3) * stride);
                     tile = (((sprite->tilesVram - charBase) >> shift) + (oam[2] & 0x3FF)) & 0xFF;
                     rowStrideU = (u8)stride;
                     ajrow = h;
                     h = (u8)(h - 1);
-                    jNext = sp08 + 1;
                     if (ajrow != 0) {
-                        aRowStrideS = (s8)rowStrideU;
                         do {
                             u8 *p = dst + ((x + (oam[1] & 0x1FF)) >> 3);
-                            acol = w;
-                            cols = (u8)(acol - 1);
+                            cols = w;
+                            acol = cols--;
                             rows2 = h - 1;
                             while (acol != 0) {
                                 if (!((uintptr_t)p & 1)) {
@@ -369,61 +364,64 @@ u32 sub_0815436C(void) {
                                 }
                                 tile = (u16)(tile + 1);
                                 p++;
-                                acol = cols;
-                                cols = (u8)(cols - 1);
+                                acol = cols--;
                             }
-                            if ((uintptr_t)p & 1) {
+                            if ((uintptr_t)p & bitMask) {
                                 *(u16 *)p = (*(u16 *)p & 0xFF00) | pair;
                             }
+                            aRowStrideS = (s8)rowStrideU;
                             dst += aRowStrideS;
                             ajrow = h;
                             h = (u8)rows2;
                         } while (ajrow != 0);
                     }
-                    sp08 = jNext;
-                } while (sp08 < attr.sub->numSubframes);
+                    ++sp08;
+                } while (sp08 < attr->numSubframes);
             } else {
                 /* text (16-bit map entries) */
                 s16 xoam, yoam;
+                u32 spriteFlip, frameFlip;
 
                 stride = 0x20;
                 sz = gBgCntRegs[bg] >> 14;
                 if ((u8)(sz - 2) <= 1)
                     stride = 0x40;
-                src = (uintptr_t)gSpriteTables->oamData[sprite->animId];
-                src += (attr.sub->bitfield & 0x3FFF) * 3 * 2;
+                src = gSpriteTables->oamData[sprite->animId];
+                src += (attr->bitfield & 0x3FFF) * 3;
                 sp08 = 0;
-                if (sp08 >= attr.sub->numSubframes)
+                if (sp08 >= attr->numSubframes)
                     continue;
                 do {
-                    u8 *dst;
 
                     DmaCopy16(3, src, oam, 6);
-                    src += 6;
+                    src += 3;
                     w = (u8)(gUnk_08D6084C[((oam[0] & 0xC000) >> 12) | ((oam[1] & 0xC000) >> 14)][0]) >> 3;
                     h = (u8)(gUnk_08D6084C[((oam[0] & 0xC000) >> 12) | ((oam[1] & 0xC000) >> 14)][1]) >> 3;
                     xoam = oam[1] & 0x1FF;
                     yoam = oam[0] & 0xFF;
                     oam[2] = (sprite->palId << 12) + oam[2];
-                    if (((sprite->unk8 >> 11) & 1) != (attr.sub->bitfield >> 15)) {
+                    if (((sprite->unk8 >> 11) & bitMask) != (attr->bitfield >> 15)) {
                         oam[1] ^= 0x2000;
-                        if (attr.sub->bitfield & 0x4000)
-                            y = sprite->y + attr.sub->offsetY - 8;
+                        if (attr->bitfield & 0x4000)
+                            y = sprite->y + attr->offsetY - 8;
                         else
-                            y = sprite->y + (attr.sub->height - attr.sub->offsetY) - 8;
+                            y = sprite->y + (attr->height - attr->offsetY) - 8;
                         yoam = -yoam;
                     } else {
-                        y = sprite->y - attr.sub->offsetY;
+                        y = sprite->y - attr->offsetY;
                     }
-                    if (((sprite->unk8 >> 10) ^ (attr.sub->bitfield >> 14)) & 1) {
+                    spriteFlip = sprite->unk8 >> 10;
+                    frameFlip = attr->bitfield >> 14;
+                    frameFlip ^= spriteFlip;
+                    if (frameFlip & bitMask) {
                         oam[1] ^= 0x1000;
-                        if (attr.sub->bitfield & 0x4000)
-                            x = sprite->x + attr.sub->offsetX - 8;
+                        if (attr->bitfield & 0x4000)
+                            x = sprite->x + attr->offsetX - 8;
                         else
-                            x = sprite->x + (attr.sub->width - attr.sub->offsetX) - 8;
+                            x = sprite->x + (attr->width - attr->offsetX) - 8;
                         xoam = -xoam;
                     } else {
-                        x = sprite->x - attr.sub->offsetX;
+                        x = sprite->x - attr->offsetX;
                     }
                     x &= -16;
                     y &= -8;
@@ -443,21 +441,19 @@ u32 sub_0815436C(void) {
                     tile = ((sprite->tilesVram - charBase) >> shift) + (oam[2] & 0xF3FF) + ((oam[1] & 0x3000) >> 2);
                     j = h;
                     h = (u8)(h - 1);
-                    jNext = sp08 + 1;
                     if (j != 0) {
                         colOff = ((s16)xoam + x) >> 2;
                         do {
                             u8 *p = dst + colOff;
-                            acol = w;
-                            cols = (u8)(acol - 1);
+                            cols = w;
+                            acol = cols--;
                             rows2 = h - 1;
                             if (acol != 0) {
                                 s32 step = (s8)colStep;
                                 do {
                                     *(u16 *)p = tile++;
                                     p += step;
-                                    acol = cols;
-                                    cols = (u8)(cols - 1);
+                                    acol = cols--;
                                 } while (acol != 0);
                             }
                             dst += (s8)rowStrideU;
@@ -465,15 +461,14 @@ u32 sub_0815436C(void) {
                             h = (u8)rows2;
                         } while (jrow != 0);
                     }
-                    sp08 = jNext;
-                } while (sp08 < attr.sub->numSubframes);
+                    ++sp08;
+                } while (sp08 < attr->numSubframes);
             }
         }
         gUnk_030068B0 = 0;
     }
     return 1;
 }
-#endif
 
 void sub_081548A8(u16 angle, s16 sx, s16 sy, s16 x0, s16 y0, s16 cx, s16 cy, struct BgAffineReg *out) {
     s32 ncx, ncy;
