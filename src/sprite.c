@@ -603,8 +603,11 @@ u32 sub_08154D78(void *dest, void *glyphs, u16 x, u16 y, u8 bg, u8 *str, u8 pal)
     bgcnt = gBgCntRegs[bg];
     charBase = ((bgcnt & 0xC) << 12) + 0x6000000;
     mapBits = bgcnt & 0x1F00;
+    // TODO: Matching: replacing this one-pass loop with a block changes
+    // register allocation in 15 instructions, without changing the count.
     do {
-        map = (u16 *)(({ (mapBits << 3) + 0x6000000; }) + y * 0x40 + x * 2);
+        mapBase = (mapBits << 3) + 0x6000000;
+        map = (u16 *)(mapBase + y * 0x40 + x * 2);
         while (str[i] != 0) {
             void *tile = dest + i * 0x20;
             CpuFastSet(glyphs + str[i] * 0x20, tile, 8);
@@ -1354,11 +1357,9 @@ void DisplaySprite(struct Sprite *sprite) {
                 r4->all.attr1 &= 0xFE00;
                 r4->all.attr0 &= 0xFE00;
                 if (sp20 | sp24) {
-                    u32 shape = ((r4->all.attr0 & 0xC000) >> 12);
-                    u32 shapeAndSize;
+                    u8 shape = (r4->all.attr0 & 0xC000) >> 12;
+                    u8 shapeAndSize = shape | ((r4->all.attr1 & 0xC000) >> 14);
 
-                    shape |= ((r4->all.attr1 & 0xC000) >> 14);
-                    shapeAndSize = shape; // required for matching
                     if (sp20) {
                         r4->all.attr1 ^= 0x2000;
                         y1 = sp08 - gUnk_08D6084C[shapeAndSize][1] - y1;
@@ -1727,6 +1728,8 @@ void DrawToOamBuffer(void) {
     u8 j = 0;
     s32 i;
     s8 r0;
+    // TODO: Matching: removing this pointer and its dummy updates swaps the
+    // OAM and index-table base loads and their registers in the first loop.
     u8 *unused;
 
     for (i = 0; i < 0x20; i++) {
@@ -1750,14 +1753,16 @@ void DrawToOamBuffer(void) {
         if (gMainFlags & 0x400) {
             s32 j;
             i = gUnk_030024F0 - 1;
-            oam = gOamBuffer + i * 4; // not used, but can force oam to be preloaded
+            // TODO: Matching: this unused preload retains two instructions
+            // before the reverse-copy loop. Integer address arithmetic avoids
+            // out-of-bounds pointer arithmetic when the count is zero.
+            oam = (u16 *)((uintptr_t)gOamBuffer + i * 8);
             for (j = 0; i >= 0; i--, j++) {
                 DmaCopy16(3, gOamBuffer + i * 4, gOamBuffer + (0x7f - j) * 4, 6);
             }
             gUnk_03003A00 = 0x80 - gUnk_030024F0;
             for (i = 0; i < gUnk_03003A00; i++) {
-                DmaFill16(3, 0x200, gOamBuffer + i * 4, 6);
-                unused++; unused--;
+                DmaFill16(3, 0x200, gOamBuffer + (i << 2), 6);
             }
         } else {
             gUnk_03003A00 = 0;
