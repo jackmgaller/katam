@@ -1427,7 +1427,6 @@ void DisplaySprite(struct Sprite *sprite) {
 
 void sub_081564D8(struct Sprite *sprite) {
     u16 localOamBuffer[3];
-    OamData *localOamBufferPtr;
     s32 sp08, sp0C;
     s32 sp10, sp14;
     u8 sp18, j;
@@ -1499,56 +1498,40 @@ void sub_081564D8(struct Sprite *sprite) {
                 u32 shapeAndSize;
 
                 DmaCopy16(3, &sp1C[3 * ((spriteAttrs.sub->bitfield & 0x3FFF) + sp18)], localOamBuffer, 6); // excluding affine params
-                localOamBufferPtr = (OamData *)localOamBuffer;
-                x1 = localOamBufferPtr->all.attr1 & 0x1FF;
+                x1 = localOamBuffer[1] & 0x1FF;
                 if (x1 >= 0x100)
                     x1 -= 0x200;
-                y1 = localOamBufferPtr->all.attr0 & 0xFF;
+                y1 = localOamBuffer[0] & 0xFF;
                 if (y1 >= 0x80)
                     y1 -= 0x100;
-                localOamBufferPtr->all.attr1 &= 0xFE00;
-                localOamBufferPtr->all.attr0 &= 0xFE00;
-                shapeAndSize = ((localOamBufferPtr->all.attr0 & 0xC000) >> 12) | ((localOamBufferPtr->all.attr1 & 0xC000) >> 14);
+                localOamBuffer[1] &= 0xFE00;
+                localOamBuffer[0] &= 0xFE00;
+                shapeAndSize = ((localOamBuffer[0] & 0xC000) >> 12) | ((localOamBuffer[1] & 0xC000) >> 14);
                 r7 = gUnk_08D6084C[shapeAndSize][1];
                 ip = gUnk_08D6084C[shapeAndSize][0];
-#ifndef NONMATCHING
-            {
-                /* localOamBufferPtr is very likely to be a real variable as the function itself is a
-                 * modified (and manually optimized) version of sub_081569A0. 
-                 */
-                register u32 _sp2C asm("r0") = sp2C;
-                register u32 _sp30 asm("r1") = sp30;
-
-                asm("":::"r2");
-                if (_sp2C | _sp30) {
-#else
                 if (sp2C | sp30) {
-#endif
                     if (sp2C) {
-                        localOamBufferPtr->all.attr1 ^= 0x2000;
+                        localOamBuffer[1] ^= 0x2000;
                         y1 = sp14 - r7 - y1;
                     }
 
                     if (sp30) {
-                        localOamBufferPtr->all.attr1 ^= 0x1000;
+                        localOamBuffer[1] ^= 0x1000;
                         x1 = sp10 - ip - x1;
                     }
                 }
-#ifndef NONMATCHING
-            }
-#endif
                 if ((sp0C + y1 + r7 >= 0 && sp0C + y1 <= 160)
                     && (sp08 + x1 + ip >= 0 && sp08 + x1 <= 240)) {
                     OamData *oamDst;
 
-                    localOamBufferPtr->all.attr0 += ((sp0C + y1) & 0xFF);
-                    localOamBufferPtr->all.attr1 += ((sp08 + x1) & 0x1FF);
-                    localOamBufferPtr->all.attr0 |= sp20;
-                    localOamBufferPtr->all.attr1 |= sp24;
-                    localOamBufferPtr->all.attr2 |= sp28;
-                    if (localOamBufferPtr->all.attr0 & 0x2000)
-                        localOamBufferPtr->all.attr2 += localOamBufferPtr->all.attr2 & 0x3FF;
-                    localOamBufferPtr->all.attr2 += (sprite->tilesVram - 0x6010000u) >> 5;
+                    localOamBuffer[0] += ((sp0C + y1) & 0xFF);
+                    localOamBuffer[1] += ((sp08 + x1) & 0x1FF);
+                    localOamBuffer[0] |= sp20;
+                    localOamBuffer[1] |= sp24;
+                    localOamBuffer[2] |= sp28;
+                    if (localOamBuffer[0] & 0x2000)
+                        localOamBuffer[2] += localOamBuffer[2] & 0x3FF;
+                    localOamBuffer[2] += (sprite->tilesVram - 0x6010000u) >> 5;
                     oamDst = sub_08156D84((sprite->unk14 & 0x7C0) >> 6);
                     if (iwram_end == oamDst) return;
                     DmaCopy16(3, localOamBuffer, oamDst, 6);
@@ -1699,6 +1682,8 @@ void sub_081569A0(struct Sprite *sprite, u16 *sp08, u8 sp0C) {
                     oam->all.attr2 += oam->all.attr2 & 0x3FF;
                 oam->all.attr2 += (sprite->tilesVram - 0x6010000u) >> 5;
 #ifndef NONMATCHING
+                // TODO: Matching: removing this clobber swaps r8 and r9 for
+                // sprite and the inner loop's DMA-register pointer.
                 asm("":::"r8");
 #endif
                 for (i = 0; i < sp0C; ++i) {
