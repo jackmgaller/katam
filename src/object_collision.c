@@ -272,66 +272,80 @@ s32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *att
         defense = other->unk5C;
         vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
         if ((vulnerableTypes & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)
-            && !(other->flags & 0x8000) && parent != NULL) {
-            parent->unkC &= ~0x40;
-            if (parent->header.kind == 1) {
-                bool8 handled;
-                switch (((struct Object *)parent)->type) {
-                case 0x3C:
-                    if (other->flags & 0x8000) return 0;
-                    handled = sub_080C8548((struct Object *)parent, (struct Kirby *)other);
-                    break;
-                case 7:
-                case 14:
-                    handled = sub_080AC5E0((struct Object *)parent, &other->header);
-                    break;
-                case 0x32:
-                    if (other->flags & 0x8000) return 0;
-                    handled = sub_080A049C((struct Object *)parent, (struct Kirby *)other);
-                    break;
-                case 0x33:
-                    if (other->flags & 0x8000) return 0;
-                    handled = sub_080A1804((struct Object *)parent, (struct Kirby *)other);
-                    break;
-                case 0x38:
-                    if (other->flags & 0x8000) return 0;
-                    handled = sub_080CC6F0((struct Object *)parent, (struct Kirby *)other);
-                    break;
-                case 0x9E:
-                case 0xAE:
-                    if (other->flags & 0x8000) return 0;
-                    handled = sub_080B6368((struct Object *)parent, (struct Kirby *)other);
-                    break;
-                case 0x3A:
-                    if (other->flags & 0x8000) return 0;
-                    handled = sub_080CE94C((struct Object *)parent, (struct Kirby *)other);
-                    break;
-                case 15:
-                    if (other->flags & 0x8000) return 0;
-                    handled = sub_080B0758((struct Object *)parent, (struct Kirby *)other);
-                    break;
-                case 0x48:
-                    if (other->flags & 0x8000) return 0;
-                    handled = sub_080E588C((struct Gobbler *)parent, (struct Kirby *)other);
-                    break;
-                case 0x9F:
-                    if (other->flags & 0x8000) return 0;
-                    handled = sub_080E74E4((struct Object *)parent, (struct Kirby *)other);
-                    break;
-                case 0x3E:
-                    if (other->flags & 0x8000) return 0;
-                    handled = sub_080D4004((struct Object *)parent, (struct Kirby *)other);
-                    break;
-                case 0x47:
-                case 0x4D:
-                    if (other->flags & 0x8000) return 0;
-                    handled = sub_080E1B8C((struct CrazyHand *)parent, (struct Kirby *)other);
-                    break;
-                default:
-                    return 0;
-                }
-                if (handled)
+            && !(other->flags & 0x8000)) {
+            struct Object *object = (struct Object *)parent;
+            if (parent != NULL) {
+                parent->unkC &= ~0x40;
+                if (parent->header.kind == 1) {
+                    bool8 handled;
+                    switch (object->type) {
+                    case 0x32:
+                        if (other->flags & 0x8000) return 0;
+                        handled = sub_080A049C(object, (struct Kirby *)other);
+                        if (handled) break;
+                        return 0;
+                    case 0x33:
+                        if (other->flags & 0x8000) return 0;
+                        handled = sub_080A1804(object, (struct Kirby *)other);
+                        if (handled) break;
+                        return 0;
+                    case 0x38:
+                        if (other->flags & 0x8000) return 0;
+                        handled = sub_080CC6F0(object, (struct Kirby *)other);
+                        if (handled) break;
+                        return 0;
+                    case 0x9E:
+                    case 0xAE:
+                        if (other->flags & 0x8000) return 0;
+                        handled = sub_080B6368(object, (struct Kirby *)other);
+                        if (handled) break;
+                        return 0;
+                    case 0x3A:
+                        if (other->flags & 0x8000) return 0;
+                        handled = sub_080CE94C(object, (struct Kirby *)other);
+                        if (handled) break;
+                        return 0;
+                    case 15:
+                        if (other->flags & 0x8000) return 0;
+                        handled = sub_080B0758(object, (struct Kirby *)other);
+                        if (handled) break;
+                        return 0;
+                    case 0x48:
+                        if (other->flags & 0x8000) return 0;
+                        handled = sub_080E588C((struct Gobbler *)object, (struct Kirby *)other);
+                        if (handled) break;
+                        return 0;
+                    case 0x9F:
+                        if (other->flags & 0x8000) return 0;
+                        handled = sub_080E74E4(object, (struct Kirby *)other);
+                        if (handled) break;
+                        return 0;
+                    case 0x3E:
+                        if (other->flags & 0x8000) return 0;
+                        handled = sub_080D4004(object, (struct Kirby *)other);
+                        if (handled) break;
+                        return 0;
+                    case 0x47:
+                    case 0x4D:
+                        if (other->flags & 0x8000) return 0;
+                        handled = sub_080E1B8C((struct CrazyHand *)object, (struct Kirby *)other);
+                        if (handled) break;
+                        return 0;
+                    case 0x3C:
+                        if (other->flags & 0x8000) return 0;
+                        handled = sub_080C8548(object, (struct Kirby *)other);
+                        if (handled) break;
+                        return 0;
+                    case 7:
+                    case 14:
+                        handled = sub_080AC5E0(object, &other->header);
+                        if (handled) break;
+                        return 0;
+                    default:
+                        return 0;
+                    }
                     return 1;
+                }
             }
         }
     } else {
