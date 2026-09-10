@@ -7,7 +7,7 @@ struct Task;
 // Declare them before headers that expose only part of this sequence.
 inline bool8 IsPaletteEffectFinished(u8 arg0);
 inline bool32 AreKirbyPaletteEffectsInactive(void);
-inline void DestroyPaletteEffectsTask(u32 UNUSED arg0);
+inline void DestroyPaletteEffectsTask(u32 arg0 UNUSED);
 inline void LoadBgPaletteAndBase(const u16 *palette, u8 offset, u16 num);
 inline void LoadLevelBasePalettes(const u16 **arg0, const u16 **arg1);
 inline void SaveObjPaletteColors(u8 offset, u8 num);
@@ -15,7 +15,7 @@ inline void SaveBgPaletteColors(u8 offset, u8 num);
 inline void BackupBasePalettes(void);
 inline void RestoreBasePalettes(void);
 inline struct PaletteEffect *GetPaletteEffect(u8 arg0);
-inline void PaletteEffectsTaskDestructor(struct Task *UNUSED task);
+inline void PaletteEffectsTaskDestructor(struct Task *task UNUSED);
 inline void InsertPaletteEffectByPriority(struct PaletteEffect *arg0, u8 arg1);
 
 #include "data.h"
@@ -133,7 +133,7 @@ void CompactPaletteEffectQueue(void)
     }
 }
 
-// TODO: Palette eligibility tests combine differently and reuse a different flag mask; the original branch grouping remains unresolved.
+// TODO(match): Palette eligibility tests combine differently and reuse a different flag mask; the original branch grouping remains unresolved.
 #ifndef NONMATCHING
 NAKED void UpdatePaletteEffects(void)
 {
@@ -301,7 +301,7 @@ static inline void AdvancePaletteEffect(struct PaletteEffect *effect)
     ++palette; transform(palette, effect); \
     ++palette; transform(palette, effect);
 
-// TODO: Unrolled channel subtraction uses different register lifetimes; scalar widths and palette subobject helpers did not recover the original layout.
+// TODO(match): Unrolled channel subtraction uses different register lifetimes; scalar widths and palette subobject helpers did not recover the original layout.
 #ifndef NONMATCHING
 NAKED void ApplyPaletteDarkening(struct PaletteEffect *effect)
 {
@@ -347,7 +347,7 @@ void ApplyPaletteDarkening(struct PaletteEffect *effect)
 }
 #endif
 
-// TODO: Channel extraction uses shifts/masks instead of the reference narrowing sequence; the original inline color temporary remains unresolved.
+// TODO(match): Channel extraction uses shifts/masks instead of the reference narrowing sequence; the original inline color temporary remains unresolved.
 #ifndef NONMATCHING
 NAKED void ApplyPaletteBrightening(struct PaletteEffect *effect)
 {
@@ -386,7 +386,7 @@ void ApplyPaletteBrightening(struct PaletteEffect *effect)
 }
 #endif
 
-// TODO: Channel extraction uses shifts/masks instead of the reference narrowing sequence; the original inline color temporary remains unresolved.
+// TODO(match): Channel extraction uses shifts/masks instead of the reference narrowing sequence; the original inline color temporary remains unresolved.
 #ifndef NONMATCHING
 NAKED void ApplyPaletteTableDarkening(struct PaletteEffect *effect)
 {
@@ -425,7 +425,7 @@ void ApplyPaletteTableDarkening(struct PaletteEffect *effect)
 }
 #endif
 
-// TODO: Channel extraction and table offsets use different lifetimes; the original inline color temporary remains unresolved.
+// TODO(match): Channel extraction and table offsets use different lifetimes; the original inline color temporary remains unresolved.
 #ifndef NONMATCHING
 NAKED void ApplyPaletteRedTint(struct PaletteEffect *effect)
 {
@@ -464,7 +464,7 @@ void ApplyPaletteRedTint(struct PaletteEffect *effect)
 }
 #endif
 
-// TODO: The fixed-point endpoint test uses different temporaries; signed accumulator and shared fill-scratch variants still differ.
+// TODO(match): The fixed-point endpoint test uses different temporaries; signed accumulator and shared fill-scratch variants still differ.
 #ifndef NONMATCHING
 NAKED void ApplyPaletteWhiteFill(struct PaletteEffect *effect)
 {
@@ -795,7 +795,7 @@ inline bool32 AreKirbyPaletteEffectsInactive(void)
         return FALSE;
 }
 
-inline void DestroyPaletteEffectsTask(u32 UNUSED arg0)
+inline void DestroyPaletteEffectsTask(u32 arg0 UNUSED)
 {
     TaskDestroy(gPaletteEffectsTask);
 }
@@ -842,7 +842,7 @@ inline struct PaletteEffect *GetPaletteEffect(u8 slot)
     return &gPaletteEffectManager.unk0[slot];
 }
 
-inline void PaletteEffectsTaskDestructor(struct Task *UNUSED task)
+inline void PaletteEffectsTaskDestructor(struct Task *task UNUSED)
 {
     gPaletteEffectsTask = NULL;
 }
@@ -882,7 +882,7 @@ static inline u8 ClampPaletteChannel(s8 channel)
     return result;
 }
 
-// TODO: Palette arrays and the temporary Sprite require different stack/spill placement; channel-width and inline-copy variants still differ.
+// TODO(match): Palette arrays and the temporary Sprite require different stack/spill placement; channel-width and inline-copy variants still differ.
 #ifndef NONMATCHING
 NAKED void BlendSpriteAnimationPalettes(u8 paletteId, u16 sourceAnim, u8 sourceVariant, u16 targetAnim, u8 targetVariant, u16 amount)
 {
@@ -940,7 +940,7 @@ void BlendSpriteAnimationPalettes(u8 paletteId, u16 sourceAnim, u8 sourceVariant
 }
 #endif
 
-// TODO: The red offset multiplication moves outside the color loop; the original channel-temporary lifetime remains unresolved.
+// TODO(match): The red offset multiplication moves outside the color loop; the original channel-temporary lifetime remains unresolved.
 #ifndef NONMATCHING
 NAKED void OffsetSpriteAnimationPalette(u8 paletteId, u16 anim, u8 variant, s8 red, s8 green, s8 blue, u16 amount)
 {

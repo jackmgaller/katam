@@ -155,5 +155,11 @@ extern const struct AnimInfo gUnk_08350620[];
 extern const struct AnimInfo gUnk_083507F8[];
 extern const struct AnimInfo gUnk_08350AAC[];
 extern const struct AnimInfo gUnk_08350B30[];
+void sub_0804A728(struct Kirby *);
+void sub_0804E09C(struct Kirby *);
+void sub_08053DAC(struct Kirby *, u8);
+void sub_08054414(struct Kirby *, u8);
+void sub_080566E0(struct Kirby *);
+bool16 sub_0803D938(struct ObjectBase *);
 
 #endif

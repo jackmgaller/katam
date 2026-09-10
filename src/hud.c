@@ -61,7 +61,6 @@ extern const u16 *gAbilityIconPalettes[32];
 extern const u8 *gAbilityIconGraphics[6][32];
 extern const u8 gOffscreenKirbyDirectionVariants[4];
 extern const u8 gOtherRoomKirbyIconX[4];
-bool16 sub_0803D938(struct ObjectBase *);
 void DrawBorrowLifeNoCursor(void);
 void DrawBorrowLifeYesCursor(void);
 
@@ -353,7 +352,7 @@ void UpdateBorrowLifeHud(void)
     }
 }
 
-// TODO: The sprite-copy scratch and per-Kirby pointers occupy different stack slots; the original local aggregate layout remains unresolved.
+// TODO(match): The sprite-copy scratch and per-Kirby pointers occupy different stack slots; the original local aggregate layout remains unresolved.
 #ifndef NONMATCHING
 NAKED void DrawOtherKirbyIndicators(struct GameplayHud *hud)
 {

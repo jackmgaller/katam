@@ -19,19 +19,10 @@
 #include "gba/m4a.h"
 #include "constants/songs.h"
 #include "constants/kirby.h"
+#include "prank.h"
+#include "soarar.h"
 
-void sub_0804A728(struct Kirby *);
-void sub_0804E09C(struct Kirby *);
-void sub_080853C8(struct Kirby *, u16);
-void sub_08053DAC(struct Kirby *, u8);
-void sub_08054414(struct Kirby *, u8);
-void sub_080566E0(struct Kirby *);
 u8 KirbyCanContactOther(struct Kirby *, struct Kirby *);
-void sub_08088F84(struct Kirby *, s16, s16);
-bool8 sub_080A1804(struct Object *, struct Kirby *);
-bool32 sub_080AC5E0(struct Object *, struct ObjectHeader *);
-bool8 sub_080B0758(struct Object *, struct Kirby *);
-bool8 sub_080B6368(struct Object *, struct Kirby *);
 void UpdateObjectCollisions(void);
 void ProcessObjectCollisionLists(void);
 void ProcessKirbyContacts(void);
@@ -120,7 +111,7 @@ s32 HandleKirbyCollision(struct ObjectBase *attack, struct ObjectBase *other)
     return 0;
 }
 
-// TODO: The attack and target pointers use different callee-saved registers; damage/grab branch sharing remains unresolved.
+// TODO(match): The attack and target pointers use different callee-saved registers; damage/grab branch sharing remains unresolved.
 #ifndef NONMATCHING
 NAKED s32 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
 {
@@ -247,7 +238,7 @@ s32 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
 }
 #endif
 
-// TODO: The grab-handler switch and damage path share different return tails; the original branch topology remains unresolved.
+// TODO(match): The grab-handler switch and damage path share different return tails; the original branch topology remains unresolved.
 #ifndef NONMATCHING
 NAKED s32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *attack)
 {
@@ -390,7 +381,7 @@ CheckDamage:
 }
 #endif
 
-// TODO: The tile scan needs 40 rather than 48 stack bytes; clipping coordinates and row/column lifetimes remain unresolved.
+// TODO(match): The tile scan needs 40 rather than 48 stack bytes; clipping coordinates and row/column lifetimes remain unresolved.
 #ifndef NONMATCHING
 NAKED void ProcessAttackTileCollisions(struct ObjectBase *attack)
 {
@@ -566,7 +557,7 @@ static inline void CommitAttackContact(struct ObjectBase *attack)
         attack->flags = (attack->flags | 0x40000) & ~0x4000000;
 }
 
-// TODO: The dispatcher needs 48 rather than 24 stack bytes; list cursors, callback results, and cached hitbox lifetimes remain unresolved.
+// TODO(match): The dispatcher needs 48 rather than 24 stack bytes; list cursors, callback results, and cached hitbox lifetimes remain unresolved.
 #ifndef NONMATCHING
 NAKED void ProcessObjectCollisionLists(void)
 {
@@ -1026,7 +1017,7 @@ static inline bool32 CanSecondKirbyShare(struct Kirby *kirby)
     return FALSE;
 }
 
-// TODO: The outer Kirby loop is rotated to a bottom test; explicit entry checks and index-width variants did not recover the original branch layout.
+// TODO(match): The outer Kirby loop is rotated to a bottom test; explicit entry checks and index-width variants did not recover the original branch layout.
 #ifndef NONMATCHING
 NAKED void ProcessKirbyContacts(void)
 {
