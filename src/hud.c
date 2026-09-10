@@ -740,50 +740,58 @@ void DrawPhoneBattery(struct Kirby *kirby)
     *tiles = (0x185 + right) | 0xF800;
 }
 
-// TODO: The HUD/task pointer and scaled health use different registers; the selection branches and health-scaling temporary still differ.
-#ifndef NONMATCHING
-NAKED struct GameplayHud *TryTrackHudEnemy(struct Object *object)
-{
-    asm(".include \"asm/nonmatching/TryTrackHudEnemy.inc\"");
-}
-#else
 struct GameplayHud *TryTrackHudEnemy(struct Object *object)
 {
-    struct GameplayHud *hud = TaskGetStructPtr(gGameplayHudTask);
+    struct GameplayHud *tmp = TaskGetStructPtr(gGameplayHudTask), *hud = tmp;
+    struct Object *tracked;
+    s16 scaledHp;
+
+    if (gUnk_0203AD10 & 0x10)
+        return NULL;
     // These are comparisons against the calling task, as in the original.
-    if (!(gUnk_0203AD10 & 0x10) && gCurTask->main != UpdateGameOverHudIndicators
-        && gCurTask->main != UpdateBorrowLifeHud && object->type <= 0x5D
-        && gKirbys[gLocalPlayerId].base.roomId == object->base.roomId && hud->unk1C != object) {
-        // TODO: The original dereferences object before this null branch; preserve that ordering.
-        if (object == NULL) {
-            hud->unk1C = object;
-            DrawEnemyHealthOrAreaName(NULL);
-        } else if (object->unk80 > 0 && !(object->base.flags & 0x1000)) {
-            s16 scaledHp;
-            hud->unk1C = object;
-            CpuCopy16(gHudEnemyAndAreaNameGraphics[gLanguage] + object->type * 0x100, (void *)(BG_VRAM + 0x77A0), 0x100);
-            hud->unkF = 0;
-            object = hud->unk1C;
-            if ((u8)(object->type - 0x38) <= 0x1A) {
-                if (object->type == OBJ_DARK_MIND_FORM_1)
-                    scaledHp = (u16)(object->unk80 * gUnk_08351628[object->subtype][gNumHumanPlayers - 1]);
-                else
-                    scaledHp = (u16)(object->unk80 * gUnk_08351458[object->type - 0x38][gNumHumanPlayers - 1]);
-            } else {
-                // TODO: Types 0x53-0x5D can index beyond the original 56-entry scale table.
-                scaledHp = gUnk_083513E8[object->type] * object->unk80;
-            }
-            hud->unkA = scaledHp >> 8;
-            if (scaledHp & 0xFF)
-                hud->unkA++;
-            hud->unk9 = hud->unkA;
-            DrawEnemyHealthOrAreaName(hud);
-            return hud;
-        }
+    if (gCurTask->main == UpdateGameOverHudIndicators)
+        return NULL;
+    if (gCurTask->main == UpdateBorrowLifeHud)
+        return NULL;
+    // TODO: The original dereferences object before its null check; preserve that ordering.
+    if (object->type > 0x5D)
+        return NULL;
+    if (gKirbys[gLocalPlayerId].base.roomId != object->base.roomId)
+        return NULL;
+    if (hud->unk1C == object)
+        return NULL;
+    if (object == NULL) {
+        hud->unk1C = object;
+        DrawEnemyHealthOrAreaName(NULL);
+        return NULL;
     }
-    return NULL;
+    if (object->unk80 <= 0)
+        return NULL;
+    if (object->base.flags & 0x1000)
+        return NULL;
+    hud->unk1C = object;
+    CpuCopy16(gHudEnemyAndAreaNameGraphics[gLanguage] + object->type * 0x100, (void *)(BG_VRAM + 0x77A0), 0x100);
+    hud->unkF = 0;
+    tracked = hud->unk1C;
+    if (tracked->type >= 0x38 && tracked->type <= 0x52) {
+        if (tracked->type == OBJ_DARK_MIND_FORM_1)
+            scaledHp = tracked->unk80 * gUnk_08351628[tracked->subtype][gNumHumanPlayers - 1];
+        else
+            scaledHp = tracked->unk80 * gUnk_08351458[tracked->type - 0x38][gNumHumanPlayers - 1];
+        hud->unkA = scaledHp >> 8;
+        if (scaledHp & 0xFF)
+            hud->unkA++;
+    } else {
+        // TODO: Types 0x53-0x5D can index beyond the original 56-entry scale table.
+        scaledHp = tracked->unk80 * gUnk_083513E8[tracked->type];
+        hud->unkA = scaledHp >> 8;
+        if (scaledHp & 0xFF)
+            hud->unkA++;
+    }
+    hud->unk9 = hud->unkA;
+    DrawEnemyHealthOrAreaName(hud);
+    return hud;
 }
-#endif
 
 void DrawEnemyHealthOrAreaName(struct GameplayHud *hud)
 {
