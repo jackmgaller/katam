@@ -77,32 +77,6 @@ void DrawBorrowLifePrompt(void);
 void DrawPhoneBattery(struct Kirby *);
 void DrawKirbyHealthBar(struct Kirby *);
 
-static inline bool32 ShouldShowKirbyCall(struct Kirby *kirby)
-{
-    bool32 show;
-    u8 i;
-    if (gUnk_02021580 >= gNumKirbys)
-        return FALSE;
-    if (!(gKirbys[gUnk_02021580].base.unkC & 0x10000) && gKirbys[gUnk_02021580].base.roomId == kirby->base.roomId)
-        return FALSE;
-    if (!(gRoomProps[kirby->base.roomId].priorityFlags & 0x10))
-        return FALSE;
-    show = TRUE;
-    for (i = 1; i <= 8; i++) {
-        if (gUnk_0835105C[i] == kirby->base.roomId && *GetStateSlot(STATE_SLOT_SESSION, i, 0)) {
-            show = FALSE;
-            break;
-        }
-    }
-    for (i = 9; i <= 13; i++) {
-        if (gUnk_0835105C[i] == kirby->base.roomId && *GetStateSlot(STATE_SLOT_SESSION, i + 3, 0)) {
-            show = FALSE;
-            break;
-        }
-    }
-    return show;
-}
-
 static inline void DisplayCallingKirby(struct GameplayHud *hud)
 {
     struct Sprite *sprite = &hud->unk20[0][gLocalPlayerId];
@@ -1120,14 +1094,12 @@ inline void DrawHudLivesCount(struct Kirby *kirby)
     for (i = 0; i < 2; i++) {
         u32 column = i + 10;
         u16 *tiles = (u16 *)(BG_VRAM + 0xE480);
-        u32 divisor;
         u32 quotient;
         u16 digit;
         tiles += column;
-        divisor = gHudDecimalDivisors[i + 6];
-        quotient = lives / divisor;
+        quotient = lives / gHudDecimalDivisors[i + 6];
         digit = quotient;
-        lives -= divisor * quotient;
+        lives -= gHudDecimalDivisors[i + 6] * quotient;
         *tiles = (digit + 0x185) | 0xF000;
         tiles = (u16 *)(BG_VRAM + 0xE4C0);
         tiles += column;
@@ -1156,8 +1128,9 @@ inline void DrawHudPhoneIcon(void)
 inline void ClearHudPhoneIcon(void)
 {
     u16 *tiles = (u16 *)(BG_VRAM + 0xE002);
-    tiles[0] = 0xF184;
-    tiles[32] = 0xF184;
+    *tiles = 0xF184;
+    tiles += 32;
+    *tiles = 0xF184;
 }
 
 inline void DrawHudEnemyNameTiles(void)
@@ -1224,17 +1197,12 @@ inline void DrawGameOverMessage(void)
     }
 }
 
-// TODO: The inline HUD helpers produce different spills in the rebuild path; their original local lifetimes remain unresolved.
-#ifndef NONMATCHING
-NAKED void RefreshGameplayHud(struct Kirby *kirby)
-{
-    asm(".include \"asm/nonmatching/RefreshGameplayHud.inc\"");
-}
-#else
 void RefreshGameplayHud(struct Kirby *kirby)
 {
     u8 color = gKirbys[gLocalPlayerId].color;
-    struct GameplayHud *hud = TaskGetStructPtr(gGameplayHudTask);
+    struct GameplayHud *tmp = TaskGetStructPtr(gGameplayHudTask), *hud = tmp;
+    bool32 showCall;
+    u8 i;
     CpuFill16(0x184, BG_SCREEN_ADDR(28), 0x500);
     if (gUnk_0203AD10 & 0x10) {
         DrawDemoHud();
@@ -1271,7 +1239,26 @@ void RefreshGameplayHud(struct Kirby *kirby)
         CpuFill16(0, (void *)(BG_VRAM + 0x77A0), 0x100);
         DrawEnemyHealthOrAreaName(NULL);
     }
-    if (!ShouldShowKirbyCall(kirby))
+    if (gUnk_02021580 >= gNumKirbys)
+        return;
+    if (!(gKirbys[gUnk_02021580].base.unkC & 0x10000) && gKirbys[gUnk_02021580].base.roomId == kirby->base.roomId)
+        return;
+    if (!(gRoomProps[kirby->base.roomId].priorityFlags & 0x10))
+        return;
+    showCall = TRUE;
+    for (i = 1; i <= 8; i++) {
+        if (gUnk_0835105C[i] == kirby->base.roomId && *GetStateSlot(STATE_SLOT_SESSION, i, 0)) {
+            showCall = FALSE;
+            break;
+        }
+    }
+    for (i = 9; i <= 13; i++) {
+        if (gUnk_0835105C[i] == kirby->base.roomId && *GetStateSlot(STATE_SLOT_SESSION, i + 3, 0)) {
+            showCall = FALSE;
+            break;
+        }
+    }
+    if (!showCall)
         return;
     if ((gKirbys[gUnk_02021580].base.unkC & 0x10000) && kirby->lives == 0) {
     } else {
@@ -1308,7 +1295,6 @@ void RefreshGameplayHud(struct Kirby *kirby)
     }
     hud->unk10 |= 1;
 }
-#endif
 
 const u16 gHudPalettes[18][16] = {
     { 0xA1C0, 0x729F, 0xE5BF, 0xCD3F, 0x001F, 0x1011, 0x90AE, 0x0000, 0xFFFF, 0x035F, 0xFF4D, 0x825F, 0x01DF, 0x5000, 0x035F, 0xCA52 },
