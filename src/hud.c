@@ -702,18 +702,12 @@ void DrawBorrowLifeYesCursor(void)
     }
 }
 
-// TODO: The row offset uses a different register and constant materialization; signed/unsigned row variants did not recover the original lifetime.
-#ifndef NONMATCHING
-NAKED void DrawHudAbilityIconRows(u8 rows)
-{
-    asm(".include \"asm/nonmatching/DrawHudAbilityIconRows.inc\"");
-}
-#else
 void DrawHudAbilityIconRows(u8 rows)
 {
     struct GameplayHud *hud;
     u16 *tiles;
     u16 y;
+    u8 palette = 0xE;
     if (!(gUnk_0203AD10 & 0x10)) {
         hud = TaskGetStructPtr(gGameplayHudTask);
         hud->unk14 = rows;
@@ -727,16 +721,15 @@ void DrawHudAbilityIconRows(u8 rows)
             tiles += 28;
         }
         for (y = 0; y < rows; y++) {
-            *tiles++ = (y * 5 + 0x1C5) | 0xE000;
-            *tiles++ = (y * 5 + 0x1C6) | 0xE000;
-            *tiles++ = (y * 5 + 0x1C7) | 0xE000;
-            *tiles++ = (y * 5 + 0x1C8) | 0xE000;
-            *tiles = (y * 5 + 0x1C9) | 0xE000;
+            *tiles++ = (y * 5 + 0x1C5) | (palette << 12);
+            *tiles++ = (y * 5 + 0x1C6) | (palette << 12);
+            *tiles++ = (y * 5 + 0x1C7) | (palette << 12);
+            *tiles++ = (y * 5 + 0x1C8) | (palette << 12);
+            *tiles = (y * 5 + 0x1C9) | (palette << 12);
             tiles += 28;
         }
     }
 }
-#endif
 
 void DrawPhoneBattery(struct Kirby *kirby)
 {
