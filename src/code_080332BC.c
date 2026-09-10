@@ -247,7 +247,7 @@ static void UNUSED sub_08033790(struct Kirby *arg0) {
     }
 }
 
-void ResetKirbyInputHistory(struct Kirby *kirby)
+static void UNUSED ResetKirbyInputHistory(struct Kirby *kirby)
 {
     DmaFill32(3, 0, kirby->unk124, 0x80);
     kirby->unk1A0[0] = 0;

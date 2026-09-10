@@ -19,7 +19,6 @@ struct Unk_0801DA58
 
 void sub_0801DA58(u16);
 
-// Referenced by the pause-transition screen table.
 void sub_0801DFE8(void);
 
 #endif
