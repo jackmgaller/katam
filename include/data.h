@@ -4,6 +4,8 @@
 #include "global.h"
 #include "bg.h"
 #include "sprite.h"
+#include "hud.h"
+#include "palette_effects.h"
 
 #define PlaySfxInternal(objBase, num) ({ \
     if ((((objBase)->header.kind != 0) || ((objBase)->unk56 == gLocalPlayerId)) \
@@ -399,25 +401,6 @@ struct EffectObject {
     void *parent;
 }; /* size = 0x48 */
 
-struct Object5 {
-    u32 unk0;
-    u16 unk4;
-    s8 unk6;
-    u8 unk7;
-    u8 filler8;
-    u8 unk9;
-    u8 unkA;
-    u8 unkB;
-    u8 unkC;
-    u8 unkD;
-    u8 unkE;
-    u8 unkF;
-    u32 unk10;
-    u8 filler14[8];
-    struct Object *unk1C;
-    struct Sprite unk20[3][4];
-}; /* size = 0x200 */
-
 struct Object6 {
     u16 unk0;
     u16 unk2;
@@ -615,27 +598,6 @@ struct AnimInfo {
 }; /* size = 0x4 */
 
 extern struct AnimInfo gUnk_02021590[4][185];
-
-struct Unk_02022930_0 {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    u16 unk4;
-    u16 unk6;
-    u16 unk8;
-    s16 unkA;
-    u16 unkC;
-    u16 unkE;
-}; /* size = 0x10 */
-
-struct Unk_02022930 {
-    struct Unk_02022930_0 unk0[8];
-    struct Unk_02022930_0 *unk80[8];
-}; /* size = 0xA0 */
-
-extern struct Task* gUnk_02022920;
-extern struct Unk_02022930 gUnk_02022930;
 
 extern u32 gShadowKirbyEncounters;
 extern u32 gMirraEncounters;

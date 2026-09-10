@@ -1,3 +1,4 @@
+#include "hud.h"
 #include "crazy_hand.h"
 #include "object.h"
 #include "functions.h"
@@ -202,10 +203,10 @@ static void sub_080DF5A4(struct CrazyHand *ch)
     ObjectSetFunc(ch, 0, sub_080E36C4);
     if (ch->obj2.type == OBJ_CRAZY_HAND_1)
     {
-        struct Object5 *obj5;
+        struct GameplayHud *obj5;
         ch->obj2.base.x = 0x11800;
         ch->obj2.base.xspeed = -0xC0;
-        obj5 = sub_08034E14(&ch->obj2);
+        obj5 = TryTrackHudEnemy(&ch->obj2);
         if (obj5)
             obj5->unk9 = 0;
     }
