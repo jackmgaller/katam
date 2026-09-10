@@ -94,17 +94,10 @@ static inline void DisplayCallingKirby(struct GameplayHud *hud)
     DisplaySprite(sprite);
 }
 
-// TODO: Task-data address formation and sprite initialization spill differently; the HUD/task subobject lifetime remains unresolved.
-#ifndef NONMATCHING
-NAKED void CreateGameplayHud(void)
-{
-    asm(".include \"asm/nonmatching/CreateGameplayHud.inc\"");
-}
-#else
 void CreateGameplayHud(void)
 {
     struct Task *task;
-    struct GameplayHud *hud;
+    struct GameplayHud *tmp, *hud;
     struct Kirby *kirby;
     u8 i;
     gBgCntRegs[1] = 0x1C04;
@@ -114,7 +107,8 @@ void CreateGameplayHud(void)
     gBgScrollRegs[1][1] = 0;
     task = TaskCreate(UpdateGameplayHud, sizeof(struct GameplayHud), 0xF500, 0, GameplayHudDestructor);
     gGameplayHudTask = task;
-    hud = TaskGetStructPtr(task);
+    tmp = TaskGetStructPtr(task);
+    hud = tmp;
     CpuFill16(0, hud, sizeof(struct GameplayHud));
     kirby = &gKirbys[gLocalPlayerId];
     if (gUnk_0203AD10 & 0x10) {
@@ -147,22 +141,17 @@ void CreateGameplayHud(void)
     hud->unk10 = 0;
     hud->unkD = 0;
     for (i = 0; i < gNumKirbys; i++) {
-        struct Sprite *sprite;
-        sprite = &hud->unk20[0][i];
         if (gLocalPlayerId == i) {
-            SpriteInitNoFunc(sprite, 0, 0x80, 0x2DB, 1, 0, 0xFF, 0x10, 0, 8, 15, 0x40000);
+            SpriteInitNoFunc(&hud->unk20[0][i], 0, 0x80, 0x2DB, 1, 0, 0xFF, 0x10, 0, 8, 15, 0x40000);
         } else {
-            SpriteInitNoFunc(sprite, gKirbys[i].base.sprite.tilesVram, 0x80, 0, 0, 0, 0xFF, 0x10,
+            SpriteInitNoFunc(&hud->unk20[0][i], gKirbys[i].base.sprite.tilesVram, 0x80, 0, 0, 0, 0xFF, 0x10,
                 gKirbys[i].base.sprite.palId, 0, 0, 0x42000);
         }
-        sprite = &hud->unk20[1][i];
-        SpriteInitNoFunc(sprite, gKirbys[i].base.sprite.tilesVram + 0x80, 0x80, 0, 0, 0, 0xFF, 0x10,
+        SpriteInitNoFunc(&hud->unk20[1][i], gKirbys[i].base.sprite.tilesVram + 0x80, 0x80, 0, 0, 0, 0xFF, 0x10,
             gKirbys[i].sprites[1].palId, 0, 0, 0x42000);
-        sprite = &hud->unk20[2][i];
-        SpriteInitNoFunc(sprite, gKirbys[i].sprites[0].tilesVram, 0x80, 0, 0, 0, 0xFF, 0x10, 15, 0, 0, 0x42000);
+        SpriteInitNoFunc(&hud->unk20[2][i], gKirbys[i].sprites[0].tilesVram, 0x80, 0, 0, 0, 0xFF, 0x10, 15, 0, 0, 0x42000);
     }
 }
-#endif
 
 void UpdateGameplayHud(void)
 {
