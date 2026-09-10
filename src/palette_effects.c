@@ -31,9 +31,9 @@ extern u16 gUnk_02022120[256];
 extern u16 gUnk_02022320[256];
 extern u16 gUnk_02022520[512];
 
-void QueuePaletteEffect(struct PaletteEffect *);
+static void QueuePaletteEffect(struct PaletteEffect *);
 void CompactPaletteEffectQueue(void);
-void UpdatePaletteEffects(void);
+static void UpdatePaletteEffects(void);
 void PaletteEffectsTaskDestructor(struct Task *);
 void InsertPaletteEffectByPriority(struct PaletteEffect *, u8);
 
@@ -50,7 +50,7 @@ extern const u16 gDarkenRedTable[64];
 extern const u16 gDarkenGreenTable[64];
 extern const u16 gDarkenBlueTable[64];
 
-void QueuePaletteEffect(struct PaletteEffect *effect)
+static void QueuePaletteEffect(struct PaletteEffect *effect)
 {
     struct Task *task = gPaletteEffectsTask;
     struct PaletteEffectManager *state = &gPaletteEffectManager;
@@ -135,12 +135,12 @@ void CompactPaletteEffectQueue(void)
 
 // TODO(match): Palette eligibility tests combine differently and reuse a different flag mask; the original branch grouping remains unresolved.
 #ifndef NONMATCHING
-NAKED void UpdatePaletteEffects(void)
+static NAKED void UpdatePaletteEffects(void)
 {
     asm(".include \"asm/nonmatching/UpdatePaletteEffects.inc\"");
 }
 #else
-void UpdatePaletteEffects(void)
+static void UpdatePaletteEffects(void)
 {
     struct PaletteEffectManager *state = &gPaletteEffectManager;
     bool32 objRestored = FALSE;
@@ -669,7 +669,7 @@ struct PaletteEffect *CreateInactivePaletteFadeToWhite(u8 slot)
     return effect;
 }
 
-struct PaletteEffect *HoldPaletteEffect(u8 slot)
+static struct PaletteEffect *HoldPaletteEffect(u8 slot)
 {
     struct PaletteEffect *effect;
     u8 slotId;

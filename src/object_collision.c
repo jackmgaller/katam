@@ -23,11 +23,11 @@
 #include "soarar.h"
 
 u8 KirbyCanContactOther(struct Kirby *, struct Kirby *);
-void UpdateObjectCollisions(void);
-void ProcessObjectCollisionLists(void);
-void ProcessKirbyContacts(void);
+static void UpdateObjectCollisions(void);
+static void ProcessObjectCollisionLists(void);
+static void ProcessKirbyContacts(void);
 void ResolveSolidObjectCollision(struct ObjectBase *, struct Object *);
-void ObjectCollisionTaskDestructor(struct Task *);
+static void ObjectCollisionTaskDestructor(struct Task *);
 
 #define COLLISION_AXIS_OVERLAP(a, aSize, b, bSize) \
     (((a) <= (b) && (a) + (aSize) >= (b)) || ((a) >= (b) && (b) + (bSize) >= (a)))
@@ -55,7 +55,7 @@ void CreateObjectCollisionTask(void)
     ClearCollisionCounts();
 }
 
-void UpdateObjectCollisions(void)
+static void UpdateObjectCollisions(void)
 {
     ProcessObjectCollisionLists();
     ProcessKirbyContacts();
@@ -559,12 +559,12 @@ static inline void CommitAttackContact(struct ObjectBase *attack)
 
 // TODO(match): The dispatcher needs 48 rather than 24 stack bytes; list cursors, callback results, and cached hitbox lifetimes remain unresolved.
 #ifndef NONMATCHING
-NAKED void ProcessObjectCollisionLists(void)
+static NAKED void ProcessObjectCollisionLists(void)
 {
     asm(".include \"asm/nonmatching/ProcessObjectCollisionLists.inc\"");
 }
 #else
-void ProcessObjectCollisionLists(void)
+static void ProcessObjectCollisionLists(void)
 {
     u8 group;
     for (group = 0; group < gNumKirbys; ++group) {
@@ -1019,12 +1019,12 @@ static inline bool32 CanSecondKirbyShare(struct Kirby *kirby)
 
 // TODO(match): The outer Kirby loop is rotated to a bottom test; explicit entry checks and index-width variants did not recover the original branch layout.
 #ifndef NONMATCHING
-NAKED void ProcessKirbyContacts(void)
+static NAKED void ProcessKirbyContacts(void)
 {
     asm(".include \"asm/nonmatching/ProcessKirbyContacts.inc\"");
 }
 #else
-void ProcessKirbyContacts(void)
+static void ProcessKirbyContacts(void)
 {
     u8 firstId, secondId;
     for (firstId = 0; firstId < gNumKirbys; ++firstId) {
@@ -1191,7 +1191,7 @@ u8 ObjectHitboxesOverlap(struct ObjectBase *first, struct ObjectBase *second)
     return FALSE;
 }
 
-s32 ObjectHitboxOverlapsRect(struct ObjectBase *object, s32 x, s32 y, s16 xOffset, s16 yOffset, u16 width, u16 height)
+static s32 ObjectHitboxOverlapsRect(struct ObjectBase *object, s32 x, s32 y, s16 xOffset, s16 yOffset, u16 width, u16 height)
 {
     s32 ax, ay, bx, by;
     if (object->flags & 1)
@@ -1245,7 +1245,7 @@ struct Object **GetRoomSolidCollisionList(struct ObjectBase *object)
     return gUnk_02022EC0[group];
 }
 
-void ObjectCollisionTaskDestructor(struct Task *task UNUSED)
+static void ObjectCollisionTaskDestructor(struct Task *task UNUSED)
 {
 }
 

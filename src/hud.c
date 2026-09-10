@@ -61,17 +61,17 @@ extern const u16 *gAbilityIconPalettes[32];
 extern const u8 *gAbilityIconGraphics[6][32];
 extern const u8 gOffscreenKirbyDirectionVariants[4];
 extern const u8 gOtherRoomKirbyIconX[4];
-void DrawBorrowLifeNoCursor(void);
-void DrawBorrowLifeYesCursor(void);
+static void DrawBorrowLifeNoCursor(void);
+static void DrawBorrowLifeYesCursor(void);
 
 void DrawCallHudMessage(u8);
 void DrawLifeSharingHudMessage(u8);
-void UpdateTrackedHudEnemy(struct GameplayHud *);
-void AnimateHudEnemyHealth(struct GameplayHud *);
+static void UpdateTrackedHudEnemy(struct GameplayHud *);
+static void AnimateHudEnemyHealth(struct GameplayHud *);
 void UpdateGameplayHud(void);
 void HideKirbySpritesInOtherRooms(void);
 void UpdateBorrowLifeHud(void);
-void DrawOtherKirbyIndicators(struct GameplayHud *);
+static void DrawOtherKirbyIndicators(struct GameplayHud *);
 void DrawBorrowLifePrompt(void);
 void DrawPhoneBattery(struct Kirby *);
 void DrawKirbyHealthBar(struct Kirby *);
@@ -354,12 +354,12 @@ void UpdateBorrowLifeHud(void)
 
 // TODO(match): The sprite-copy scratch and per-Kirby pointers occupy different stack slots; the original local aggregate layout remains unresolved.
 #ifndef NONMATCHING
-NAKED void DrawOtherKirbyIndicators(struct GameplayHud *hud)
+static NAKED void DrawOtherKirbyIndicators(struct GameplayHud *hud)
 {
     asm(".include \"asm/nonmatching/DrawOtherKirbyIndicators.inc\"");
 }
 #else
-void DrawOtherKirbyIndicators(struct GameplayHud *hud)
+static void DrawOtherKirbyIndicators(struct GameplayHud *hud)
 {
     struct Sprite savedSprite;
     u8 i, indicator = 0;
@@ -630,7 +630,7 @@ void DrawBorrowLifePrompt(void)
     DrawPhoneBattery(kirby);
 }
 
-void DrawBorrowLifeNoCursor(void)
+static void DrawBorrowLifeNoCursor(void)
 {
     u16 *tiles = (u16 *)(BG_VRAM + 0xE350);
     u8 y, x;
@@ -647,7 +647,7 @@ void DrawBorrowLifeNoCursor(void)
     }
 }
 
-void DrawBorrowLifeYesCursor(void)
+static void DrawBorrowLifeYesCursor(void)
 {
     u16 *tiles = (u16 *)(BG_VRAM + 0xE290);
     u8 y, x;
@@ -895,12 +895,12 @@ void DrawKirbyHealthBar(struct Kirby *kirby)
 
 // TODO(match): The two abs() distance tests compare a value the original stores first (one shared compare after the abs join, and the y test re-reads gLocalPlayerId); a stored x distance reproduces that compare but lets the y test reuse the index product.
 #ifndef NONMATCHING
-NAKED void UpdateTrackedHudEnemy(struct GameplayHud *hud)
+static NAKED void UpdateTrackedHudEnemy(struct GameplayHud *hud)
 {
     asm(".include \"asm/nonmatching/UpdateTrackedHudEnemy.inc\"");
 }
 #else
-void UpdateTrackedHudEnemy(struct GameplayHud *hud)
+static void UpdateTrackedHudEnemy(struct GameplayHud *hud)
 {
     struct Object *object = hud->unk1C;
     struct Object *tracked;
@@ -964,7 +964,7 @@ void UpdateTrackedHudEnemy(struct GameplayHud *hud)
 }
 #endif
 
-void AnimateHudEnemyHealth(struct GameplayHud *hud)
+static void AnimateHudEnemyHealth(struct GameplayHud *hud)
 {
     if (hud->unkF != 0) {
         u32 paused = gUnk_03000510.unk4 & ((1 << gLocalPlayerId) | 0x10);
