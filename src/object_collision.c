@@ -739,100 +739,7 @@ void ProcessObjectCollisionLists(void)
 }
 #endif
 
-static inline void SetSolidBounds(struct ObjectBase *object, s8 bounds[4])
-{
-    if (object->flags & 1) {
-        bounds[2] = -object->unk3C;
-        bounds[0] = -object->unk3E;
-    } else {
-        bounds[0] = object->unk3C;
-        bounds[2] = object->unk3E;
-    }
-    bounds[1] = object->unk3D;
-    bounds[3] = object->unk3F;
-}
-
-static inline void ResolveSolidBottom(struct ObjectBase *object, struct Object *solid, s8 a[4], s8 b[4])
-{
-    s32 tolerance = object->yspeed + 0x300;
-    s32 top = object->y + a[1] * 256;
-    s32 bottom = solid->base.y + b[3] * 256;
-    if (abs(top - bottom) < tolerance) {
-        object->unk62 |= 8;
-        solid->base.unk62 |= 4;
-        object->y = solid->base.y + (b[3] - a[1]) * 256 + 0x100 + solid->base.yspeed;
-        object->yspeed = 0;
-    }
-}
-
-static inline void PlaceOnSolidTop(struct ObjectBase *object, struct Object *solid, s8 a[4], s8 b[4])
-{
-    object->unk62 |= 4;
-    solid->base.unk62 |= 8;
-    object->y = solid->base.y + (b[1] - a[3] + 1) * 256;
-    if ((object->flags & 0x40) && object->yspeed > 0)
-        object->yspeed &= 0xFF;
-    else
-        object->yspeed = 0;
-    object->kirby2 = (struct Kirby *)solid;
-}
-
-static inline void ResolveSolidTop(struct ObjectBase *object, struct Object *solid, s8 a[4], s8 b[4])
-{
-    s32 tolerance = 0x300 - object->yspeed;
-    s32 bottom = object->y + a[3] * 256;
-    s32 top = solid->base.y + b[1] * 256;
-    if (abs(bottom - top) < tolerance)
-        PlaceOnSolidTop(object, solid, a, b);
-}
-
-static inline void ResolveSolidSides(struct ObjectBase *object, struct Object *solid, s8 a[4], s8 b[4])
-{
-    s32 tolerance = 0x200 - object->yspeed;
-    s32 bottom = object->y + a[3] * 256;
-    s32 top = solid->base.y + b[1] * 256;
-    if (abs(bottom - top) > tolerance) {
-        s32 solidX = solid->base.x;
-        s32 x = object->x;
-        if (x > solidX) {
-            s32 distance = (solid->base.xspeed + 0x400) - object->xspeed;
-            s32 left = x + a[0] * 256;
-            s32 right = solidX + b[2] * 256;
-            if (abs(left - right) < distance) {
-                if (object->flags & 1)
-                    object->unk62 |= 1;
-                else
-                    object->unk62 |= 2;
-                if (solid->base.flags & 1)
-                    solid->base.unk62 |= 2;
-                else
-                    solid->base.unk62 |= 1;
-                object->x = solid->base.x + (b[2] - a[0]) * 256;
-            } else if (object->yspeed == 0) {
-                object->x = x + 0x100;
-            }
-        } else {
-            s32 distance = object->xspeed - (solid->base.xspeed - 0x400);
-            s32 right = x + a[2] * 256;
-            s32 left = solidX + b[0] * 256;
-            if (abs(right - left) < distance) {
-                if (object->flags & 1)
-                    object->unk62 |= 2;
-                else
-                    object->unk62 |= 1;
-                if (solid->base.flags & 1)
-                    solid->base.unk62 |= 1;
-                else
-                    solid->base.unk62 |= 2;
-                object->x = solid->base.x + (b[0] - a[2]) * 256;
-            } else if (object->yspeed == 0) {
-                object->x = x - 0x100;
-            }
-        }
-    }
-}
-
-// TODO: The collision scratch uses 40 rather than 36 stack bytes; direct bounds arrays and position records did not recover the original lifetimes.
+// TODO(match): The collision scratch uses 40 rather than 36 stack bytes; direct bounds arrays and position records did not recover the original lifetimes.
 #ifndef NONMATCHING
 NAKED void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid)
 {
@@ -844,27 +751,36 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
     s8 a[4], b[4];
     u8 widthA, widthB, heightA, heightB;
     bool32 previousX, previousY, overlapX, overlapY;
-    s32 ax, ay, bx, by;
     u32 solidFlags;
-    SetSolidBounds(object, a);
+    s32 tolerance;
+
+    if (object->flags & 1) {
+        a[2] = -object->unk3C;
+        a[0] = -object->unk3E;
+    } else {
+        a[0] = object->unk3C;
+        a[2] = object->unk3E;
+    }
+    a[1] = object->unk3D;
+    a[3] = object->unk3F;
     solidFlags = solid->base.flags;
-    SetSolidBounds(&solid->base, b);
+    if (solidFlags & 1) {
+        b[2] = -solid->base.unk3C;
+        b[0] = -solid->base.unk3E;
+    } else {
+        b[0] = solid->base.unk3C;
+        b[2] = solid->base.unk3E;
+    }
+    b[1] = solid->base.unk3D;
+    b[3] = solid->base.unk3F;
     widthA = a[2] - a[0];
     widthB = b[2] - b[0];
     heightA = a[3] - a[1];
     heightB = b[3] - b[1];
-    ax = object->unk48 + a[0] * 256;
-    bx = solid->base.unk48 + b[0] * 256;
-    previousX = COLLISION_AXIS_OVERLAP(ax, widthA * 256, bx, widthB * 256);
-    ay = object->unk4C + a[1] * 256;
-    by = solid->base.unk4C + b[1] * 256;
-    previousY = COLLISION_AXIS_OVERLAP(ay, heightA * 256, by, heightB * 256);
-    ax = object->x + a[0] * 256;
-    bx = solid->base.x + b[0] * 256;
-    overlapX = COLLISION_AXIS_OVERLAP(ax, widthA * 256, bx, widthB * 256);
-    ay = object->y + a[1] * 256;
-    by = solid->base.y + b[1] * 256;
-    overlapY = COLLISION_AXIS_OVERLAP(ay, heightA * 256, by, heightB * 256);
+    previousX = COLLISION_AXIS_OVERLAP(object->unk48 + a[0] * 256, widthA * 256, solid->base.unk48 + b[0] * 256, widthB * 256);
+    previousY = COLLISION_AXIS_OVERLAP(object->unk4C + a[1] * 256, heightA * 256, solid->base.unk4C + b[1] * 256, heightB * 256);
+    overlapX = COLLISION_AXIS_OVERLAP(object->x + a[0] * 256, widthA * 256, solid->base.x + b[0] * 256, widthB * 256);
+    overlapY = COLLISION_AXIS_OVERLAP(object->y + a[1] * 256, heightA * 256, solid->base.y + b[1] * 256, heightB * 256);
     if (overlapX && overlapY) {
         if (solidFlags & 0x80) {
             object->unk62 |= 0x10;
@@ -875,36 +791,192 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
             && object->x != solid->base.x + (b[2] - a[0]) * 256
             && object->x != solid->base.x + (b[0] - a[2]) * 256) {
             if (object->yspeed > 0) {
-                ResolveSolidBottom(object, solid, a, b);
-                if (object->yspeed <= 0 || solid->base.yspeed != 0)
-                    ResolveSolidTop(object, solid, a, b);
+                tolerance = object->yspeed + 0x300;
+                if (abs((object->y + a[1] * 256) - (solid->base.y + b[3] * 256)) < tolerance) {
+                    object->unk62 |= 8;
+                    solid->base.unk62 |= 4;
+                    object->y = solid->base.y + (b[3] - a[1]) * 256 + 0x100 + solid->base.yspeed;
+                    object->yspeed = 0;
+                }
+                if (object->yspeed <= 0 || solid->base.yspeed != 0) {
+                    tolerance = 0x300 - object->yspeed;
+                    if (abs((object->y + a[3] * 256) - (solid->base.y + b[1] * 256)) < tolerance) {
+                        object->unk62 |= 4;
+                        solid->base.unk62 |= 8;
+                        object->y = solid->base.y + (b[1] - a[3] + 1) * 256;
+                        if ((object->flags & 0x40) && object->yspeed > 0)
+                            object->yspeed &= 0xFF;
+                        else
+                            object->yspeed = 0;
+                        object->kirby2 = (struct Kirby *)solid;
+                    }
+                }
             } else {
-                ResolveSolidTop(object, solid, a, b);
+                tolerance = 0x300 - object->yspeed;
+                if (abs((object->y + a[3] * 256) - (solid->base.y + b[1] * 256)) < tolerance) {
+                    object->unk62 |= 4;
+                    solid->base.unk62 |= 8;
+                    object->y = solid->base.y + (b[1] - a[3] + 1) * 256;
+                    if ((object->flags & 0x40) && object->yspeed > 0)
+                        object->yspeed &= 0xFF;
+                    else
+                        object->yspeed = 0;
+                    object->kirby2 = (struct Kirby *)solid;
+                }
             }
         }
-        if (!previousX && previousY)
-            ResolveSolidSides(object, solid, a, b);
+        if (!previousX && previousY) {
+            tolerance = 0x200 - object->yspeed;
+            if (abs((object->y + a[3] * 256) - (solid->base.y + b[1] * 256)) > tolerance) {
+                if (object->x > solid->base.x) {
+                    s32 distance = (solid->base.xspeed + 0x400) - object->xspeed;
+                    if (abs((object->x + a[0] * 256) - (solid->base.x + b[2] * 256)) < distance) {
+                        if (object->flags & 1)
+                            object->unk62 |= 1;
+                        else
+                            object->unk62 |= 2;
+                        if (solid->base.flags & 1)
+                            solid->base.unk62 |= 2;
+                        else
+                            solid->base.unk62 |= 1;
+                        object->x = solid->base.x + (b[2] - a[0]) * 256;
+                    } else if (object->yspeed == 0) {
+                        object->x += 0x100;
+                    }
+                } else {
+                    s32 distance = object->xspeed - (solid->base.xspeed - 0x400);
+                    if (abs((object->x + a[2] * 256) - (solid->base.x + b[0] * 256)) < distance) {
+                        if (object->flags & 1)
+                            object->unk62 |= 2;
+                        else
+                            object->unk62 |= 1;
+                        if (solid->base.flags & 1)
+                            solid->base.unk62 |= 1;
+                        else
+                            solid->base.unk62 |= 2;
+                        object->x = solid->base.x + (b[0] - a[2]) * 256;
+                    } else if (object->yspeed == 0) {
+                        object->x -= 0x100;
+                    }
+                }
+            }
+        }
         if (!previousX && !previousY) {
             if (object->y > solid->base.y) {
-                if (object->yspeed > 0)
-                    ResolveSolidBottom(object, solid, a, b);
+                if (object->yspeed > 0) {
+                    tolerance = object->yspeed + 0x300;
+                    if (abs((object->y + a[1] * 256) - (solid->base.y + b[3] * 256)) < tolerance) {
+                        object->unk62 |= 8;
+                        solid->base.unk62 |= 4;
+                        object->y = solid->base.y + (b[3] - a[1]) * 256 + 0x100 + solid->base.yspeed;
+                        object->yspeed = 0;
+                    }
+                }
             } else if (object->yspeed <= 0) {
-                ResolveSolidTop(object, solid, a, b);
+                tolerance = 0x300 - object->yspeed;
+                if (abs((object->y + a[3] * 256) - (solid->base.y + b[1] * 256)) < tolerance) {
+                    object->unk62 |= 4;
+                    solid->base.unk62 |= 8;
+                    object->y = solid->base.y + (b[1] - a[3] + 1) * 256;
+                    if ((object->flags & 0x40) && object->yspeed > 0)
+                        object->yspeed &= 0xFF;
+                    else
+                        object->yspeed = 0;
+                    object->kirby2 = (struct Kirby *)solid;
+                }
             }
-            ResolveSolidSides(object, solid, a, b);
+            tolerance = 0x200 - object->yspeed;
+            if (abs((object->y + a[3] * 256) - (solid->base.y + b[1] * 256)) > tolerance) {
+                if (object->x > solid->base.x) {
+                    s32 distance = (solid->base.xspeed + 0x400) - object->xspeed;
+                    if (abs((object->x + a[0] * 256) - (solid->base.x + b[2] * 256)) < distance) {
+                        if (object->flags & 1)
+                            object->unk62 |= 1;
+                        else
+                            object->unk62 |= 2;
+                        if (solid->base.flags & 1)
+                            solid->base.unk62 |= 2;
+                        else
+                            solid->base.unk62 |= 1;
+                        object->x = solid->base.x + (b[2] - a[0]) * 256;
+                    } else if (object->yspeed == 0) {
+                        object->x += 0x100;
+                    }
+                } else {
+                    s32 distance = object->xspeed - (solid->base.xspeed - 0x400);
+                    if (abs((object->x + a[2] * 256) - (solid->base.x + b[0] * 256)) < distance) {
+                        if (object->flags & 1)
+                            object->unk62 |= 2;
+                        else
+                            object->unk62 |= 1;
+                        if (solid->base.flags & 1)
+                            solid->base.unk62 |= 1;
+                        else
+                            solid->base.unk62 |= 2;
+                        object->x = solid->base.x + (b[0] - a[2]) * 256;
+                    } else if (object->yspeed == 0) {
+                        object->x -= 0x100;
+                    }
+                }
+            }
         }
         if (previousX && previousY) {
             if (object->x != solid->base.x + (b[2] - a[0]) * 256
                 && object->x != solid->base.x + (b[0] - a[2]) * 256) {
-                s32 tolerance = 0x300 - object->yspeed;
-                s32 bottom = object->y + a[3] * 256;
-                s32 top = solid->base.y + b[1] * 256;
-                if (abs(bottom - top) < tolerance)
-                    PlaceOnSolidTop(object, solid, a, b);
-                else if (object->yspeed > 0)
-                    ResolveSolidBottom(object, solid, a, b);
+                tolerance = 0x300 - object->yspeed;
+                if (abs((object->y + a[3] * 256) - (solid->base.y + b[1] * 256)) < tolerance) {
+                    object->unk62 |= 4;
+                    solid->base.unk62 |= 8;
+                    object->y = solid->base.y + (b[1] - a[3] + 1) * 256;
+                    if ((object->flags & 0x40) && object->yspeed > 0)
+                        object->yspeed &= 0xFF;
+                    else
+                        object->yspeed = 0;
+                    object->kirby2 = (struct Kirby *)solid;
+                } else if (object->yspeed > 0) {
+                    tolerance = object->yspeed + 0x300;
+                    if (abs((object->y + a[1] * 256) - (solid->base.y + b[3] * 256)) < tolerance) {
+                        object->unk62 |= 8;
+                        solid->base.unk62 |= 4;
+                        object->y = solid->base.y + (b[3] - a[1]) * 256 + 0x100 + solid->base.yspeed;
+                        object->yspeed = 0;
+                    }
+                }
             }
-            ResolveSolidSides(object, solid, a, b);
+            tolerance = 0x200 - object->yspeed;
+            if (abs((object->y + a[3] * 256) - (solid->base.y + b[1] * 256)) > tolerance) {
+                if (object->x > solid->base.x) {
+                    s32 distance = (solid->base.xspeed + 0x400) - object->xspeed;
+                    if (abs((object->x + a[0] * 256) - (solid->base.x + b[2] * 256)) < distance) {
+                        if (object->flags & 1)
+                            object->unk62 |= 1;
+                        else
+                            object->unk62 |= 2;
+                        if (solid->base.flags & 1)
+                            solid->base.unk62 |= 2;
+                        else
+                            solid->base.unk62 |= 1;
+                        object->x = solid->base.x + (b[2] - a[0]) * 256;
+                    } else if (object->yspeed == 0) {
+                        object->x += 0x100;
+                    }
+                } else {
+                    s32 distance = object->xspeed - (solid->base.xspeed - 0x400);
+                    if (abs((object->x + a[2] * 256) - (solid->base.x + b[0] * 256)) < distance) {
+                        if (object->flags & 1)
+                            object->unk62 |= 2;
+                        else
+                            object->unk62 |= 1;
+                        if (solid->base.flags & 1)
+                            solid->base.unk62 |= 1;
+                        else
+                            solid->base.unk62 |= 2;
+                        object->x = solid->base.x + (b[0] - a[2]) * 256;
+                    } else if (object->yspeed == 0) {
+                        object->x -= 0x100;
+                    }
+                }
+            }
         }
     }
 }
