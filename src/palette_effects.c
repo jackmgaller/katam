@@ -642,7 +642,6 @@ struct PaletteEffect *CreatePaletteFadeToWhite(u8 slot)
 struct PaletteEffect *CreateInactivePaletteFadeToWhite(u8 slot)
 {
     struct PaletteEffectManager *state;
-    struct PaletteEffect **queueSlot;
     struct PaletteEffect *effect;
     u8 slotId;
     u8 queueIndex;
@@ -651,12 +650,8 @@ struct PaletteEffect *CreateInactivePaletteFadeToWhite(u8 slot)
     state = &gPaletteEffectManager;
     effect = &state->unk0[slotId];
     for (queueIndex = 0; queueIndex < 8; queueIndex++) {
-        // Matching: materialize the byte offset before the queue base.
-        asm("" : : "r"(queueIndex * sizeof(*queueSlot)));
-        queueSlot = state->unk80;
-        queueSlot += queueIndex;
-        if (*queueSlot == effect) {
-            *queueSlot = NULL;
+        if (state->unk80[queueIndex] == effect) {
+            state->unk80[queueIndex] = NULL;
             CompactPaletteEffectQueue();
         }
     }
