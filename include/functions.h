@@ -133,6 +133,7 @@ void sub_08025A80(void);
 void sub_08025AD0(void);
 void sub_0802B4A8(void);
 struct Unk_0802E57C *sub_0802E57C(void);
+void sub_0802E16C(void);
 void sub_0802E6C4(struct Unk_0802E57C *);
 void sub_0802FBE0(struct Unk_0802E57C *);
 void sub_0802FBF4(struct Unk_0802E57C *);

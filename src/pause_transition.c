@@ -1,5 +1,5 @@
-#include "hud.h"
 #include "pause_transition.h"
+#include "hud.h"
 #include "palette_effects.h"
 #include "global.h"
 #include "data.h"
@@ -26,20 +26,20 @@ struct PauseTransition {
 extern struct Task *gUnk_0203AD4C;
 extern void (*const gPauseTransitionScreens[])(void);
 
-void ResumeGameplayAfterPauseScreen(struct PauseTransition *);
-void UpdatePauseScreenTransition(void);
-void PauseScreenTransitionDestructor(struct Task *);
-void BeginPauseScreenTransition(struct PauseTransition *);
-void StartPauseScreenFadeOut(struct PauseTransition *);
-void WaitForPauseScreenFadeOut(struct PauseTransition *);
-void OpenPauseTransitionScreen(struct PauseTransition *);
-void WaitForPauseScreenFinish(struct PauseTransition *);
-void RestoreGameplayAfterPauseScreen(struct PauseTransition *);
-void DelayPauseScreenFadeIn(struct PauseTransition *);
-void StartPauseScreenFadeIn(struct PauseTransition *);
-void DestroyPauseScreenTransition(struct PauseTransition *);
+static void ResumeGameplayAfterPauseScreen(struct PauseTransition *);
+static void UpdatePauseScreenTransition(void);
+static void PauseScreenTransitionDestructor(struct Task *);
+static void BeginPauseScreenTransition(struct PauseTransition *);
+static void StartPauseScreenFadeOut(struct PauseTransition *);
+static void WaitForPauseScreenFadeOut(struct PauseTransition *);
+static void OpenPauseTransitionScreen(struct PauseTransition *);
+static void WaitForPauseScreenFinish(struct PauseTransition *);
+static void RestoreGameplayAfterPauseScreen(struct PauseTransition *);
+static void DelayPauseScreenFadeIn(struct PauseTransition *);
+static void StartPauseScreenFadeIn(struct PauseTransition *);
+static void DestroyPauseScreenTransition(struct PauseTransition *);
 
-void ResumeGameplayAfterPauseScreen(struct PauseTransition *transition)
+static void ResumeGameplayAfterPauseScreen(struct PauseTransition *transition)
 {
     u16 i;
 
@@ -185,14 +185,14 @@ void StartWorldMapUnlockCandyConstellation(void)
     StartPauseTransitionInternal(24);
 }
 
-void UpdatePauseScreenTransition(void)
+static void UpdatePauseScreenTransition(void)
 {
     struct PauseTransition *transition = TaskGetStructPtr(gCurTask);
 
     transition->callback(transition);
 }
 
-void PauseScreenTransitionDestructor(struct Task *UNUSED task)
+static void PauseScreenTransitionDestructor(struct Task *task UNUSED)
 {
     m4aSongNumContinue(MUS_VICTORY_LONG);
     m4aSongNumContinue(MUS_VICTORY_SHORT);
@@ -202,14 +202,14 @@ void PauseScreenTransitionDestructor(struct Task *UNUSED task)
     gUnk_0203AD4C = NULL;
 }
 
-void BeginPauseScreenTransition(struct PauseTransition *transition)
+static void BeginPauseScreenTransition(struct PauseTransition *transition)
 {
     if (transition->screen == 0)
         m4aSongNumStart(SE_PAUSE_MENU_OPEN);
     transition->callback = StartPauseScreenFadeOut;
 }
 
-void StartPauseScreenFadeOut(struct PauseTransition *transition)
+static void StartPauseScreenFadeOut(struct PauseTransition *transition)
 {
     struct PaletteEffect *effect;
 
@@ -221,7 +221,7 @@ void StartPauseScreenFadeOut(struct PauseTransition *transition)
     transition->callback = WaitForPauseScreenFadeOut;
 }
 
-void WaitForPauseScreenFadeOut(struct PauseTransition *transition)
+static void WaitForPauseScreenFadeOut(struct PauseTransition *transition)
 {
     if (++transition->timer > 30) {
         u16 color = RGB_WHITE;
@@ -237,7 +237,7 @@ void WaitForPauseScreenFadeOut(struct PauseTransition *transition)
     }
 }
 
-void OpenPauseTransitionScreen(struct PauseTransition *transition)
+static void OpenPauseTransitionScreen(struct PauseTransition *transition)
 {
     sub_08020220();
     BackupBasePalettes();
@@ -246,7 +246,7 @@ void OpenPauseTransitionScreen(struct PauseTransition *transition)
     transition->callback = WaitForPauseScreenFinish;
 }
 
-void WaitForPauseScreenFinish(struct PauseTransition *transition)
+static void WaitForPauseScreenFinish(struct PauseTransition *transition)
 {
     sub_080203C8();
     if (transition->finished) {
@@ -256,7 +256,7 @@ void WaitForPauseScreenFinish(struct PauseTransition *transition)
     }
 }
 
-void RestoreGameplayAfterPauseScreen(struct PauseTransition *transition)
+static void RestoreGameplayAfterPauseScreen(struct PauseTransition *transition)
 {
     sub_08020370();
     RestoreBasePalettes();
@@ -266,13 +266,13 @@ void RestoreGameplayAfterPauseScreen(struct PauseTransition *transition)
     transition->callback = ResumeGameplayAfterPauseScreen;
 }
 
-void DelayPauseScreenFadeIn(struct PauseTransition *transition)
+static void DelayPauseScreenFadeIn(struct PauseTransition *transition)
 {
     if (transition->timer++ > 2)
         transition->callback = StartPauseScreenFadeIn;
 }
 
-void StartPauseScreenFadeIn(struct PauseTransition *transition)
+static void StartPauseScreenFadeIn(struct PauseTransition *transition)
 {
     struct PaletteEffect *effect;
     u16 color;
@@ -288,12 +288,10 @@ void StartPauseScreenFadeIn(struct PauseTransition *transition)
     transition->callback(transition);
 }
 
-void DestroyPauseScreenTransition(struct PauseTransition *UNUSED transition)
+static void DestroyPauseScreenTransition(struct PauseTransition *transition UNUSED)
 {
     TaskDestroy(gCurTask);
 }
-
-void sub_0802E16C(void);
 
 void (*const gPauseTransitionScreens[27])(void) = {
     CreatePauseMenu,
