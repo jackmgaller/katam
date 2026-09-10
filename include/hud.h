@@ -33,7 +33,7 @@ void CreateGameplayHud(void);
 void DrawHudAbilityIconRows(u8 rows);
 struct GameplayHud *TryTrackHudEnemy(struct Object *object);
 void DrawEnemyHealthOrAreaName(struct GameplayHud *hud);
-void LoadAbilityIconGraphicsAndPalette(u32 tilesVram, u32 paletteId, u8 ability);
+void LoadAbilityIconGraphicsAndPalette(u32 tilesVram, u8 paletteId, u8 ability);
 void RefreshGameplayHud(struct Kirby *kirby);
 void LoadHudAbilityIcon(u8 ability);
 void StartHudAbilityIconExpansion(struct ObjectBase *object);

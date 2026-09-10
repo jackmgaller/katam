@@ -1032,14 +1032,7 @@ void AnimateHudEnemyHealth(struct GameplayHud *hud)
     }
 }
 
-// TODO: agbcc folds the ability move and shift together instead of emitting both; the incoming ability lifetime still differs.
-#ifndef NONMATCHING
-NAKED void LoadAbilityIconGraphicsAndPalette(u32 tilesVram, u32 paletteId, u8 ability)
-{
-    asm(".include \"asm/nonmatching/LoadAbilityIconGraphicsAndPalette.inc\"");
-}
-#else
-void LoadAbilityIconGraphicsAndPalette(u32 tilesVram, u32 paletteId, u8 ability)
+void LoadAbilityIconGraphicsAndPalette(u32 tilesVram, u8 paletteId, u8 ability)
 {
     LoadBgPaletteAndBase(gAbilityIconPalettes[ability], paletteId * 16, 16);
     gMainFlags |= MAIN_FLAG_BG_PALETTE_SYNC_ENABLE;
@@ -1054,7 +1047,6 @@ void LoadAbilityIconGraphicsAndPalette(u32 tilesVram, u32 paletteId, u8 ability)
     }
     gUnk_030039A4 = (gUnk_030039A4 + 1) & 0x3F;
 }
-#endif
 
 inline void LoadHudAbilityIcon(u8 ability)
 {
