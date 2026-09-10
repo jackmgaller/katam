@@ -897,7 +897,7 @@ void DrawKirbyHealthBar(struct Kirby *kirby)
     }
 }
 
-// TODO: Health scaling and offscreen checks spill differently; the original shared scaling helper/source form remains unresolved.
+// TODO(match): The two abs() distance tests compare a value the original stores first (one shared compare after the abs join, and the y test re-reads gLocalPlayerId); a stored x distance reproduces that compare but lets the y test reuse the index product.
 #ifndef NONMATCHING
 NAKED void UpdateTrackedHudEnemy(struct GameplayHud *hud)
 {
@@ -907,27 +907,32 @@ NAKED void UpdateTrackedHudEnemy(struct GameplayHud *hud)
 void UpdateTrackedHudEnemy(struct GameplayHud *hud)
 {
     struct Object *object = hud->unk1C;
-    struct Kirby *kirby;
+    struct Object *tracked;
+    u32 flags;
     if (object->unk80 <= 0) {
         hud->unkA = 0;
     } else {
         s16 scaledHp;
         if ((u8)(object->type - 0x38) <= 0x1A) {
             if (object->type == OBJ_DARK_MIND_FORM_1)
-                scaledHp = (u16)(object->unk80 * gUnk_08351628[object->subtype][gNumHumanPlayers - 1]);
+                scaledHp = object->unk80 * gUnk_08351628[object->subtype][gNumHumanPlayers - 1];
             else
-                scaledHp = (u16)(object->unk80 * gUnk_08351458[object->type - 0x38][gNumHumanPlayers - 1]);
+                scaledHp = object->unk80 * gUnk_08351458[object->type - 0x38][gNumHumanPlayers - 1];
+            hud->unkA = scaledHp >> 8;
+            if (scaledHp & 0xFF)
+                hud->unkA++;
         } else {
             // TODO: Types 0x53-0x5D can index beyond the original 56-entry scale table.
-            scaledHp = gUnk_083513E8[object->type] * object->unk80;
+            scaledHp = object->unk80 * gUnk_083513E8[object->type];
+            hud->unkA = scaledHp >> 8;
+            if (scaledHp & 0xFF)
+                hud->unkA++;
         }
-        hud->unkA = scaledHp >> 8;
-        if (scaledHp & 0xFF)
-            hud->unkA++;
     }
-    object = hud->unk1C;
-    if (object->base.flags & 0x1000) {
-        if (object->unk80 <= 0) {
+    flags = hud->unk1C->base.flags & 0x1000;
+    tracked = hud->unk1C;
+    if (flags) {
+        if (tracked->unk80 <= 0) {
             hud->unkA = 0;
         } else {
             CpuFill16(0, (void *)(BG_VRAM + 0x77A0), 0x100);
@@ -938,8 +943,7 @@ void UpdateTrackedHudEnemy(struct GameplayHud *hud)
         hud->unk1C = NULL;
         return;
     }
-    kirby = &gKirbys[gLocalPlayerId];
-    if (kirby->base.roomId != object->base.roomId || kirby->hp <= 0 || (gUnk_0203AD10 & 0x20)) {
+    if (gKirbys[gLocalPlayerId].base.roomId != tracked->base.roomId || gKirbys[gLocalPlayerId].hp <= 0 || (gUnk_0203AD10 & 0x20)) {
         CpuFill16(0, (void *)(BG_VRAM + 0x77A0), 0x100);
         hud->unk9 = 0;
         hud->unkA = 0;
@@ -947,13 +951,13 @@ void UpdateTrackedHudEnemy(struct GameplayHud *hud)
         hud->unk1C = NULL;
         return;
     }
-    if ((u8)(object->type - 0x38) <= 0x1A) {
-        if (abs(gCurLevelInfo[gLocalPlayerId].viewportPosition.x - (object->base.x - 0x7800)) <= 0xF000
-            && abs(gCurLevelInfo[gLocalPlayerId].viewportPosition.y - (object->base.y - 0x5000)) <= 0xC800)
+    if ((u8)(tracked->type - 0x38) <= 0x1A) {
+        if (abs(gCurLevelInfo[gLocalPlayerId].viewportPosition.x + 0x7800 - tracked->base.x) <= 0xF000
+            && abs(gCurLevelInfo[gLocalPlayerId].viewportPosition.y + 0x5000 - tracked->base.y) <= 0xC800)
             return;
     } else {
-        if (abs(gCurLevelInfo[gLocalPlayerId].viewportPosition.x - (object->base.x - 0x7800)) <= 0xA800
-            && abs(gCurLevelInfo[gLocalPlayerId].viewportPosition.y - (object->base.y - 0x5000)) <= 0x8000)
+        if (abs(gCurLevelInfo[gLocalPlayerId].viewportPosition.x + 0x7800 - tracked->base.x) <= 0xA800
+            && abs(gCurLevelInfo[gLocalPlayerId].viewportPosition.y + 0x5000 - tracked->base.y) <= 0x8000)
             return;
     }
     CpuFill16(0, (void *)(BG_VRAM + 0x77A0), 0x100);
