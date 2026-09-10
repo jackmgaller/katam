@@ -537,7 +537,6 @@ struct PaletteEffect *CreateRoomPaletteFlash(u8 slot, u16 room)
 struct PaletteEffect *CreateLowPriorityRoomPaletteFlash(u8 slot, u16 room)
 {
     struct PaletteEffectManager *state;
-    struct PaletteEffect **queueSlot;
     struct PaletteEffect *effect;
     u16 roomId;
     u8 queueIndex;
@@ -546,12 +545,8 @@ struct PaletteEffect *CreateLowPriorityRoomPaletteFlash(u8 slot, u16 room)
     state = &gPaletteEffectManager;
     effect = &state->unk0[slot];
     for (queueIndex = 0; queueIndex < 8; queueIndex++) {
-        // Matching: materialize the byte offset before the queue base.
-        asm("" : : "r"(queueIndex * sizeof(*queueSlot)));
-        queueSlot = state->unk80;
-        queueSlot += queueIndex;
-        if (*queueSlot == effect) {
-            *queueSlot = NULL;
+        if (state->unk80[queueIndex] == effect) {
+            state->unk80[queueIndex] = NULL;
             CompactPaletteEffectQueue();
         }
     }
