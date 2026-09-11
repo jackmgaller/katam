@@ -352,18 +352,11 @@ void UpdateBorrowLifeHud(void)
     }
 }
 
-// TODO(match): The sprite-copy scratch and per-Kirby pointers occupy different stack slots; the original local aggregate layout remains unresolved.
-#ifndef NONMATCHING
-static NAKED void DrawOtherKirbyIndicators(struct GameplayHud *hud)
-{
-    asm(".include \"asm/nonmatching/DrawOtherKirbyIndicators.inc\"");
-}
-#else
 static void DrawOtherKirbyIndicators(struct GameplayHud *hud)
 {
     struct Sprite savedSprite;
-    u8 i, indicator = 0;
-    for (i = 0; i < gNumKirbys; i++) {
+    u8 i = 0, indicator = 0;
+    for (; i < gNumKirbys; i++) {
         struct Kirby *kirby;
         struct Sprite *body, *ability, *effect;
         if (i == gLocalPlayerId)
@@ -373,7 +366,88 @@ static void DrawOtherKirbyIndicators(struct GameplayHud *hud)
         body = &hud->unk20[0][i];
         ability = &hud->unk20[1][i];
         effect = &hud->unk20[2][i];
-        if (gKirbys[gLocalPlayerId].base.roomId != kirby->base.roomId) {
+        if (gKirbys[gLocalPlayerId].base.roomId == kirby->base.roomId) {
+            if (sub_0803D938(&kirby->base)) {
+                struct LevelInfo *level = &gCurLevelInfo[gLocalPlayerId];
+                body->animId = 0x2DC;
+                body->variant = 0;
+                if (level->viewportPosition.x + 0x600 > kirby->base.x)
+                    body->x = 6;
+                else if (level->viewportPosition.x + 0xE800 < kirby->base.x)
+                    body->x = 0xE8;
+                else
+                    body->x = (kirby->base.x - level->viewportPosition.x) >> 8;
+                if (level->viewportPosition.y + 0xA00 > kirby->base.y)
+                    body->y = 10;
+                else if (level->viewportPosition.y + 0x8C00 < kirby->base.y)
+                    body->y = 0x8C;
+                else
+                    body->y = (kirby->base.y - level->viewportPosition.y) >> 8;
+                if (body->x <= 21) {
+                    if (body->y <= 25) {
+                        body->variant = 3;
+                        if (body->y < gOffscreenKirbyDirectionVariants[indicator] + 10)
+                            body->y = gOffscreenKirbyDirectionVariants[indicator] + 10;
+                    } else if (body->y > 124) {
+                        body->variant = 7;
+                        if (body->y > 140 - gOffscreenKirbyDirectionVariants[indicator])
+                            body->y = 140 - gOffscreenKirbyDirectionVariants[indicator];
+                    } else {
+                        body->variant = 1;
+                    }
+                    body->x += gOffscreenKirbyDirectionVariants[indicator];
+                } else if (body->x > 216) {
+                    if (body->y <= 25) {
+                        body->variant = 2;
+                        if (body->y < gOffscreenKirbyDirectionVariants[indicator] + 10)
+                            body->y = gOffscreenKirbyDirectionVariants[indicator] + 10;
+                    } else if (body->y > 124) {
+                        body->variant = 6;
+                        if (body->y > 140 - gOffscreenKirbyDirectionVariants[indicator])
+                            body->y = 140 - gOffscreenKirbyDirectionVariants[indicator];
+                    } else {
+                        body->variant = 0;
+                    }
+                    body->x -= gOffscreenKirbyDirectionVariants[indicator];
+                } else {
+                    if (body->y <= 25) {
+                        body->variant = 4;
+                        body->y += gOffscreenKirbyDirectionVariants[indicator];
+                    } else {
+                        body->variant = 5;
+                        body->y -= gOffscreenKirbyDirectionVariants[indicator];
+                    }
+                }
+                if (hud->unk15[i] != 1) {
+                    ability->unk1B = 0xFF;
+                    body->unk1B = -1;
+                    effect->animId = 0;
+                    effect->variant = 0;
+                    hud->unk15[i] = 1;
+                }
+                if (!(gUnk_0203AD20 & 8))
+                    body->unk8 &= ~0x800;
+                kirby->base.sprite.unk8 |= 0x80000;
+                kirby->sprites[1].unk8 |= 0x80000;
+                kirby->sprites[0].unk8 |= 0x80000;
+                sub_08155128(body);
+                if (!(gUnk_0203AD10 & 0x20) && kirby->hp > 0
+                    && (u16)(kirby->base.roomId - 0x394) > 3
+                    && kirby->base.roomId != 0x38D && kirby->base.roomId <= 0x3D3)
+                    DisplaySprite(body);
+            } else if (hud->unk15[i]) {
+                kirby->base.sprite.unk8 &= ~0x80000;
+                kirby->sprites[1].unk8 &= ~0x80000;
+                kirby->sprites[0].unk8 &= ~0x80000;
+                effect->animId = 0;
+                effect->variant = 0;
+                CpuCopy32(&kirby->base.sprite, &savedSprite, sizeof(savedSprite));
+                sub_0815521C(&savedSprite, kirby->base.header.unk1);
+                CpuCopy32(&kirby->sprites[1], &savedSprite, sizeof(savedSprite));
+                sub_0815521C(&savedSprite, kirby->base.header.unk1);
+                hud->unk15[i] = 0;
+            }
+        } else {
             kirby->base.sprite.unk8 &= ~0x80000;
             kirby->sprites[1].unk8 &= ~0x80000;
             kirby->sprites[0].unk8 &= ~0x80000;
@@ -400,7 +474,7 @@ static void DrawOtherKirbyIndicators(struct GameplayHud *hud)
             }
             if (hud->unk15[i] != 2) {
                 ability->unk1B = 0xFF;
-                body->unk1B = 0xFF;
+                body->unk1B = -1;
                 effect->animId = 0;
                 effect->variant = 0;
                 hud->unk15[i] = 2;
@@ -443,91 +517,9 @@ static void DrawOtherKirbyIndicators(struct GameplayHud *hud)
             kirby->base.sprite.unk8 |= 0x80000;
             kirby->sprites[1].unk8 |= 0x80000;
             kirby->sprites[0].unk8 |= 0x80000;
-        } else if (!sub_0803D938(&kirby->base)) {
-            if (hud->unk15[i]) {
-                kirby->base.sprite.unk8 &= ~0x80000;
-                kirby->sprites[1].unk8 &= ~0x80000;
-                kirby->sprites[0].unk8 &= ~0x80000;
-                effect->animId = 0;
-                effect->variant = 0;
-                CpuCopy32(&kirby->base.sprite, &savedSprite, sizeof(savedSprite));
-                sub_0815521C(&savedSprite, kirby->base.header.unk1);
-                CpuCopy32(&kirby->sprites[1], &savedSprite, sizeof(savedSprite));
-                sub_0815521C(&savedSprite, kirby->base.header.unk1);
-                hud->unk15[i] = 0;
-            }
-        } else {
-            struct LevelInfo *level = &gCurLevelInfo[gLocalPlayerId];
-            body->animId = 0x2DC;
-            body->variant = 0;
-            if (level->viewportPosition.x + 0x600 > kirby->base.x)
-                body->x = 6;
-            else if (level->viewportPosition.x + 0xE800 < kirby->base.x)
-                body->x = 0xE8;
-            else
-                body->x = (kirby->base.x - level->viewportPosition.x) >> 8;
-            if (level->viewportPosition.y + 0xA00 > kirby->base.y)
-                body->y = 10;
-            else if (level->viewportPosition.y + 0x8C00 < kirby->base.y)
-                body->y = 0x8C;
-            else
-                body->y = (kirby->base.y - level->viewportPosition.y) >> 8;
-            if (body->x <= 21) {
-                if (body->y <= 25) {
-                    body->variant = 3;
-                    if (body->y < gOffscreenKirbyDirectionVariants[indicator] + 10)
-                        body->y = gOffscreenKirbyDirectionVariants[indicator] + 10;
-                } else if (body->y > 124) {
-                    body->variant = 7;
-                    if (body->y > 140 - gOffscreenKirbyDirectionVariants[indicator])
-                        body->y = 140 - gOffscreenKirbyDirectionVariants[indicator];
-                } else {
-                    body->variant = 1;
-                }
-                body->x += gOffscreenKirbyDirectionVariants[indicator];
-            } else if (body->x > 216) {
-                if (body->y <= 25) {
-                    body->variant = 2;
-                    if (body->y < gOffscreenKirbyDirectionVariants[indicator] + 10)
-                        body->y = gOffscreenKirbyDirectionVariants[indicator] + 10;
-                } else if (body->y > 124) {
-                    body->variant = 6;
-                    if (body->y > 140 - gOffscreenKirbyDirectionVariants[indicator])
-                        body->y = 140 - gOffscreenKirbyDirectionVariants[indicator];
-                } else {
-                    body->variant = 0;
-                }
-                body->x -= gOffscreenKirbyDirectionVariants[indicator];
-            } else {
-                if (body->y <= 25) {
-                    body->variant = 4;
-                    body->y += gOffscreenKirbyDirectionVariants[indicator];
-                } else {
-                    body->variant = 5;
-                    body->y -= gOffscreenKirbyDirectionVariants[indicator];
-                }
-            }
-            if (hud->unk15[i] != 1) {
-                ability->unk1B = 0xFF;
-                body->unk1B = 0xFF;
-                effect->animId = 0;
-                effect->variant = 0;
-                hud->unk15[i] = 1;
-            }
-            if (!(gUnk_0203AD20 & 8))
-                body->unk8 &= ~0x800;
-            kirby->base.sprite.unk8 |= 0x80000;
-            kirby->sprites[1].unk8 |= 0x80000;
-            kirby->sprites[0].unk8 |= 0x80000;
-            sub_08155128(body);
-            if (!(gUnk_0203AD10 & 0x20) && kirby->hp > 0
-                && (u16)(kirby->base.roomId - 0x394) > 3
-                && kirby->base.roomId != 0x38D && kirby->base.roomId <= 0x3D3)
-                DisplaySprite(body);
         }
     }
 }
-#endif
 
 void DrawCallHudMessage(u8 message)
 {
