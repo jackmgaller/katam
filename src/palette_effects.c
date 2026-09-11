@@ -480,20 +480,21 @@ void ApplyPaletteWhiteFill(struct PaletteEffect *effect)
 {
     u16 *palette;
     u32 fill;
-    u16 bank;
+    u16 bgBank;
+    u16 objBank;
     u32 flags;
     if (effect->unk8 & 2) {
         palette = gBgPalette;
-        for (bank = 0; bank < 16; bank++) {
-            if ((effect->unk6 >> bank) & 1) {
+        for (bgBank = 0; bgBank < 16; bgBank++) {
+            if ((effect->unk6 >> bgBank) & 1) {
                 fill = 0xFFFFFFFF;
                 CpuSet(&fill, palette, CPU_SET_SRC_FIXED | CPU_SET_32BIT | 8);
             }
             palette += 16;
         }
         palette = gObjPalette;
-        for (bank = 0; bank < 16; bank++) {
-            if ((effect->unk4 >> bank) & 1) {
+        for (objBank = 0; objBank < 16; objBank++) {
+            if ((effect->unk4 >> objBank) & 1) {
                 fill = 0xFFFFFFFF;
                 CpuSet(&fill, palette, CPU_SET_SRC_FIXED | CPU_SET_32BIT | 8);
             }
