@@ -226,11 +226,12 @@ static inline void BrightenColor(u16 *palette, struct PaletteEffect *effect)
 
 static inline void DarkenColorWithTable(u16 *palette, struct PaletteEffect *effect)
 {
+    const u16 *redTable = gDarkenRedTable;
     s32 offset;
     u32 result;
     u32 red = *palette & 31;
     offset = effect->unk1 - 31;
-    result = gDarkenRedTable[red - offset];
+    result = redTable[red - offset];
     result |= gDarkenGreenTable[((*palette >> 5) & 31) - offset];
     result |= gDarkenBlueTable[((*palette >> 10) & 31) - offset];
     *palette = result;
