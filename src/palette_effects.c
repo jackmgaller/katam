@@ -201,15 +201,15 @@ static void UpdatePaletteEffects(void)
 
 static inline void DarkenColor(u16 *palette, struct PaletteEffect *effect)
 {
-    s8 amount = effect->unk1;
-    u16 channel = (*palette & 31) - amount;
+    u16 channel = (*palette & 31) - effect->unk1;
+    u32 underflow = channel & 0x8000;
     u16 result = channel;
-    if (channel & 0x8000)
+    if (underflow)
         result = 0;
-    channel = ((*palette >> 5) & 31) - amount;
+    channel = ((*palette >> 5) & 31) - effect->unk1;
     if (!(channel & 0x8000))
         result |= channel << 5;
-    channel = ((*palette >> 10) & 31) - amount;
+    channel = ((*palette >> 10) & 31) - effect->unk1;
     if (!(channel & 0x8000))
         result |= channel << 10;
     *palette = result;
@@ -292,7 +292,10 @@ static inline void AdvancePaletteEffect(struct PaletteEffect *effect, u16 flags)
     ++palette; transform(palette, effect); \
     ++palette; transform(palette, effect);
 
-// TODO(match): Unrolled channel subtraction uses different register lifetimes; scalar widths and palette subobject helpers did not recover the original layout.
+// TODO(match): Only the `effect->unk8 |= 1; effect->unk8 &= 0xFF79;` tail differs: the OR keeps its
+// result in the flags register instead of the register holding the constant, so the following AND and
+// store name two registers the other way round. The same tail shape differs in the other ApplyPalette*
+// functions.
 #ifndef NONMATCHING
 NAKED void ApplyPaletteDarkening(struct PaletteEffect *effect)
 {
@@ -303,6 +306,7 @@ void ApplyPaletteDarkening(struct PaletteEffect *effect)
 {
     u16 *palette;
     u16 bank;
+    u32 flags;
     if (effect->unk8 & 2) {
         palette = gBgPalette;
         for (bank = 0; bank < 16; bank++) {
@@ -324,12 +328,15 @@ void ApplyPaletteDarkening(struct PaletteEffect *effect)
         }
         gMainFlags |= MAIN_FLAG_BG_PALETTE_SYNC_ENABLE | MAIN_FLAG_OBJ_PALETTE_SYNC_ENABLE;
     }
-    if (!(effect->unk8 & 1) && (!(gMainFlags & 0x800) || (effect->unk8 & 0x80))) {
+    flags = effect->unk8;
+    if (!(flags & 1) && (!(gMainFlags & 0x800) || (flags & 0x80))) {
         if ((s8)effect->unk1 == (s8)effect->unk2) {
-            if (effect->unk8 & 0x40)
+            if (flags & 0x40)
                 effect->unk1 = effect->unk2;
-            else
-                effect->unk8 = (effect->unk8 | 1) & 0xFF79;
+            else {
+                effect->unk8 |= 1;
+                effect->unk8 &= 0xFF79;
+            }
         } else {
             effect->unkC += effect->unkA;
             effect->unk1 = effect->unkC >> 8;
