@@ -9162,7 +9162,7 @@ struct Object6 *sub_0808671C(struct Object *obj2) {
     obj6->unk4 = obj2;
     obj6->unk2 = 0xB;
     obj6->unk0 = 0;
-    unk = CreateLowPriorityRoomPaletteFlash(5, obj2->base.roomId);
+    unk = CreateLowPriorityRoomPaletteEffect(5, obj2->base.roomId);
     unk->unk0 = 2;
     unk->unkA = 0x100;
     unk->unk3 = 5;
@@ -9174,7 +9174,7 @@ struct Object6 *sub_0808671C(struct Object *obj2) {
 }
 
 void sub_080867A0(struct Object6 *obj6) {
-    struct PaletteEffect *unk = CreateLowPriorityRoomPaletteFlash(5, obj6->unk4->base.roomId);
+    struct PaletteEffect *unk = CreateLowPriorityRoomPaletteEffect(5, obj6->unk4->base.roomId);
 
     unk->unk0 = 2;
     unk->unkA = -0x100;
@@ -9216,7 +9216,7 @@ void sub_080868D4(struct Task *t) {
     struct PaletteEffect *unk;
 
     if (obj6->unk0 != 2) {
-        unk = CreateLowPriorityRoomPaletteFlash(5, obj2->base.roomId);
+        unk = CreateLowPriorityRoomPaletteEffect(5, obj2->base.roomId);
         unk->unk0 = 2;
         unk->unkA = -0x1000;
         unk->unkC = 0x1000;
@@ -9239,7 +9239,7 @@ struct Object6 *sub_08086938(struct Object *obj2, u8 a2) {
     obj6->unk0 = 0;
     if (a2)
         t->dtor = sub_08086BE0;
-    unk = CreateLowPriorityRoomPaletteFlash(6, obj2->base.roomId);
+    unk = CreateLowPriorityRoomPaletteEffect(6, obj2->base.roomId);
     unk->unk4 = 0xFF00;
     unk->unk6 = 0x3FFF;
     ret = sub_0803DF24(0x39A);
@@ -9265,7 +9265,7 @@ struct Object6 *sub_08086938(struct Object *obj2, u8 a2) {
 }
 
 void sub_08086A28(struct Object6 *obj6, u8 a2) {
-    struct PaletteEffect *unk = CreateLowPriorityRoomPaletteFlash(6, obj6->unk4->base.roomId);
+    struct PaletteEffect *unk = CreateLowPriorityRoomPaletteEffect(6, obj6->unk4->base.roomId);
     u8 ret;
 
     unk->unk4 = 0xFF00;
@@ -9309,7 +9309,7 @@ void sub_08086B40(struct Task *t) {
     u8 ret;
 
     if (obj6->unk0 != 2) {
-        unk = CreateLowPriorityRoomPaletteFlash(6, obj2->base.roomId);
+        unk = CreateLowPriorityRoomPaletteEffect(6, obj2->base.roomId);
         unk->unk0 = 2;
         unk->unkA = -0x1000;
         unk->unkC = 0x1F00;
@@ -9333,7 +9333,7 @@ void sub_08086BE0(struct Task *t) {
     struct Object *obj2 = obj6->unk4;
 
     if (obj6->unk0 != 2) {
-        unk = CreateLowPriorityRoomPaletteFlash(6, obj2->base.roomId);
+        unk = CreateLowPriorityRoomPaletteEffect(6, obj2->base.roomId);
         unk->unk0 = 2;
         unk->unkA = -0x1000;
         unk->unkC = 0x1F00;
@@ -9793,7 +9793,7 @@ void sub_08087F98(void) {
             --unk->unk2;
             if (gLocalPlayerId == kirby->base.unk56) {
                 LoadHudAbilityIcon(unk->unk0);
-                RequestHudAbilityIconCollapse(&kirby->base);
+                CollapseHudAbilityIcon(&kirby->base);
             }
             if (!unk->unk2) {
                 if (gLocalPlayerId == kirby->base.unk56)
@@ -14864,7 +14864,7 @@ void sub_08096898(void) {
             if (obj4->header.unk1 == 0xF) {
                 struct PaletteEffect *v13;
 
-                v13 = CreateRoomPaletteFlash(4, kirby->base.roomId);
+                v13 = CreateRoomPaletteEffect(4, kirby->base.roomId);
                 v13->unk0 = 2;
                 v13->unkA = 0x180;
                 v13->unk4 = 0x7F00;

@@ -10,7 +10,7 @@ inline void LoadHudAbilityIcon(u8 ability);
 inline void StartHudAbilityIconExpansion(struct ObjectBase *object);
 inline void HoldExpandedHudAbilityIcon(struct ObjectBase *object);
 inline void ScheduleHudAbilityIconCollapse(struct ObjectBase *object);
-inline void RequestHudAbilityIconCollapse(struct ObjectBase *object);
+inline void CollapseHudAbilityIcon(struct ObjectBase *object);
 inline void UpdateGameOverHudIndicators(void);
 inline void GameplayHudDestructor(struct Task *task);
 inline void LoadGameplayHudGraphics(void);
@@ -59,7 +59,7 @@ extern const u16 gUnk_08351458[27][4];
 extern const u16 gUnk_08351628[4][4];
 extern const u16 *gAbilityIconPalettes[32];
 extern const u8 *gAbilityIconGraphics[6][32];
-extern const u8 gOffscreenKirbyDirectionVariants[4];
+extern const u8 gOffscreenKirbyIconOffsets[4];
 extern const u8 gOtherRoomKirbyIconX[4];
 static void DrawBorrowLifeNoCursor(void);
 static void DrawBorrowLifeYesCursor(void);
@@ -386,36 +386,36 @@ static void DrawOtherKirbyIndicators(struct GameplayHud *hud)
                 if (body->x <= 21) {
                     if (body->y <= 25) {
                         body->variant = 3;
-                        if (body->y < gOffscreenKirbyDirectionVariants[indicator] + 10)
-                            body->y = gOffscreenKirbyDirectionVariants[indicator] + 10;
+                        if (body->y < gOffscreenKirbyIconOffsets[indicator] + 10)
+                            body->y = gOffscreenKirbyIconOffsets[indicator] + 10;
                     } else if (body->y > 124) {
                         body->variant = 7;
-                        if (body->y > 140 - gOffscreenKirbyDirectionVariants[indicator])
-                            body->y = 140 - gOffscreenKirbyDirectionVariants[indicator];
+                        if (body->y > 140 - gOffscreenKirbyIconOffsets[indicator])
+                            body->y = 140 - gOffscreenKirbyIconOffsets[indicator];
                     } else {
                         body->variant = 1;
                     }
-                    body->x += gOffscreenKirbyDirectionVariants[indicator];
+                    body->x += gOffscreenKirbyIconOffsets[indicator];
                 } else if (body->x > 216) {
                     if (body->y <= 25) {
                         body->variant = 2;
-                        if (body->y < gOffscreenKirbyDirectionVariants[indicator] + 10)
-                            body->y = gOffscreenKirbyDirectionVariants[indicator] + 10;
+                        if (body->y < gOffscreenKirbyIconOffsets[indicator] + 10)
+                            body->y = gOffscreenKirbyIconOffsets[indicator] + 10;
                     } else if (body->y > 124) {
                         body->variant = 6;
-                        if (body->y > 140 - gOffscreenKirbyDirectionVariants[indicator])
-                            body->y = 140 - gOffscreenKirbyDirectionVariants[indicator];
+                        if (body->y > 140 - gOffscreenKirbyIconOffsets[indicator])
+                            body->y = 140 - gOffscreenKirbyIconOffsets[indicator];
                     } else {
                         body->variant = 0;
                     }
-                    body->x -= gOffscreenKirbyDirectionVariants[indicator];
+                    body->x -= gOffscreenKirbyIconOffsets[indicator];
                 } else {
                     if (body->y <= 25) {
                         body->variant = 4;
-                        body->y += gOffscreenKirbyDirectionVariants[indicator];
+                        body->y += gOffscreenKirbyIconOffsets[indicator];
                     } else {
                         body->variant = 5;
-                        body->y -= gOffscreenKirbyDirectionVariants[indicator];
+                        body->y -= gOffscreenKirbyIconOffsets[indicator];
                     }
                 }
                 if (hud->unk15[i] != 1) {
@@ -1031,7 +1031,7 @@ inline void ScheduleHudAbilityIconCollapse(struct ObjectBase *object)
         hud->unk4 = 0xC;
 }
 
-inline void RequestHudAbilityIconCollapse(struct ObjectBase *object)
+inline void CollapseHudAbilityIcon(struct ObjectBase *object)
 {
     struct GameplayHud *hud = TaskGetStructPtr(gGameplayHudTask);
     if (!(gUnk_0203AD10 & 0x10) && object->unk56 == gLocalPlayerId)
@@ -1304,7 +1304,7 @@ const u16 gHudPalettes[18][16] = {
 const u32 gHudDecimalDivisors[8] = {
     10000000, 1000000, 100000, 10000, 1000, 100, 10, 1,
 };
-const u8 gOffscreenKirbyDirectionVariants[4] = {
+const u8 gOffscreenKirbyIconOffsets[4] = {
     0, 4, 8, 12,
 };
 const u8 gOtherRoomKirbyIconX[4] = {

@@ -26,7 +26,7 @@ struct PauseTransition {
 extern struct Task *gUnk_0203AD4C;
 extern void (*const gPauseTransitionScreens[])(void);
 
-static void ResumeGameplayAfterPauseScreen(struct PauseTransition *);
+static void UnpauseGameplay(struct PauseTransition *);
 static void UpdatePauseScreenTransition(void);
 static void PauseScreenTransitionDestructor(struct Task *);
 static void BeginPauseScreenTransition(struct PauseTransition *);
@@ -39,7 +39,7 @@ static void DelayPauseScreenFadeIn(struct PauseTransition *);
 static void StartPauseScreenFadeIn(struct PauseTransition *);
 static void DestroyPauseScreenTransition(struct PauseTransition *);
 
-static void ResumeGameplayAfterPauseScreen(struct PauseTransition *transition)
+static void UnpauseGameplay(struct PauseTransition *transition)
 {
     u16 i;
 
@@ -263,7 +263,7 @@ static void RestoreGameplayAfterPauseScreen(struct PauseTransition *transition)
     RestoreDisplayState();
     RefreshGameplayHud(&gKirbys[gLocalPlayerId]);
     sub_0806F734();
-    transition->callback = ResumeGameplayAfterPauseScreen;
+    transition->callback = UnpauseGameplay;
 }
 
 static void DelayPauseScreenFadeIn(struct PauseTransition *transition)

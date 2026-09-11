@@ -26,11 +26,11 @@ struct PaletteEffectManager {
 extern struct Task *gPaletteEffectsTask;
 extern struct PaletteEffectManager gPaletteEffectManager;
 
-struct PaletteEffect *CreateRoomPaletteFlash(u8 slot, u16 room);
-struct PaletteEffect *CreateLowPriorityRoomPaletteFlash(u8 slot, u16 room);
+struct PaletteEffect *CreateRoomPaletteEffect(u8 slot, u16 room);
+struct PaletteEffect *CreateLowPriorityRoomPaletteEffect(u8 slot, u16 room);
 struct PaletteEffect *CreatePaletteFadeFromWhite(u8 slot);
 struct PaletteEffect *CreatePaletteFadeToWhite(u8 slot);
-struct PaletteEffect *CreateInactivePaletteFadeToWhite(u8 slot);
+struct PaletteEffect *CreateHiddenPaletteFadeToWhite(u8 slot);
 struct PaletteEffect *CreatePaletteDim(u8 slot);
 struct PaletteEffect *CreatePaletteUndim(u8 slot);
 void EnablePaletteEffectsForCurrentRoom(void);

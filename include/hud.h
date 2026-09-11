@@ -39,7 +39,7 @@ void LoadHudAbilityIcon(u8 ability);
 void StartHudAbilityIconExpansion(struct ObjectBase *object);
 void HoldExpandedHudAbilityIcon(struct ObjectBase *object);
 void ScheduleHudAbilityIconCollapse(struct ObjectBase *object);
-void RequestHudAbilityIconCollapse(struct ObjectBase *object);
+void CollapseHudAbilityIcon(struct ObjectBase *object);
 void ShowGameOverHud(void);
 void ShowBorrowLifeHud(void);
 void RestoreHudAfterLifeBorrow(void);

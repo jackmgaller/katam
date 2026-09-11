@@ -1298,7 +1298,7 @@ static void sub_08022D78(struct CutsceneTrigger5 *trigger)
 {
     if (++trigger->unkB4 > 0x3B)
     {
-        trigger->unkC4 = CreateRoomPaletteFlash(5, trigger->obj2.base.roomId);
+        trigger->unkC4 = CreateRoomPaletteEffect(5, trigger->obj2.base.roomId);
         trigger->unkC4->unk8 |= 0x40;
         trigger->unkC4->unkA = 0x80;
         trigger->unkC4->unk4 = 0xFFFF;

@@ -9293,7 +9293,7 @@ void sub_0804BD00(struct Kirby *kirby)
     { \
         LoadHudAbilityIcon(0); \
         DrawHudAbilityIconRows(2); \
-        RequestHudAbilityIconCollapse(&(kirby)->base); \
+        CollapseHudAbilityIcon(&(kirby)->base); \
     } \
 })
 
@@ -9456,7 +9456,7 @@ void sub_0804C614(struct Kirby *kirby)
         if (kirby->base.unk56 == gLocalPlayerId)
             r2 = CreatePaletteFadeToWhite(kirby->base.unk56);
         else
-            r2 = CreateInactivePaletteFadeToWhite(kirby->base.unk56);
+            r2 = CreateHiddenPaletteFadeToWhite(kirby->base.unk56);
         r2->unkA = 0x400;
         r2->unk8 |= 0x40;
     }
@@ -10617,7 +10617,7 @@ void sub_0804FBFC(struct Kirby *kirby)
         if (kirby->base.unk56 == gLocalPlayerId)
             CreatePaletteFadeToWhite(kirby->base.unk56);
         else
-            CreateInactivePaletteFadeToWhite(kirby->base.unk56);
+            CreateHiddenPaletteFadeToWhite(kirby->base.unk56);
     }
     if (kirby->base.counter == 194)
     {
@@ -10758,7 +10758,7 @@ void sub_0804FBFC(struct Kirby *kirby)
     if (gLocalPlayerId == (kirby)->base.unk56) \
         CreatePaletteFadeFromWhite((kirby)->base.unk56); \
     else \
-        CreateInactivePaletteFadeToWhite((kirby)->base.unk56); \
+        CreateHiddenPaletteFadeToWhite((kirby)->base.unk56); \
 })
 
 void sub_08050218(struct Kirby *kirby)
@@ -11304,7 +11304,7 @@ void sub_0805177C(struct Kirby *kirby)
         if (kirby->base.unk56 == gLocalPlayerId)
             v = CreatePaletteFadeToWhite(kirby->base.unk56);
         else
-            v = CreateInactivePaletteFadeToWhite(kirby->base.unk56);
+            v = CreateHiddenPaletteFadeToWhite(kirby->base.unk56);
         v->unkA = 0x200;
         v->unk8 |= 0x40;
         kirby->idleTimer = 1;
@@ -11854,7 +11854,7 @@ void sub_080534D0(struct Kirby *kirby)
             if (kirby->base.unk56 == gLocalPlayerId)
                 CreatePaletteFadeToWhite(kirby->base.unk56);
             else
-                CreateInactivePaletteFadeToWhite(kirby->base.unk56);
+                CreateHiddenPaletteFadeToWhite(kirby->base.unk56);
             break;
         case 10:
             if (kirby->base.unkC & 0x2000)
@@ -12509,7 +12509,7 @@ void sub_0805545C(struct Kirby *kirby)
             if (kirby->base.unk56 == gLocalPlayerId)
                 v = CreatePaletteFadeToWhite(kirby->base.unk56);
             else
-                v = CreateInactivePaletteFadeToWhite(kirby->base.unk56);
+                v = CreateHiddenPaletteFadeToWhite(kirby->base.unk56);
             v->unkA = 0x400;
             v->unk8 |= 0x40;
         }
@@ -12527,7 +12527,7 @@ void sub_0805545C(struct Kirby *kirby)
                 if (kirby->base.unk56 == gLocalPlayerId)
                     v = CreatePaletteFadeToWhite(kirby->base.unk56);
                 else
-                    v = CreateInactivePaletteFadeToWhite(kirby->base.unk56);
+                    v = CreateHiddenPaletteFadeToWhite(kirby->base.unk56);
                 v->unkA = 0x400;
                 v->unk8 |= 0x40;
             }
@@ -12548,7 +12548,7 @@ void sub_0805545C(struct Kirby *kirby)
             if (kirby->base.unk56 == gLocalPlayerId)
                 v = CreatePaletteFadeToWhite(kirby->base.unk56);
             else
-                v = CreateInactivePaletteFadeToWhite(kirby->base.unk56);
+                v = CreateHiddenPaletteFadeToWhite(kirby->base.unk56);
             v->unkA = 0x400;
             v->unk8 |= 0x40;
         }
@@ -12667,7 +12667,7 @@ void sub_08055C14(struct Kirby *kirby)
             if (kirby->base.unk56 == gLocalPlayerId)
                 v = CreatePaletteFadeToWhite(kirby->base.unk56);
             else
-                v = CreateInactivePaletteFadeToWhite(kirby->base.unk56);
+                v = CreateHiddenPaletteFadeToWhite(kirby->base.unk56);
             v->unkA = 0x400;
             v->unk8 |= 0x40;
         }
@@ -20910,7 +20910,7 @@ void sub_08068724(struct Kirby *kirby)
             a->unkA = -0x600;
             a->unk4 = 0;
             a->unk6 = 0x3FFF;
-            a = CreateRoomPaletteFlash(4, kirby->base.roomId);
+            a = CreateRoomPaletteEffect(4, kirby->base.roomId);
             a->unk0 = 2;
             a->unkA = -0x500;
             a->unkC = 0x1F00;

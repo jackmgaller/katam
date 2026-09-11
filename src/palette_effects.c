@@ -511,7 +511,7 @@ void ApplyPaletteWhiteFill(struct PaletteEffect *effect)
 
 #undef TRANSFORM_VISIBLE_COLORS
 
-struct PaletteEffect *CreateRoomPaletteFlash(u8 slot, u16 room)
+struct PaletteEffect *CreateRoomPaletteEffect(u8 slot, u16 room)
 {
     struct PaletteEffectManager *state;
     struct PaletteEffect *effect;
@@ -544,7 +544,7 @@ struct PaletteEffect *CreateRoomPaletteFlash(u8 slot, u16 room)
     return effect;
 }
 
-struct PaletteEffect *CreateLowPriorityRoomPaletteFlash(u8 slot, u16 room)
+struct PaletteEffect *CreateLowPriorityRoomPaletteEffect(u8 slot, u16 room)
 {
     struct PaletteEffectManager *state;
     struct PaletteEffect *effect;
@@ -649,7 +649,7 @@ struct PaletteEffect *CreatePaletteFadeToWhite(u8 slot)
     return effect;
 }
 
-struct PaletteEffect *CreateInactivePaletteFadeToWhite(u8 slot)
+struct PaletteEffect *CreateHiddenPaletteFadeToWhite(u8 slot)
 {
     struct PaletteEffectManager *state;
     struct PaletteEffect *effect;
