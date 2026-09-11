@@ -247,9 +247,11 @@ static inline void TintColorRed(u16 *palette, struct PaletteEffect *effect)
 {
     s8 amount = effect->unk1;
     s32 offset;
+    u32 green;
     u32 result = gBrightenRedTable[(*palette & 31) + amount];
+    green = (*palette >> 5) & 31;
     offset = amount - 31;
-    result |= gDarkenGreenTable[((*palette >> 5) & 31) - offset];
+    result |= gDarkenGreenTable[green - offset];
     result |= gDarkenBlueTable[((*palette >> 10) & 31) - offset];
     *palette = result;
 }
