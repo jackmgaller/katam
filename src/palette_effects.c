@@ -850,16 +850,17 @@ inline void PaletteEffectsTaskDestructor(struct Task *task UNUSED)
 inline void InsertPaletteEffectByPriority(struct PaletteEffect *effect, u8 index)
 {
     struct PaletteEffectManager *state;
+    struct PaletteEffect **queue;
     struct PaletteEffect **slot;
     struct PaletteEffect *existing;
     u8 queueIndex;
+    u32 offset;
 
     queueIndex = index;
-    // TODO(match): Remove this clobber when effect stays in r5 and the queue slot stays in r4.
-    asm("" : : : "r4");
     state = &gPaletteEffectManager;
-    // TODO(match): Restore indexed C when it preserves the queue base calculation and add operand order.
-    asm("add %0, %1, %2" : "=r"(slot) : "r"(queueIndex * sizeof(*slot)), "r"(state->unk80) : "cc");
+    offset = queueIndex * sizeof(*slot);
+    queue = state->unk80;
+    slot = (struct PaletteEffect **)((u8 *)queue + offset);
     existing = *slot;
     if (existing != NULL) {
         if (existing->unk3 <= effect->unk3) {
@@ -867,6 +868,8 @@ inline void InsertPaletteEffectByPriority(struct PaletteEffect *effect, u8 index
             return;
         }
         InsertPaletteEffectByPriority(existing, queueIndex + 1);
+        *slot = effect;
+        return;
     }
     *slot = effect;
 }
