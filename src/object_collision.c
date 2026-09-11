@@ -111,7 +111,8 @@ s32 HandleKirbyCollision(struct ObjectBase *attack, struct ObjectBase *other)
     return 0;
 }
 
-// TODO(match): The attack and target pointers use different callee-saved registers; damage/grab branch sharing remains unresolved.
+// TODO(match): The vulnerability mask reassociates to (0x3FFFF8 & attackFlags) & ~(defense & ~7),
+// so the two ANDs are emitted in the wrong order at all six test sites.
 #ifndef NONMATCHING
 NAKED s32 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
 {
@@ -123,7 +124,7 @@ s32 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
     struct Object *object = (struct Object *)other;
     struct ObjectBase *parent;
     s32 attackFlags;
-    u32 flags, defense, vulnerableTypes;
+    u32 flags, defense;
     if (attack->header.kind == 2) {
         if (object->type == 0x46 && attack->xspeed < 0)
             return 0;
@@ -140,99 +141,99 @@ s32 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
     if (parent != NULL && parent->header.kind == 0 && attack->unk56 == gLocalPlayerId)
         TryTrackHudEnemy(object);
     attackFlags = attack->unk68;
-    if (!(attackFlags & 0x20)) {
-        flags = attack->flags;
-        defense = object->base.unk5C;
-        vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
-        if (!(flags & 0x10000) && !(object->base.flags & 0x20000)) {
-            if (!(flags & 0x100000) && !(object->base.flags & 0x200000)) {
-                object->base.flags |= 0x40000;
-                object->base.unk6C = attack;
-            } else if ((vulnerableTypes & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)) {
-                object->base.flags |= 0x40000;
-                object->base.unk6C = attack;
-            }
-        }
-        if ((vulnerableTypes & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7) && !(object->base.flags & 0x8000)) {
-            if (attackFlags & 0x8000)
-                sub_0809C6D0(object);
-            else
-                sub_0809B1E4(object);
-            if (!(object->base.unk68 & 0x20000000))
-                return 1;
+    if (attackFlags & 0x20) {
+        parent = attack->parent;
+        if (parent == NULL)
             return 0;
-        }
-        if ((object->base.flags & 0x40000) && !(attackFlags & 0x800000)) {
-            if ((u8)(object->type - 0x38) > 0x1A) {
-                if (object->type != 0x6D || !(attackFlags & 0x80))
-                    sub_0808845C(object, 10);
-                if (!(object->base.flags & 0x8000))
-                    sub_0808520C(object, 16);
-            } else {
-                sub_0808845C(object, 10);
-                if (!(object->base.flags & 0x8000))
-                    sub_0808520C(object, 16);
-            }
-            if (attack->unk68 & 0x10000)
-                sub_080884C4(object);
-        }
-        return 0;
-    }
-    parent = attack->parent;
-    if (parent == NULL)
-        return 0;
-    if (parent->header.kind == 1) {
-        u8 type = ((struct Object *)parent)->type;
-        if (type != 7 && type != 14)
-            return 0;
-        if ((u8)(object->type - 0x5E) > 14)
-            return 0;
-        if (!(attack->flags & 0x10000)) {
-            object->base.flags |= 0x40000;
-            object->base.unk6C = parent;
-        }
-        sub_0809CFC4(object);
-        return 1;
-    }
-    if (attack->unk56 >= gNumHumanPlayers) {
-        if ((u8)(object->type - 0x5E) <= 14 || object->type == 0xA4
-            || (object->type == 0xA3 && object->base.unk56 < gNumHumanPlayers))
-            return 0;
-    }
-    flags = attack->flags;
-    if (!(flags & 0x10000) && !(object->base.flags & 0x20000)) {
-        if ((flags & 0x100000) || (object->base.flags & 0x200000)) {
-            defense = object->base.unk5C;
-            vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
-            if ((vulnerableTypes & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)) {
+        if (parent->header.kind == 1) {
+            u8 type = ((struct Object *)parent)->type;
+            if (type != 7 && type != 14)
+                return 0;
+            if ((u8)(object->type - 0x5E) > 14)
+                return 0;
+            if (!(attack->flags & 0x10000)) {
                 object->base.flags |= 0x40000;
                 object->base.unk6C = parent;
             }
+            sub_0809CFC4(object);
+            return 1;
+        }
+        if (attack->unk56 >= gNumHumanPlayers) {
+            if ((u8)(object->type - 0x5E) <= 14 || object->type == 0xA4
+                || (object->type == 0xA3 && object->base.unk56 < gNumHumanPlayers))
+                return 0;
+        }
+        flags = attack->flags;
+        if (!(flags & 0x10000) && !(object->base.flags & 0x20000)) {
+            if ((flags & 0x100000) || (object->base.flags & 0x200000)) {
+                defense = object->base.unk5C;
+                if (((0x3FFFF8 & ~(defense & ~7)) & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)) {
+                    object->base.flags |= 0x40000;
+                    object->base.unk6C = parent;
+                }
+            } else {
+                object->base.flags |= 0x40000;
+                object->base.unk6C = parent;
+            }
+        }
+        if (attackFlags == 0x20000023) {
+            object->unk90 &= ~(3 << (attack->unk56 * 2));
+            object->unk90 |= 2 << (attack->unk56 * 2);
         } else {
-            object->base.flags |= 0x40000;
-            object->base.unk6C = parent;
+            object->unk90 &= ~(3 << (attack->unk56 * 2));
+            object->unk90 |= 1 << (attack->unk56 * 2);
         }
+        defense = object->base.unk5C;
+        if (defense & 0x20) {
+            if (object->type <= 0xD4 || !(attackFlags & 0x200000))
+                return 0;
+        }
+        if ((attackFlags & 0x200000) && (u8)(object->type - 0x5E) <= 14) {
+            attack->flags = flags & ~0x40000;
+        } else {
+                if (((0x3FFFF8 & ~(defense & ~7)) & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)) {
+                attack->flags = flags | 0x40000;
+                object->base.unk6C = parent;
+                sub_0809C380(object);
+            } else if (!(gUnk_03000510.unk4 & ((1 << object->base.unk56) | 0x10))) {
+                object->base.objBase54 += (gUnk_0203AD40 & 2) * 2;
+            }
+        }
+        return 0;
     }
-    if (attackFlags == 0x20000023)
-        object->unk90 = (object->unk90 & ~(3 << (attack->unk56 * 2))) | (2 << (attack->unk56 * 2));
-    else
-        object->unk90 = (object->unk90 & ~(3 << (attack->unk56 * 2))) | (1 << (attack->unk56 * 2));
+    flags = attack->flags;
     defense = object->base.unk5C;
-    if (defense & 0x20) {
-        if (object->type <= 0xD4 || !(attackFlags & 0x200000))
-            return 0;
-    }
-    if ((attackFlags & 0x200000) && (u8)(object->type - 0x5E) <= 14) {
-        attack->flags = flags & ~0x40000;
-    } else {
-        vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
-        if ((vulnerableTypes & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)) {
-            attack->flags = flags | 0x40000;
-            object->base.unk6C = parent;
-            sub_0809C380(object);
-        } else if (!(gUnk_03000510.unk4 & ((1 << object->base.unk56) | 0x10))) {
-            object->base.objBase54 += (gUnk_0203AD40 & 2) * 2;
+    if (!(flags & 0x10000) && !(object->base.flags & 0x20000)) {
+        if (!(flags & 0x100000) && !(object->base.flags & 0x200000)) {
+            object->base.flags |= 0x40000;
+            object->base.unk6C = attack;
+        } else if (((0x3FFFF8 & ~(defense & ~7)) & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)) {
+            object->base.flags |= 0x40000;
+            object->base.unk6C = attack;
         }
+    }
+    if (((0x3FFFF8 & ~(defense & ~7)) & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7) && !(object->base.flags & 0x8000)) {
+        if (attackFlags & 0x8000)
+            sub_0809C6D0(object);
+        else
+            sub_0809B1E4(object);
+        if (!(object->base.unk68 & 0x20000000))
+            return 1;
+        return 0;
+    }
+    if ((object->base.flags & 0x40000) && !(attackFlags & 0x800000)) {
+        if ((u8)(object->type - 0x38) > 0x1A) {
+            if (object->type != 0x6D || !(attackFlags & 0x80))
+                sub_0808845C(object, 10);
+            if (!(object->base.flags & 0x8000))
+                sub_0808520C(object, 16);
+        } else {
+            sub_0808845C(object, 10);
+            if (!(object->base.flags & 0x8000))
+                sub_0808520C(object, 16);
+        }
+        if (attack->unk68 & 0x10000)
+            sub_080884C4(object);
     }
     return 0;
 }
@@ -531,7 +532,7 @@ static inline bool32 AttackOverlapsObject(struct ObjectBase *attack, s32 ax, s32
 {
     s32 bx, by;
     if (other->flags & 1)
-        bx = (other->x >> 8) - other->unk38 - other->unk3A * 2;
+        bx = (other->x >> 8) + (-other->unk38 - other->unk3A * 2);
     else
         bx = (other->x >> 8) + other->unk38;
     by = (other->y >> 8) + other->unk39;
@@ -557,7 +558,8 @@ static inline void CommitAttackContact(struct ObjectBase *attack)
         attack->flags = (attack->flags | 0x40000) & ~0x4000000;
 }
 
-// TODO(match): The dispatcher needs 48 rather than 24 stack bytes; list cursors, callback results, and cached hitbox lifetimes remain unresolved.
+// TODO(match): The frame is 48 rather than 24 bytes: ax, ay and the attack cursor spill
+// instead of living in r8, r9 and r7, and the Kirby hit body is emitted once, not twice.
 #ifndef NONMATCHING
 static NAKED void ProcessObjectCollisionLists(void)
 {
@@ -580,7 +582,7 @@ static void ProcessObjectCollisionLists(void)
                         ResolveSolidObjectCollision(kirby, *solidSlot);
                 }
                 otherSlot = &gUnk_02022F50[group * 64];
-                for (otherRemaining = gUnk_02022EB0[group][0]; otherRemaining != 0; --otherRemaining, ++otherSlot) {
+                for (otherRemaining = gUnk_02022EB0[0][group * 2]; otherRemaining != 0; --otherRemaining, ++otherSlot) {
                     struct ObjectBase *other = *otherSlot;
                     if ((other->unkC & 0x1000) && (*solidSlot)->base.roomId == other->roomId && !(other->flags & 0x100))
                         ResolveSolidObjectCollision(other, *solidSlot);
@@ -588,19 +590,19 @@ static void ProcessObjectCollisionLists(void)
             }
         }
         attackSlot = &gUnk_02022F50[(group * 64) | 32];
-        for (remaining = gUnk_02022EB0[group][1]; remaining != 0; --remaining, ++attackSlot) {
+        for (remaining = gUnk_02022EB0[0][group * 2 + 1]; remaining != 0; --remaining, ++attackSlot) {
             struct ObjectBase *attack = *attackSlot;
             s32 ax, ay;
             if (attack == NULL)
                 continue;
             if (attack->flags & 1)
-                ax = (attack->x >> 8) - attack->unk38 - attack->unk3A * 2;
+                ax = (attack->x >> 8) + (-attack->unk38 - attack->unk3A * 2);
             else
                 ax = (attack->x >> 8) + attack->unk38;
             ay = (attack->y >> 8) + attack->unk39;
             if (attack->flags & 0x20000000) {
                 otherSlot = &gUnk_02022F50[group * 64];
-                for (otherRemaining = gUnk_02022EB0[group][0]; otherRemaining != 0; --otherRemaining, ++otherSlot) {
+                for (otherRemaining = gUnk_02022EB0[0][group * 2]; otherRemaining != 0; --otherRemaining, ++otherSlot) {
                     struct ObjectBase *other = *otherSlot;
                     if (other == NULL)
                         continue;
@@ -648,7 +650,7 @@ static void ProcessObjectCollisionLists(void)
             }
             if (attack->flags & 0x40000000) {
                 otherSlot = &gUnk_02022F50[(group * 64) | 32];
-                for (otherRemaining = gUnk_02022EB0[group][1]; otherRemaining != 0; --otherRemaining, ++otherSlot) {
+                for (otherRemaining = gUnk_02022EB0[0][group * 2 + 1]; otherRemaining != 0; --otherRemaining, ++otherSlot) {
                     struct ObjectBase *other = *otherSlot;
                     if (other == NULL)
                         continue;
@@ -678,19 +680,19 @@ static void ProcessObjectCollisionLists(void)
                 ProcessAttackTileCollisions(attack);
         }
         attackSlot = &gUnk_02022F50[group * 64];
-        for (remaining = gUnk_02022EB0[group][0]; remaining != 0; --remaining, ++attackSlot) {
+        for (remaining = gUnk_02022EB0[0][group * 2]; remaining != 0; --remaining, ++attackSlot) {
             struct ObjectBase *attack = *attackSlot;
             s32 ax, ay;
             if (attack == NULL)
                 continue;
             if (attack->flags & 1)
-                ax = (attack->x >> 8) - attack->unk38 - attack->unk3A * 2;
+                ax = (attack->x >> 8) + (-attack->unk38 - attack->unk3A * 2);
             else
                 ax = (attack->x >> 8) + attack->unk38;
             ay = (attack->y >> 8) + attack->unk39;
             if (attack->flags & 0x20000000) {
                 otherSlot = &gUnk_02022F50[group * 64];
-                for (otherRemaining = gUnk_02022EB0[group][0]; otherRemaining != 0; --otherRemaining, ++otherSlot) {
+                for (otherRemaining = gUnk_02022EB0[0][group * 2]; otherRemaining != 0; --otherRemaining, ++otherSlot) {
                     struct ObjectBase *other = *otherSlot;
                     if (other == NULL)
                         continue;
@@ -976,22 +978,7 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
 }
 #endif
 
-static inline bool32 CanFirstKirbyShare(struct Kirby *kirby)
-{
-    if (kirby->ability != KIRBY_ABILITY_UFO) {
-        if ((kirby->animationIndex == 0x19 || kirby->animationIndex == 0x2F)
-            && kirby->animationIndex != 0xD)
-            return TRUE;
-        if ((u16)(kirby->animationIndex - 0x38) <= 7)
-            return TRUE;
-    }
-    if (kirby->ability == KIRBY_ABILITY_UFO
-        && (kirby->animationIndex <= 0x12 || (u16)(kirby->animationIndex - 0x21) <= 13))
-        return TRUE;
-    return FALSE;
-}
-
-static inline bool32 CanSecondKirbyShare(struct Kirby *kirby)
+static inline bool32 CanKirbyShare(struct Kirby *kirby)
 {
     if (kirby->ability != KIRBY_ABILITY_UFO) {
         if ((kirby->animationIndex <= 0x15 || kirby->animationIndex == 0x19 || kirby->animationIndex == 0x2F)
@@ -1006,7 +993,23 @@ static inline bool32 CanSecondKirbyShare(struct Kirby *kirby)
     return FALSE;
 }
 
-// TODO(match): The outer Kirby loop is rotated to a bottom test; explicit entry checks and index-width variants did not recover the original branch layout.
+static inline bool32 CanKirbyShareIndex(s32 index)
+{
+    if (gKirbys[index].ability != KIRBY_ABILITY_UFO) {
+        if ((gKirbys[index].animationIndex <= 0x15 || gKirbys[index].animationIndex == 0x19 || gKirbys[index].animationIndex == 0x2F)
+            && gKirbys[index].animationIndex != 0xD)
+            return TRUE;
+        if ((u16)(gKirbys[index].animationIndex - 0x38) <= 7)
+            return TRUE;
+    }
+    if (gKirbys[index].ability == KIRBY_ABILITY_UFO
+        && (gKirbys[index].animationIndex <= 0x12 || (u16)(gKirbys[index].animationIndex - 0x21) <= 13))
+        return TRUE;
+    return FALSE;
+}
+
+// TODO(match): The first Kirby's animation-index pointer spills to the stack instead of
+// staying in a register, so the frame is 16 rather than 12 bytes.
 #ifndef NONMATCHING
 static NAKED void ProcessKirbyContacts(void)
 {
@@ -1026,25 +1029,27 @@ static void ProcessKirbyContacts(void)
             struct Kirby *second = &gKirbys[secondId];
             bool8 overlap;
             // The original repeats the first Kirby's animation check here.
-            if ((second->base.flags & 0x3800F00) || second->stateFn == sub_080566E0
+            if ((second->base.flags & 0x3800F00) || gKirbys[secondId].stateFn == sub_080566E0
                 || (u16)(first->animationIndex - 0x4A) <= 15 || second->base.sprite.animId == 0x220
                 || second->base.roomId != first->base.roomId)
                 continue;
             overlap = KirbyCanContactOther(first, second);
-            if (overlap && first->ability != KIRBY_ABILITY_MINI && second->ability != KIRBY_ABILITY_MINI) {
-                if (first->unkE5 != 0 && !((first->unkE1 >> secondId) & 1)) {
-                    if (CanFirstKirbyShare(first) && CanSecondKirbyShare(second)
-                        && (first->base.unk56 < gNumHumanPlayers || second->base.unk56 < gNumHumanPlayers)) {
+            if (overlap && first->ability != KIRBY_ABILITY_MINI) {
+                if (gKirbys[secondId].ability != KIRBY_ABILITY_MINI
+                    && first->unkE5 != 0 && !((first->unkE1 >> secondId) & 1)) {
+                    if (CanKirbyShare(first) && CanKirbyShareIndex(secondId)
+                        && (first->base.unk56 < gNumHumanPlayers || gKirbys[secondId].base.unk56 < gNumHumanPlayers)) {
                         sub_08053DAC(first, secondId);
-                        sub_08054414(second, firstId);
+                        sub_08054414(&gKirbys[secondId], firstId);
                         first->unkE1 |= 1 << secondId;
                     }
-                } else if (second->unkE5 != 0 && !((second->unkE1 >> firstId) & 1)) {
-                    if (CanFirstKirbyShare(first) && CanSecondKirbyShare(second)
-                        && (first->base.unk56 < gNumHumanPlayers || second->base.unk56 < gNumHumanPlayers)) {
-                        sub_08053DAC(second, firstId);
+                } else if (first->ability != KIRBY_ABILITY_MINI && gKirbys[secondId].ability != KIRBY_ABILITY_MINI
+                    && gKirbys[secondId].unkE5 != 0 && !((gKirbys[secondId].unkE1 >> firstId) & 1)) {
+                    if (CanKirbyShare(first) && CanKirbyShareIndex(secondId)
+                        && (first->base.unk56 < gNumHumanPlayers || gKirbys[secondId].base.unk56 < gNumHumanPlayers)) {
+                        sub_08053DAC(&gKirbys[secondId], firstId);
                         sub_08054414(first, secondId);
-                        second->unkE1 |= 1 << firstId;
+                        gKirbys[secondId].unkE1 |= 1 << firstId;
                     }
                 }
             }
@@ -1082,7 +1087,7 @@ static void ProcessKirbyContacts(void)
                     }
                 }
                 if (!overlap) {
-                    u16 contacts = first->unk104;
+                    u32 contacts = first->unk104;
                     u32 mask = 7 << shift;
                     if ((contacts & mask) != mask) {
                         if (first->base.y > second->base.y - 0x1000)
@@ -1096,18 +1101,18 @@ static void ProcessKirbyContacts(void)
                 }
                 overlap = KirbyCanContactOther(second, first);
                 shift = firstId * 4;
-                if ((second->unk104 & (7 << shift)) && overlap) {
+                if ((gKirbys[secondId].unk104 & (7 << shift)) && overlap) {
                     if (first->base.y > second->base.y) {
                         second->base.unkC |= 0x100;
                         second->base.unk62 |= 4;
                         second->base.yspeed = 0;
-                        second->unk104 -= 1 << shift;
+                        gKirbys[secondId].unk104 -= 1 << shift;
                     } else {
                         second->base.objBase55++;
                     }
                 }
                 if (!overlap) {
-                    u16 contacts = second->unk104;
+                    u32 contacts = gKirbys[secondId].unk104;
                     u32 mask = 7 << shift;
                     if ((contacts & mask) != mask) {
                         if (second->base.y > first->base.y - 0x1000)
@@ -1117,7 +1122,7 @@ static void ProcessKirbyContacts(void)
                     } else {
                         contacts |= contacts & mask;
                     }
-                    second->unk104 = contacts;
+                    gKirbys[secondId].unk104 = contacts;
                 }
             }
         }
