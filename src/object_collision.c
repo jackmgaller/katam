@@ -238,7 +238,7 @@ s32 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
 }
 #endif
 
-// TODO(match): The grab-handler switch and damage path share different return tails; the original branch topology remains unresolved.
+// TODO(match): Sizes agree; the shared `break` tail of the grab switch lands on the first case instead of the last, and the 0x400000 mask does not get its own register.
 #ifndef NONMATCHING
 NAKED s32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *attack)
 {
@@ -268,69 +268,68 @@ s32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *att
             if (parent != NULL) {
                 parent->unkC &= ~0x40;
                 if (parent->header.kind == 1) {
-                    bool8 handled;
                     switch (object->type) {
                     case 0x32:
                         if (other->flags & 0x8000) return 0;
-                        handled = sub_080A049C(object, (struct Kirby *)other);
-                        if (handled) break;
+                        if (sub_080A049C(object, (struct Kirby *)other))
+                            break;
                         return 0;
                     case 0x33:
                         if (other->flags & 0x8000) return 0;
-                        handled = sub_080A1804(object, (struct Kirby *)other);
-                        if (handled) break;
+                        if (sub_080A1804(object, (struct Kirby *)other))
+                            break;
                         return 0;
                     case 0x38:
                         if (other->flags & 0x8000) return 0;
-                        handled = sub_080CC6F0(object, (struct Kirby *)other);
-                        if (handled) break;
+                        if (sub_080CC6F0(object, (struct Kirby *)other))
+                            break;
                         return 0;
                     case 0x9E:
                     case 0xAE:
                         if (other->flags & 0x8000) return 0;
-                        handled = sub_080B6368(object, (struct Kirby *)other);
-                        if (handled) break;
+                        if (sub_080B6368(object, (struct Kirby *)other))
+                            break;
                         return 0;
                     case 0x3A:
                         if (other->flags & 0x8000) return 0;
-                        handled = sub_080CE94C(object, (struct Kirby *)other);
-                        if (handled) break;
+                        if (sub_080CE94C(object, (struct Kirby *)other))
+                            break;
                         return 0;
                     case 15:
                         if (other->flags & 0x8000) return 0;
-                        handled = sub_080B0758(object, (struct Kirby *)other);
-                        if (handled) break;
+                        if (sub_080B0758(object, (struct Kirby *)other))
+                            break;
                         return 0;
                     case 0x48:
                         if (other->flags & 0x8000) return 0;
-                        handled = sub_080E588C((struct Gobbler *)object, (struct Kirby *)other);
-                        if (handled) break;
+                        if (sub_080E588C((struct Gobbler *)object, (struct Kirby *)other))
+                            break;
                         return 0;
                     case 0x9F:
                         if (other->flags & 0x8000) return 0;
-                        handled = sub_080E74E4(object, (struct Kirby *)other);
-                        if (handled) break;
+                        if (sub_080E74E4(object, (struct Kirby *)other))
+                            break;
                         return 0;
                     case 0x3E:
                         if (other->flags & 0x8000) return 0;
-                        handled = sub_080D4004(object, (struct Kirby *)other);
-                        if (handled) break;
+                        if (sub_080D4004(object, (struct Kirby *)other))
+                            break;
                         return 0;
                     case 0x47:
                     case 0x4D:
                         if (other->flags & 0x8000) return 0;
-                        handled = sub_080E1B8C((struct CrazyHand *)object, (struct Kirby *)other);
-                        if (handled) break;
+                        if (sub_080E1B8C((struct CrazyHand *)object, (struct Kirby *)other))
+                            break;
                         return 0;
                     case 0x3C:
                         if (other->flags & 0x8000) return 0;
-                        handled = sub_080C8548(object, (struct Kirby *)other);
-                        if (handled) break;
+                        if (sub_080C8548(object, (struct Kirby *)other))
+                            break;
                         return 0;
                     case 7:
                     case 14:
-                        handled = sub_080AC5E0(object, &other->header);
-                        if (handled) break;
+                        if (sub_080AC5E0(object, &other->header))
+                            break;
                         return 0;
                     default:
                         return 0;
@@ -357,8 +356,8 @@ s32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *att
                 }
             }
         }
-        if ((attackFlags & 0x10000000) && !(flags & 0x400000) && !(flags & 0x10000)) {
-            if (flags & 0x100000) {
+        if ((attackFlags & 0x10000000) && !(other->flags & 0x400000) && !(flags & 0x10000)) {
+            if (other->flags & 0x100000) {
                 defense = other->unk5C;
                 vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
                 if (!(vulnerableTypes & attackFlags))
@@ -381,7 +380,7 @@ CheckDamage:
 }
 #endif
 
-// TODO(match): The tile scan needs 40 rather than 48 stack bytes; clipping coordinates and row/column lifetimes remain unresolved.
+// TODO(match): The frame is 44 rather than 48 bytes; the column counter still compares against 255 and the width/clip sum is not folded into a cmn.
 #ifndef NONMATCHING
 NAKED void ProcessAttackTileCollisions(struct ObjectBase *attack)
 {
@@ -396,14 +395,12 @@ void ProcessAttackTileCollisions(struct ObjectBase *attack)
     if (attack->unk68 & 0x20) {
         s8 direction = 1;
         s16 minX, maxX, minY, maxY;
-        const struct LevelInfo *level;
         if (attack->flags & 0x40000)
             return;
-        level = &gCurLevelInfo[attack->unk56];
-        maxX = level->levelMaxPosition.x >> 12;
-        maxY = level->levelMaxPosition.y >> 12;
-        minX = level->levelMinPosition.x >> 12;
-        minY = level->levelMinPosition.y >> 12;
+        maxX = gCurLevelInfo[attack->unk56].levelMaxPosition.x >> 12;
+        maxY = gCurLevelInfo[attack->unk56].levelMaxPosition.y >> 12;
+        minX = gCurLevelInfo[attack->unk56].levelMinPosition.x >> 12;
+        minY = gCurLevelInfo[attack->unk56].levelMinPosition.y >> 12;
         if (attack->flags & 1) {
             bounds[2] = -attack->unk3C;
             bounds[0] = -attack->unk3E;
@@ -421,7 +418,12 @@ void ProcessAttackTileCollisions(struct ObjectBase *attack)
         for (row = 0; row <= height; ++row) {
             if (tileY <= maxY && tileY >= minY) {
                 tileX = attack->x >> 12;
-                for (column = width; column != 0 && tileX <= maxX && tileX >= minX; --column) {
+                for (column = width; column != 0; ) {
+                    --column;
+                    if (tileX > maxX)
+                        break;
+                    if (tileX < minX)
+                        break;
                     if ((gCollisionAttributes[GetCollisionTile(attack->unk56, tileX, tileY)] & 0xF01000) == 0x1000) {
                         sub_08001408(attack->unk56, sub_080025AC(attack->unk56, tileX, tileY), NULL, NULL);
                         sub_08088F84(attack->parent, tileX, tileY);
@@ -433,12 +435,11 @@ void ProcessAttackTileCollisions(struct ObjectBase *attack)
                 if (row & 1)
                     tileY = tileY + 1 + row;
                 else
-                    tileY = tileY - 1 - row;
+                    tileY = (u16)(tileY - 1) - row;
             }
         }
     } else {
         s16 clip;
-        const struct LevelInfo *level;
         if (attack->flags & 1) {
             bounds[2] = -attack->unk3C;
             bounds[0] = -attack->unk3E;
@@ -452,28 +453,27 @@ void ProcessAttackTileCollisions(struct ObjectBase *attack)
         height = (abs(bounds[3] - bounds[1]) + (((attack->y >> 8) + bounds[1]) & 15)) >> 4;
         tileX = ((attack->x >> 8) + bounds[0]) >> 4;
         tileY = ((attack->y >> 8) + bounds[1]) >> 4;
-        level = &gCurLevelInfo[attack->unk56];
-        clip = (level->levelMaxPosition.x >> 12) - (width + tileX);
-        if (clip < 0) {
+        clip = (gCurLevelInfo[attack->unk56].levelMaxPosition.x >> 12) - (width + tileX);
+        if (clip & 0x8000) {
             width += clip;
             if (width & 0x80)
                 return;
         }
-        clip = tileX - (level->levelMinPosition.x >> 12);
-        if (clip < 0) {
+        clip = tileX - (gCurLevelInfo[attack->unk56].levelMinPosition.x >> 12);
+        if (clip & 0x8000) {
             if (width + clip < 0)
                 return;
             tileX -= clip;
             width += clip;
         }
-        clip = (level->levelMaxPosition.y >> 12) - (tileY + height);
-        if (clip < 0) {
+        clip = (gCurLevelInfo[attack->unk56].levelMaxPosition.y >> 12) - (tileY + height);
+        if (clip & 0x8000) {
             height += clip;
             if (height & 0x80)
                 return;
         }
-        clip = tileY - (level->levelMinPosition.y >> 12);
-        if (clip < 0) {
+        clip = tileY - (gCurLevelInfo[attack->unk56].levelMinPosition.y >> 12);
+        if (clip & 0x8000) {
             if (height + clip < 0)
                 return;
             tileY -= clip;
@@ -482,7 +482,7 @@ void ProcessAttackTileCollisions(struct ObjectBase *attack)
         for (row = height + 1; row != 0;) {
             --row;
             for (column = width + 1; column != 0;) {
-                u8 x, y;
+                s32 x, y;
                 u32 attributes;
                 --column;
                 y = row + tileY;
@@ -755,7 +755,8 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
 {
     s8 a[4], b[4];
     u8 widthA, widthB, heightA, heightB;
-    bool32 previousX, previousY, overlapX, overlapY;
+    bool32 previousOverlap[2];
+    bool32 overlapX, overlapY;
     u32 solidFlags;
     s32 tolerance;
 
@@ -782,8 +783,8 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
     widthB = b[2] - b[0];
     heightA = a[3] - a[1];
     heightB = b[3] - b[1];
-    previousX = COLLISION_AXIS_OVERLAP(object->unk48 + a[0] * 256, widthA * 256, solid->base.unk48 + b[0] * 256, widthB * 256);
-    previousY = COLLISION_AXIS_OVERLAP(object->unk4C + a[1] * 256, heightA * 256, solid->base.unk4C + b[1] * 256, heightB * 256);
+    previousOverlap[0] = COLLISION_AXIS_OVERLAP(object->unk48 + a[0] * 256, widthA * 256, solid->base.unk48 + b[0] * 256, widthB * 256);
+    previousOverlap[1] = COLLISION_AXIS_OVERLAP(object->unk4C + a[1] * 256, heightA * 256, solid->base.unk4C + b[1] * 256, heightB * 256);
     overlapX = COLLISION_AXIS_OVERLAP(object->x + a[0] * 256, widthA * 256, solid->base.x + b[0] * 256, widthB * 256);
     overlapY = COLLISION_AXIS_OVERLAP(object->y + a[1] * 256, heightA * 256, solid->base.y + b[1] * 256, heightB * 256);
     if (overlapX && overlapY) {
@@ -792,7 +793,7 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
             object->unk6C = solid;
             return;
         }
-        if (previousX && !previousY
+        if (previousOverlap[0] && !previousOverlap[1]
             && object->x != solid->base.x + (b[2] - a[0]) * 256
             && object->x != solid->base.x + (b[0] - a[2]) * 256) {
             if (object->yspeed > 0) {
@@ -800,23 +801,11 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
                 if (abs((object->y + a[1] * 256) - (solid->base.y + b[3] * 256)) < tolerance) {
                     object->unk62 |= 8;
                     solid->base.unk62 |= 4;
-                    object->y = solid->base.y + (b[3] - a[1]) * 256 + 0x100 + solid->base.yspeed;
+                    object->y = solid->base.y + (b[3] - a[1]) * 256 + (solid->base.yspeed + 0x100);
                     object->yspeed = 0;
                 }
-                if (object->yspeed <= 0 || solid->base.yspeed != 0) {
-                    tolerance = 0x300 - object->yspeed;
-                    if (abs((object->y + a[3] * 256) - (solid->base.y + b[1] * 256)) < tolerance) {
-                        object->unk62 |= 4;
-                        solid->base.unk62 |= 8;
-                        object->y = solid->base.y + (b[1] - a[3] + 1) * 256;
-                        if ((object->flags & 0x40) && object->yspeed > 0)
-                            object->yspeed &= 0xFF;
-                        else
-                            object->yspeed = 0;
-                        object->kirby2 = (struct Kirby *)solid;
-                    }
-                }
-            } else {
+            }
+            if (object->yspeed <= 0 || solid->base.yspeed != 0) {
                 tolerance = 0x300 - object->yspeed;
                 if (abs((object->y + a[3] * 256) - (solid->base.y + b[1] * 256)) < tolerance) {
                     object->unk62 |= 4;
@@ -830,11 +819,11 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
                 }
             }
         }
-        if (!previousX && previousY) {
+        if (!previousOverlap[0] && previousOverlap[1]) {
             tolerance = 0x200 - object->yspeed;
             if (abs((object->y + a[3] * 256) - (solid->base.y + b[1] * 256)) > tolerance) {
                 if (object->x > solid->base.x) {
-                    s32 distance = (solid->base.xspeed + 0x400) - object->xspeed;
+                    s32 distance = solid->base.xspeed - (object->xspeed - 0x400);
                     if (abs((object->x + a[0] * 256) - (solid->base.x + b[2] * 256)) < distance) {
                         if (object->flags & 1)
                             object->unk62 |= 1;
@@ -849,7 +838,7 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
                         object->x += 0x100;
                     }
                 } else {
-                    s32 distance = object->xspeed - (solid->base.xspeed - 0x400);
+                    s32 distance = (object->xspeed + 0x400) - solid->base.xspeed;
                     if (abs((object->x + a[2] * 256) - (solid->base.x + b[0] * 256)) < distance) {
                         if (object->flags & 1)
                             object->unk62 |= 2;
@@ -866,14 +855,14 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
                 }
             }
         }
-        if (!previousX && !previousY) {
+        if (!previousOverlap[0] && !previousOverlap[1]) {
             if (object->y > solid->base.y) {
                 if (object->yspeed > 0) {
                     tolerance = object->yspeed + 0x300;
                     if (abs((object->y + a[1] * 256) - (solid->base.y + b[3] * 256)) < tolerance) {
                         object->unk62 |= 8;
                         solid->base.unk62 |= 4;
-                        object->y = solid->base.y + (b[3] - a[1]) * 256 + 0x100 + solid->base.yspeed;
+                        object->y = solid->base.y + (b[3] - a[1]) * 256 + (solid->base.yspeed + 0x100);
                         object->yspeed = 0;
                     }
                 }
@@ -893,7 +882,7 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
             tolerance = 0x200 - object->yspeed;
             if (abs((object->y + a[3] * 256) - (solid->base.y + b[1] * 256)) > tolerance) {
                 if (object->x > solid->base.x) {
-                    s32 distance = (solid->base.xspeed + 0x400) - object->xspeed;
+                    s32 distance = solid->base.xspeed - (object->xspeed - 0x400);
                     if (abs((object->x + a[0] * 256) - (solid->base.x + b[2] * 256)) < distance) {
                         if (object->flags & 1)
                             object->unk62 |= 1;
@@ -908,7 +897,7 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
                         object->x += 0x100;
                     }
                 } else {
-                    s32 distance = object->xspeed - (solid->base.xspeed - 0x400);
+                    s32 distance = (object->xspeed + 0x400) - solid->base.xspeed;
                     if (abs((object->x + a[2] * 256) - (solid->base.x + b[0] * 256)) < distance) {
                         if (object->flags & 1)
                             object->unk62 |= 2;
@@ -925,7 +914,7 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
                 }
             }
         }
-        if (previousX && previousY) {
+        if (previousOverlap[0] && previousOverlap[1]) {
             if (object->x != solid->base.x + (b[2] - a[0]) * 256
                 && object->x != solid->base.x + (b[0] - a[2]) * 256) {
                 tolerance = 0x300 - object->yspeed;
@@ -943,7 +932,7 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
                     if (abs((object->y + a[1] * 256) - (solid->base.y + b[3] * 256)) < tolerance) {
                         object->unk62 |= 8;
                         solid->base.unk62 |= 4;
-                        object->y = solid->base.y + (b[3] - a[1]) * 256 + 0x100 + solid->base.yspeed;
+                        object->y = solid->base.y + (b[3] - a[1]) * 256 + (solid->base.yspeed + 0x100);
                         object->yspeed = 0;
                     }
                 }
@@ -951,7 +940,7 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
             tolerance = 0x200 - object->yspeed;
             if (abs((object->y + a[3] * 256) - (solid->base.y + b[1] * 256)) > tolerance) {
                 if (object->x > solid->base.x) {
-                    s32 distance = (solid->base.xspeed + 0x400) - object->xspeed;
+                    s32 distance = solid->base.xspeed - (object->xspeed - 0x400);
                     if (abs((object->x + a[0] * 256) - (solid->base.x + b[2] * 256)) < distance) {
                         if (object->flags & 1)
                             object->unk62 |= 1;
@@ -966,7 +955,7 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
                         object->x += 0x100;
                     }
                 } else {
-                    s32 distance = object->xspeed - (solid->base.xspeed - 0x400);
+                    s32 distance = (object->xspeed + 0x400) - solid->base.xspeed;
                     if (abs((object->x + a[2] * 256) - (solid->base.x + b[0] * 256)) < distance) {
                         if (object->flags & 1)
                             object->unk62 |= 2;
