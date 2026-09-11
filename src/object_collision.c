@@ -532,7 +532,7 @@ static inline bool32 AttackOverlapsObject(struct ObjectBase *attack, s32 ax, s32
 {
     s32 bx, by;
     if (other->flags & 1)
-        bx = (other->x >> 8) - other->unk38 - other->unk3A * 2;
+        bx = (other->x >> 8) + (-other->unk38 - other->unk3A * 2);
     else
         bx = (other->x >> 8) + other->unk38;
     by = (other->y >> 8) + other->unk39;
@@ -558,7 +558,8 @@ static inline void CommitAttackContact(struct ObjectBase *attack)
         attack->flags = (attack->flags | 0x40000) & ~0x4000000;
 }
 
-// TODO(match): The dispatcher needs 48 rather than 24 stack bytes; list cursors, callback results, and cached hitbox lifetimes remain unresolved.
+// TODO(match): The frame is 48 rather than 24 bytes: ax, ay and the attack cursor spill
+// instead of living in r8, r9 and r7, and the Kirby hit body is emitted once, not twice.
 #ifndef NONMATCHING
 static NAKED void ProcessObjectCollisionLists(void)
 {
@@ -581,7 +582,7 @@ static void ProcessObjectCollisionLists(void)
                         ResolveSolidObjectCollision(kirby, *solidSlot);
                 }
                 otherSlot = &gUnk_02022F50[group * 64];
-                for (otherRemaining = gUnk_02022EB0[group][0]; otherRemaining != 0; --otherRemaining, ++otherSlot) {
+                for (otherRemaining = gUnk_02022EB0[0][group * 2]; otherRemaining != 0; --otherRemaining, ++otherSlot) {
                     struct ObjectBase *other = *otherSlot;
                     if ((other->unkC & 0x1000) && (*solidSlot)->base.roomId == other->roomId && !(other->flags & 0x100))
                         ResolveSolidObjectCollision(other, *solidSlot);
@@ -589,19 +590,19 @@ static void ProcessObjectCollisionLists(void)
             }
         }
         attackSlot = &gUnk_02022F50[(group * 64) | 32];
-        for (remaining = gUnk_02022EB0[group][1]; remaining != 0; --remaining, ++attackSlot) {
+        for (remaining = gUnk_02022EB0[0][group * 2 + 1]; remaining != 0; --remaining, ++attackSlot) {
             struct ObjectBase *attack = *attackSlot;
             s32 ax, ay;
             if (attack == NULL)
                 continue;
             if (attack->flags & 1)
-                ax = (attack->x >> 8) - attack->unk38 - attack->unk3A * 2;
+                ax = (attack->x >> 8) + (-attack->unk38 - attack->unk3A * 2);
             else
                 ax = (attack->x >> 8) + attack->unk38;
             ay = (attack->y >> 8) + attack->unk39;
             if (attack->flags & 0x20000000) {
                 otherSlot = &gUnk_02022F50[group * 64];
-                for (otherRemaining = gUnk_02022EB0[group][0]; otherRemaining != 0; --otherRemaining, ++otherSlot) {
+                for (otherRemaining = gUnk_02022EB0[0][group * 2]; otherRemaining != 0; --otherRemaining, ++otherSlot) {
                     struct ObjectBase *other = *otherSlot;
                     if (other == NULL)
                         continue;
@@ -649,7 +650,7 @@ static void ProcessObjectCollisionLists(void)
             }
             if (attack->flags & 0x40000000) {
                 otherSlot = &gUnk_02022F50[(group * 64) | 32];
-                for (otherRemaining = gUnk_02022EB0[group][1]; otherRemaining != 0; --otherRemaining, ++otherSlot) {
+                for (otherRemaining = gUnk_02022EB0[0][group * 2 + 1]; otherRemaining != 0; --otherRemaining, ++otherSlot) {
                     struct ObjectBase *other = *otherSlot;
                     if (other == NULL)
                         continue;
@@ -679,19 +680,19 @@ static void ProcessObjectCollisionLists(void)
                 ProcessAttackTileCollisions(attack);
         }
         attackSlot = &gUnk_02022F50[group * 64];
-        for (remaining = gUnk_02022EB0[group][0]; remaining != 0; --remaining, ++attackSlot) {
+        for (remaining = gUnk_02022EB0[0][group * 2]; remaining != 0; --remaining, ++attackSlot) {
             struct ObjectBase *attack = *attackSlot;
             s32 ax, ay;
             if (attack == NULL)
                 continue;
             if (attack->flags & 1)
-                ax = (attack->x >> 8) - attack->unk38 - attack->unk3A * 2;
+                ax = (attack->x >> 8) + (-attack->unk38 - attack->unk3A * 2);
             else
                 ax = (attack->x >> 8) + attack->unk38;
             ay = (attack->y >> 8) + attack->unk39;
             if (attack->flags & 0x20000000) {
                 otherSlot = &gUnk_02022F50[group * 64];
-                for (otherRemaining = gUnk_02022EB0[group][0]; otherRemaining != 0; --otherRemaining, ++otherSlot) {
+                for (otherRemaining = gUnk_02022EB0[0][group * 2]; otherRemaining != 0; --otherRemaining, ++otherSlot) {
                     struct ObjectBase *other = *otherSlot;
                     if (other == NULL)
                         continue;
