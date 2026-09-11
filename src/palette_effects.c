@@ -208,16 +208,15 @@ static void UpdatePaletteEffects(void)
 
 static inline void DarkenColor(u16 *palette, struct PaletteEffect *effect)
 {
-    u16 color = *palette;
     s8 amount = effect->unk1;
-    u16 channel = (31 & color) - amount;
+    u16 channel = (*palette & 31) - amount;
     u16 result = channel;
     if (channel & 0x8000)
         result = 0;
-    channel = (((u16)color >> 5) & 31) - amount;
+    channel = ((*palette >> 5) & 31) - amount;
     if (!(channel & 0x8000))
         result |= channel << 5;
-    channel = (((u16)color >> 10) & 31) - amount;
+    channel = ((*palette >> 10) & 31) - amount;
     if (!(channel & 0x8000))
         result |= channel << 10;
     *palette = result;
@@ -225,60 +224,53 @@ static inline void DarkenColor(u16 *palette, struct PaletteEffect *effect)
 
 static inline void BrightenColor(u16 *palette, struct PaletteEffect *effect)
 {
-    u16 color = *palette;
     s8 amount = effect->unk1;
-    u32 result = gBrightenRedTable[(31 & color) + amount];
-    result |= gBrightenGreenTable[(((u16)color >> 5) & 31) + amount];
-    result |= gBrightenBlueTable[(((u16)color >> 10) & 31) + amount];
+    u32 result = gBrightenRedTable[(*palette & 31) + amount];
+    result |= gBrightenGreenTable[((*palette >> 5) & 31) + amount];
+    result |= gBrightenBlueTable[((*palette >> 10) & 31) + amount];
     *palette = result;
 }
 
 static inline void DarkenColorWithTable(u16 *palette, struct PaletteEffect *effect)
 {
-    u16 color = *palette;
     s8 amount = effect->unk1;
     s32 offset = amount - 31;
-    u32 result = gDarkenRedTable[(31 & color) - offset];
-    result |= gDarkenGreenTable[(((u16)color >> 5) & 31) - offset];
-    result |= gDarkenBlueTable[(((u16)color >> 10) & 31) - offset];
+    u32 result = gDarkenRedTable[(*palette & 31) - offset];
+    result |= gDarkenGreenTable[((*palette >> 5) & 31) - offset];
+    result |= gDarkenBlueTable[((*palette >> 10) & 31) - offset];
     *palette = result;
 }
 
 static inline void TintColorRed(u16 *palette, struct PaletteEffect *effect)
 {
-    u16 color = *palette;
     s8 amount = effect->unk1;
-    u32 result = gBrightenRedTable[(31 & color) + amount];
-    result |= gDarkenGreenTable[(((u16)color >> 5) & 31) - (amount - 31)];
-    result |= gDarkenBlueTable[(((u16)color >> 10) & 31) - (amount - 31)];
+    u32 result = gBrightenRedTable[(*palette & 31) + amount];
+    result |= gDarkenGreenTable[((*palette >> 5) & 31) - (amount - 31)];
+    result |= gDarkenBlueTable[((*palette >> 10) & 31) - (amount - 31)];
     *palette = result;
 }
 
-static inline void AdvancePaletteEffect(struct PaletteEffect *effect)
+static inline void AdvancePaletteEffect(struct PaletteEffect *effect, u16 flags)
 {
-    u16 flags = effect->unk8;
-    if (!(flags & 1)) {
-        u16 step = effect->unkA;
-        u32 accumulator = step + effect->unkC;
-        s32 current;
-        u8 target;
-        effect->unkC = accumulator;
-        current = (s16)accumulator >> 8;
-        effect->unk1 = current;
-        target = effect->unk2;
-        if ((current <= (s8)effect->unk2 && (s16)step < 0)
-            || (current >= (s8)effect->unk2 && (s16)step > 0)) {
-            if (flags & 0x20) {
-                if (flags & 0x40) {
-                    effect->unkC = (s8)effect->unk2 * 256;
-                    effect->unk1 = target;
-                } else {
-                    effect->unk8 = (flags | 1) & 0xFF59;
-                }
+    s32 current;
+    s32 tgt;
+    u8 target;
+    effect->unkC += effect->unkA;
+    current = effect->unk1 = (s16)effect->unkC >> 8;
+    tgt = effect->unk2;
+    target = effect->unk2;
+    if ((current <= tgt && effect->unkA < 0) || (current >= tgt && effect->unkA > 0)) {
+        struct PaletteEffect *e = effect;
+        if (flags & 0x20) {
+            if (flags & 0x40) {
+                e->unkC = e->unk2 << 8;
+                e->unk1 = target;
             } else {
-                effect->unk1 = target;
-                effect->unk8 = flags | 0x20;
+                e->unk8 = (flags | 1) & 0xFF59;
             }
+        } else {
+            e->unk1 = target;
+            e->unk8 = flags | 0x20;
         }
     }
 }
@@ -358,6 +350,7 @@ void ApplyPaletteBrightening(struct PaletteEffect *effect)
 {
     u16 *palette;
     u16 bank;
+    u16 flags;
     if (effect->unk8 & 2) {
         palette = gBgPalette;
         for (bank = 0; bank < 16; bank++) {
@@ -381,8 +374,9 @@ void ApplyPaletteBrightening(struct PaletteEffect *effect)
         }
         gMainFlags |= MAIN_FLAG_BG_PALETTE_SYNC_ENABLE | MAIN_FLAG_OBJ_PALETTE_SYNC_ENABLE;
     }
-    if (!(effect->unk8 & 1) && (!(gMainFlags & 0x800) || (effect->unk8 & 0x80)))
-        AdvancePaletteEffect(effect);
+    flags = effect->unk8;
+    if (!(flags & 1) && (!(gMainFlags & 0x800) || (flags & 0x80)))
+        AdvancePaletteEffect(effect, flags);
 }
 #endif
 
@@ -397,6 +391,7 @@ void ApplyPaletteTableDarkening(struct PaletteEffect *effect)
 {
     u16 *palette;
     u16 bank;
+    u16 flags;
     if (effect->unk8 & 2) {
         palette = gBgPalette;
         for (bank = 0; bank < 16; bank++) {
@@ -420,8 +415,9 @@ void ApplyPaletteTableDarkening(struct PaletteEffect *effect)
         }
         gMainFlags |= MAIN_FLAG_BG_PALETTE_SYNC_ENABLE | MAIN_FLAG_OBJ_PALETTE_SYNC_ENABLE;
     }
-    if (!(effect->unk8 & 1) && (!(gMainFlags & 0x800) || (effect->unk8 & 0x80)))
-        AdvancePaletteEffect(effect);
+    flags = effect->unk8;
+    if (!(flags & 1) && (!(gMainFlags & 0x800) || (flags & 0x80)))
+        AdvancePaletteEffect(effect, flags);
 }
 #endif
 
@@ -436,6 +432,7 @@ void ApplyPaletteRedTint(struct PaletteEffect *effect)
 {
     u16 *palette;
     u16 bank;
+    u16 flags;
     if (effect->unk8 & 2) {
         palette = gBgPalette;
         for (bank = 0; bank < 16; bank++) {
@@ -459,8 +456,9 @@ void ApplyPaletteRedTint(struct PaletteEffect *effect)
         }
         gMainFlags |= MAIN_FLAG_BG_PALETTE_SYNC_ENABLE | MAIN_FLAG_OBJ_PALETTE_SYNC_ENABLE;
     }
-    if (!(effect->unk8 & 1) && (!(gMainFlags & 0x800) || (effect->unk8 & 0x80)))
-        AdvancePaletteEffect(effect);
+    flags = effect->unk8;
+    if (!(flags & 1) && (!(gMainFlags & 0x800) || (flags & 0x80)))
+        AdvancePaletteEffect(effect, flags);
 }
 #endif
 
@@ -476,6 +474,7 @@ void ApplyPaletteWhiteFill(struct PaletteEffect *effect)
     u16 *palette;
     u32 fill;
     u16 bank;
+    u16 flags;
     if (effect->unk8 & 2) {
         palette = gBgPalette;
         for (bank = 0; bank < 16; bank++) {
@@ -495,7 +494,9 @@ void ApplyPaletteWhiteFill(struct PaletteEffect *effect)
         }
         gMainFlags |= MAIN_FLAG_BG_PALETTE_SYNC_ENABLE | MAIN_FLAG_OBJ_PALETTE_SYNC_ENABLE;
     }
-    AdvancePaletteEffect(effect);
+    flags = effect->unk8;
+    if (!(flags & 1))
+        AdvancePaletteEffect(effect, flags);
 }
 #endif
 
