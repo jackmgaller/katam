@@ -867,18 +867,21 @@ inline void InsertPaletteEffectByPriority(struct PaletteEffect *effect, u8 index
     *slot = effect;
 }
 
-static inline u8 ClampPaletteChannel(s8 channel)
+static inline s8 ClampPaletteChannel(s32 value)
 {
-    u8 result = channel;
+    u8 result = value;
+    s8 channel = value;
+
     if (channel & 0xE0) {
-        result = 31;
         if (channel & 0x80)
             result = 0;
+        else
+            result = 31;
     }
     return result;
 }
 
-// TODO(match): Palette arrays and the temporary Sprite require different stack/spill placement; channel-width and inline-copy variants still differ.
+// TODO(match): Only the red channel's two masks differ: the original masks the loaded bytes into fresh registers, this masks them in place.
 #ifndef NONMATCHING
 NAKED void BlendSpriteAnimationPalettes(u8 paletteId, u16 sourceAnim, u8 sourceVariant, u16 targetAnim, u8 targetVariant, u16 amount)
 {
@@ -916,15 +919,19 @@ void BlendSpriteAnimationPalettes(u8 paletteId, u16 sourceAnim, u8 sourceVariant
         CpuCopy16(&gObjPalette[paletteId * 16], target, sizeof(target));
     }
     for (i = 1; !(i & 0xF0); i++) {
-        s32 channel;
-        u8 r, g, b;
-        channel = source[i] & 31;
-        r = ClampPaletteChannel(channel + ((amount * ((target[i] & 31) - channel)) >> 8));
-        channel = (source[i] >> 5) & 31;
-        g = ClampPaletteChannel(channel + ((amount * (((target[i] >> 5) & 31) - channel)) >> 8));
-        channel = (source[i] >> 10) & 31;
-        b = ClampPaletteChannel(channel + ((amount * (((target[i] >> 10) & 31) - channel)) >> 8));
-        source[i] = r | (g << 5) | (b << 10);
+        u8 srcLow, dstLow;
+        u16 srcChannel, dstChannel;
+        u16 color;
+        srcLow = source[i];
+        dstLow = target[i];
+        color = ClampPaletteChannel(((amount * ((dstLow & 31) - (srcLow & 31))) >> 8) + (srcLow & 31));
+        srcChannel = source[i] >> 5;
+        dstChannel = target[i] >> 5;
+        color |= ClampPaletteChannel(((amount * ((dstChannel & 31) - (srcChannel & 31))) >> 8) + (srcChannel & 31)) * 32;
+        srcChannel = source[i] >> 10;
+        dstChannel = target[i] >> 10;
+        color |= ClampPaletteChannel(((amount * ((dstChannel & 31) - (srcChannel & 31))) >> 8) + (srcChannel & 31)) * 1024;
+        source[i] = color;
     }
     if (gMainFlags & 0x20000)
         LoadObjPaletteWithTransformation(source, paletteId * 16, 16);
@@ -936,7 +943,7 @@ void BlendSpriteAnimationPalettes(u8 paletteId, u16 sourceAnim, u8 sourceVariant
 }
 #endif
 
-// TODO(match): The red offset multiplication moves outside the color loop; the original channel-temporary lifetime remains unresolved.
+// TODO(match): One instruction differs: the original copies the sign-extended red offset before multiplying it by the amount.
 #ifndef NONMATCHING
 NAKED void OffsetSpriteAnimationPalette(u8 paletteId, u16 anim, u8 variant, s8 red, s8 green, s8 blue, u16 amount)
 {
@@ -965,10 +972,16 @@ void OffsetSpriteAnimationPalette(u8 paletteId, u16 anim, u8 variant, s8 red, s8
     }
     CpuCopy16(&gObjPalette[paletteId * 16], colors, sizeof(colors));
     for (i = 1; !(i & 0xF0); i++) {
-        u8 r = ClampPaletteChannel((colors[i] & 31) + ((amount * red) >> 8));
-        u8 g = ClampPaletteChannel(((colors[i] >> 5) & 31) + ((amount * green) >> 8));
-        u8 b = ClampPaletteChannel(((colors[i] >> 10) & 31) + ((amount * blue) >> 8));
-        colors[i] = r | (g << 5) | (b << 10);
+        u8 low;
+        u16 channel;
+        u16 color;
+        low = colors[i];
+        color = ClampPaletteChannel(((amount * red) >> 8) + (low & 31));
+        channel = colors[i] >> 5;
+        color |= ClampPaletteChannel(((amount * green) >> 8) + (channel & 31)) * 32;
+        channel = colors[i] >> 10;
+        color |= ClampPaletteChannel(((amount * blue) >> 8) + (channel & 31)) * 1024;
+        colors[i] = color;
     }
     if (gMainFlags & 0x20000)
         LoadObjPaletteWithTransformation(colors, paletteId * 16, 16);
