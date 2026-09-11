@@ -249,6 +249,7 @@ NAKED s32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBas
 s32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *attack)
 {
     struct ObjectBase *parent;
+    bool8 handled;
     s32 attackFlags;
     u32 flags, defense, vulnerableTypes;
     if (other->header.kind == 1 && ((struct Object *)other)->type == 0x46 && attack->xspeed < 0)
@@ -271,71 +272,72 @@ s32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *att
                 if (parent->header.kind == 1) {
                     switch (object->type) {
                     case 0x32:
-                        if (other->flags & 0x8000) return 0;
-                        if (sub_080A049C(object, (struct Kirby *)other))
-                            break;
-                        return 0;
+                        if (other->flags & 0x8000)
+                            return 0;
+                        handled = sub_080A049C(object, (struct Kirby *)other);
+                        break;
                     case 0x33:
-                        if (other->flags & 0x8000) return 0;
-                        if (sub_080A1804(object, (struct Kirby *)other))
-                            break;
-                        return 0;
+                        if (other->flags & 0x8000)
+                            return 0;
+                        handled = sub_080A1804(object, (struct Kirby *)other);
+                        break;
                     case 0x38:
-                        if (other->flags & 0x8000) return 0;
-                        if (sub_080CC6F0(object, (struct Kirby *)other))
-                            break;
-                        return 0;
+                        if (other->flags & 0x8000)
+                            return 0;
+                        handled = sub_080CC6F0(object, (struct Kirby *)other);
+                        break;
                     case 0x9E:
                     case 0xAE:
-                        if (other->flags & 0x8000) return 0;
-                        if (sub_080B6368(object, (struct Kirby *)other))
-                            break;
-                        return 0;
+                        if (other->flags & 0x8000)
+                            return 0;
+                        handled = sub_080B6368(object, (struct Kirby *)other);
+                        break;
                     case 0x3A:
-                        if (other->flags & 0x8000) return 0;
-                        if (sub_080CE94C(object, (struct Kirby *)other))
-                            break;
-                        return 0;
+                        if (other->flags & 0x8000)
+                            return 0;
+                        handled = sub_080CE94C(object, (struct Kirby *)other);
+                        break;
                     case 15:
-                        if (other->flags & 0x8000) return 0;
-                        if (sub_080B0758(object, (struct Kirby *)other))
-                            break;
-                        return 0;
+                        if (other->flags & 0x8000)
+                            return 0;
+                        handled = sub_080B0758(object, (struct Kirby *)other);
+                        break;
                     case 0x48:
-                        if (other->flags & 0x8000) return 0;
-                        if (sub_080E588C((struct Gobbler *)object, (struct Kirby *)other))
-                            break;
-                        return 0;
+                        if (other->flags & 0x8000)
+                            return 0;
+                        handled = sub_080E588C((struct Gobbler *)object, (struct Kirby *)other);
+                        break;
                     case 0x9F:
-                        if (other->flags & 0x8000) return 0;
-                        if (sub_080E74E4(object, (struct Kirby *)other))
-                            break;
-                        return 0;
+                        if (other->flags & 0x8000)
+                            return 0;
+                        handled = sub_080E74E4(object, (struct Kirby *)other);
+                        break;
                     case 0x3E:
-                        if (other->flags & 0x8000) return 0;
-                        if (sub_080D4004(object, (struct Kirby *)other))
-                            break;
-                        return 0;
+                        if (other->flags & 0x8000)
+                            return 0;
+                        handled = sub_080D4004(object, (struct Kirby *)other);
+                        break;
                     case 0x47:
                     case 0x4D:
-                        if (other->flags & 0x8000) return 0;
-                        if (sub_080E1B8C((struct CrazyHand *)object, (struct Kirby *)other))
-                            break;
-                        return 0;
+                        if (other->flags & 0x8000)
+                            return 0;
+                        handled = sub_080E1B8C((struct CrazyHand *)object, (struct Kirby *)other);
+                        break;
                     case 0x3C:
-                        if (other->flags & 0x8000) return 0;
-                        if (sub_080C8548(object, (struct Kirby *)other))
-                            break;
-                        return 0;
+                        if (other->flags & 0x8000)
+                            return 0;
+                        handled = sub_080C8548(object, (struct Kirby *)other);
+                        break;
                     case 7:
                     case 14:
-                        if (sub_080AC5E0(object, &other->header))
-                            break;
-                        return 0;
+                        handled = sub_080AC5E0(object, &other->header);
+                        break;
                     default:
                         return 0;
                     }
-                    return 1;
+                    if (handled)
+                        return 1;
+                    return 0;
                 }
             }
         }
@@ -756,8 +758,8 @@ NAKED void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object 
 void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid)
 {
     s8 a[4], b[4];
-    u8 widthA, widthB, heightA, heightB;
     bool32 previousOverlap[2];
+    u8 widthA, widthB, heightA, heightB;
     bool32 overlapX, overlapY;
     u32 solidFlags;
     s32 tolerance;
