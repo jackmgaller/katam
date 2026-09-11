@@ -827,8 +827,6 @@ void DrawKirbyHealthBar(struct Kirby *kirby)
     if (gUnk_0203AD10 & 0x10)
         return;
     capacity = kirby->maxHp;
-    // TODO(match): Remove this input when natural lifetimes keep capacity in r4 and the column offset in r5.
-    asm("" : : "r"(capacity));
     hp = kirby->hp;
     if (hp < 0)
         hp = 0;
@@ -844,7 +842,6 @@ void DrawKirbyHealthBar(struct Kirby *kirby)
             *tiles = 0xF1A2;
             hp -= 2;
             capacity -= 2;
-            continue;
         } else if (hp & 1) {
             if (!(capacity & 0xFE) && (capacity & 1)) {
                 *tiles = 0xF1B2;
@@ -857,6 +854,7 @@ void DrawKirbyHealthBar(struct Kirby *kirby)
                 *tiles = 0xF1A3;
             }
             hp--;
+            capacity -= 2;
         } else {
             if (!(capacity & 0xFE) && (capacity & 1)) {
                 *tiles = 0xF9B4;
@@ -868,8 +866,8 @@ void DrawKirbyHealthBar(struct Kirby *kirby)
                 tiles += 32;
                 *tiles = 0xF994;
             }
+            capacity -= 2;
         }
-        capacity -= 2;
     }
     if (!(kirby->maxHp & 1)) {
         u32 column = i + 13;
