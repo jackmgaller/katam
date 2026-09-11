@@ -133,13 +133,6 @@ void CompactPaletteEffectQueue(void)
     }
 }
 
-// TODO(match): Palette eligibility tests combine differently and reuse a different flag mask; the original branch grouping remains unresolved.
-#ifndef NONMATCHING
-static NAKED void UpdatePaletteEffects(void)
-{
-    asm(".include \"asm/nonmatching/UpdatePaletteEffects.inc\"");
-}
-#else
 static void UpdatePaletteEffects(void)
 {
     struct PaletteEffectManager *state = &gPaletteEffectManager;
@@ -151,16 +144,17 @@ static void UpdatePaletteEffects(void)
 
     if (flags & 4) {
         for (i = 0; i < 8; i++) {
-            struct PaletteEffect *effect = &state->unk0[i];
-            if (!(effect->unk8 & 0x10) && (effect->unk8 & 4)
-                && (!(gMainFlags & 0x800) || !(flags & 0x100) || (effect->unk8 & 0x80))) {
-                if (effect->unk6 && !bgRestored) {
-                    CpuCopy32(gUnk_02022120, gBgPalette, sizeof(gBgPalette));
-                    bgRestored = TRUE;
-                }
-                if (effect->unk4 && !objRestored) {
-                    CpuCopy32(gUnk_02022320, gObjPalette, sizeof(gObjPalette));
-                    objRestored = TRUE;
+            if (!(state->unk0[i].unk8 & 0x10)) {
+                if ((state->unk0[i].unk8 & 4)
+                    && (!(gMainFlags & 0x800) || !(flags & 0x100) || (state->unk0[i].unk8 & 0x80))) {
+                    if (state->unk0[i].unk6 && !bgRestored) {
+                        CpuCopy32(gUnk_02022120, gBgPalette, sizeof(gBgPalette));
+                        bgRestored = TRUE;
+                    }
+                    if (state->unk0[i].unk4 && !objRestored) {
+                        CpuCopy32(gUnk_02022320, gObjPalette, sizeof(gObjPalette));
+                        objRestored = TRUE;
+                    }
                 }
             }
         }
@@ -168,19 +162,19 @@ static void UpdatePaletteEffects(void)
     if ((gMainFlags & 0x800) && !(flags & 0x80))
         return;
     for (i = 0; i < 8; i++) {
-        struct PaletteEffect **slot = &state->unk80[i];
-        struct PaletteEffect *effect = *slot;
-        if (effect && (!(gMainFlags & 0x800) || !(flags & 0x100) || (effect->unk8 & 0x80))) {
-            gPaletteEffectCallbacks[effect->unk0](effect);
-            if (!((*slot)->unk8 & 2)) {
-                if ((*slot)->unk8 & 1)
-                    *slot = NULL;
+        if (state->unk80[i] && (!(gMainFlags & 0x800) || !(flags & 0x100) || (state->unk80[i]->unk8 & 0x80))) {
+            gPaletteEffectCallbacks[state->unk80[i]->unk0](state->unk80[i]);
+            if (!(state->unk80[i]->unk8 & 2)) {
+                if (state->unk80[i]->unk8 & 1)
+                    state->unk80[i] = NULL;
                 objRestored = FALSE;
             } else {
-                // The original indexes storage by queue position here, not by *slot.
-                effect = &state->unk0[i];
-                if (!(effect->unk8 & 0x10) && (effect->unk8 & 4) && effect->unk4)
-                    objRestored = TRUE;
+                // Indexed by queue position, not by the effect the slot points at.
+                struct PaletteEffect *effect = &state->unk0[i];
+                if (!(effect->unk8 & 0x10)) {
+                    if ((effect->unk8 & 4) && effect->unk4)
+                        objRestored = TRUE;
+                }
             }
         }
     }
@@ -204,7 +198,6 @@ static void UpdatePaletteEffects(void)
         }
     }
 }
-#endif
 
 static inline void DarkenColor(u16 *palette, struct PaletteEffect *effect)
 {
