@@ -249,7 +249,7 @@ static inline void TintColorRed(u16 *palette, struct PaletteEffect *effect)
     *palette = result;
 }
 
-static inline void AdvancePaletteEffect(struct PaletteEffect *effect, u16 flags)
+static inline void AdvancePaletteEffect(struct PaletteEffect *effect, u32 flags)
 {
     s32 current;
     s32 tgt;
@@ -265,7 +265,8 @@ static inline void AdvancePaletteEffect(struct PaletteEffect *effect, u16 flags)
                 e->unkC = e->unk2 << 8;
                 e->unk1 = target;
             } else {
-                e->unk8 = (flags | 1) & 0xFF59;
+                u32 newFlags = (flags | 1) & 0xFF59;
+                e->unk8 = newFlags;
             }
         } else {
             e->unk1 = target;
@@ -356,7 +357,7 @@ void ApplyPaletteBrightening(struct PaletteEffect *effect)
 {
     u16 *palette;
     u16 bank;
-    u16 flags;
+    u32 flags;
     if (effect->unk8 & 2) {
         palette = gBgPalette;
         for (bank = 0; bank < 16; bank++) {
@@ -397,7 +398,7 @@ void ApplyPaletteTableDarkening(struct PaletteEffect *effect)
 {
     u16 *palette;
     u16 bank;
-    u16 flags;
+    u32 flags;
     if (effect->unk8 & 2) {
         palette = gBgPalette;
         for (bank = 0; bank < 16; bank++) {
@@ -438,7 +439,7 @@ void ApplyPaletteRedTint(struct PaletteEffect *effect)
 {
     u16 *palette;
     u16 bank;
-    u16 flags;
+    u32 flags;
     if (effect->unk8 & 2) {
         palette = gBgPalette;
         for (bank = 0; bank < 16; bank++) {
@@ -480,7 +481,7 @@ void ApplyPaletteWhiteFill(struct PaletteEffect *effect)
     u16 *palette;
     u32 fill;
     u16 bank;
-    u16 flags;
+    u32 flags;
     if (effect->unk8 & 2) {
         palette = gBgPalette;
         for (bank = 0; bank < 16; bank++) {
@@ -769,7 +770,7 @@ void EnablePaletteEffectsForCurrentRoom(void)
 {
     struct PaletteEffectManager *state = &gPaletteEffectManager;
     struct PaletteEffect *effect;
-    u16 flags;
+    u32 flags;
     u8 queueIndex;
 
     for (queueIndex = 0; queueIndex < 8; queueIndex++) {
