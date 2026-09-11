@@ -790,24 +790,21 @@ void DrawEnemyHealthOrAreaName(struct GameplayHud *hud)
         return;
     tiles = (u16 *)(BG_VRAM + 0xE4E8);
     if (hud == NULL) {
-        u16 baseTile;
+        u16 index = 0x20;
         CpuCopy16(gHudEnemyAndAreaNameGraphics[gLanguage] + (gUnk_08D6CD0C[gKirbys[gLocalPlayerId].base.roomId]->unk46 * 0x200 + 0x5300),
             (void *)(BG_VRAM + 0x77A0), 0x100);
         CpuCopy16(gHudEnemyAndAreaNameGraphics[gLanguage] + (gUnk_08D6CD0C[gKirbys[gLocalPlayerId].base.roomId]->unk46 * 0x200 + 0x5400),
             (void *)(BG_VRAM + 0x74A0), 0x100);
         *tiles++ = 0xF184;
         *tiles++ = 0xF184;
-        // TODO(match): Remove this input when the base tile is loaded into r2 before copying it to r1.
-        asm("" : : "r"((u16)0x185));
-        baseTile = 0x185;
-        *tiles++ = (baseTile + 0x20) | 0xF000;
-        *tiles++ = (baseTile + 0x21) | 0xF000;
-        *tiles++ = (baseTile + 0x22) | 0xF000;
-        *tiles++ = (baseTile + 0x23) | 0xF000;
-        *tiles++ = (baseTile + 0x24) | 0xF000;
-        *tiles++ = (baseTile + 0x25) | 0xF000;
-        *tiles++ = (baseTile + 0x26) | 0xF000;
-        *tiles = (baseTile + 0x27) | 0xF000;
+        *tiles++ = (index++ + 0x185) | 0xF000;
+        *tiles++ = (index++ + 0x185) | 0xF000;
+        *tiles++ = (index++ + 0x185) | 0xF000;
+        *tiles++ = (index++ + 0x185) | 0xF000;
+        *tiles++ = (index++ + 0x185) | 0xF000;
+        *tiles++ = (index++ + 0x185) | 0xF000;
+        *tiles++ = (index++ + 0x185) | 0xF000;
+        *tiles = (index + 0x185) | 0xF000;
     } else {
         s16 hp;
         u16 cells;
