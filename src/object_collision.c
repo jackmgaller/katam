@@ -111,7 +111,8 @@ s32 HandleKirbyCollision(struct ObjectBase *attack, struct ObjectBase *other)
     return 0;
 }
 
-// TODO(match): The attack and target pointers use different callee-saved registers; damage/grab branch sharing remains unresolved.
+// TODO(match): The vulnerability mask reassociates to (0x3FFFF8 & attackFlags) & ~(defense & ~7),
+// so the two ANDs are emitted in the wrong order at all six test sites.
 #ifndef NONMATCHING
 NAKED s32 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
 {
@@ -123,7 +124,7 @@ s32 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
     struct Object *object = (struct Object *)other;
     struct ObjectBase *parent;
     s32 attackFlags;
-    u32 flags, defense, vulnerableTypes;
+    u32 flags, defense;
     if (attack->header.kind == 2) {
         if (object->type == 0x46 && attack->xspeed < 0)
             return 0;
@@ -140,99 +141,99 @@ s32 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
     if (parent != NULL && parent->header.kind == 0 && attack->unk56 == gLocalPlayerId)
         TryTrackHudEnemy(object);
     attackFlags = attack->unk68;
-    if (!(attackFlags & 0x20)) {
-        flags = attack->flags;
-        defense = object->base.unk5C;
-        vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
-        if (!(flags & 0x10000) && !(object->base.flags & 0x20000)) {
-            if (!(flags & 0x100000) && !(object->base.flags & 0x200000)) {
-                object->base.flags |= 0x40000;
-                object->base.unk6C = attack;
-            } else if ((vulnerableTypes & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)) {
-                object->base.flags |= 0x40000;
-                object->base.unk6C = attack;
-            }
-        }
-        if ((vulnerableTypes & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7) && !(object->base.flags & 0x8000)) {
-            if (attackFlags & 0x8000)
-                sub_0809C6D0(object);
-            else
-                sub_0809B1E4(object);
-            if (!(object->base.unk68 & 0x20000000))
-                return 1;
+    if (attackFlags & 0x20) {
+        parent = attack->parent;
+        if (parent == NULL)
             return 0;
-        }
-        if ((object->base.flags & 0x40000) && !(attackFlags & 0x800000)) {
-            if ((u8)(object->type - 0x38) > 0x1A) {
-                if (object->type != 0x6D || !(attackFlags & 0x80))
-                    sub_0808845C(object, 10);
-                if (!(object->base.flags & 0x8000))
-                    sub_0808520C(object, 16);
-            } else {
-                sub_0808845C(object, 10);
-                if (!(object->base.flags & 0x8000))
-                    sub_0808520C(object, 16);
-            }
-            if (attack->unk68 & 0x10000)
-                sub_080884C4(object);
-        }
-        return 0;
-    }
-    parent = attack->parent;
-    if (parent == NULL)
-        return 0;
-    if (parent->header.kind == 1) {
-        u8 type = ((struct Object *)parent)->type;
-        if (type != 7 && type != 14)
-            return 0;
-        if ((u8)(object->type - 0x5E) > 14)
-            return 0;
-        if (!(attack->flags & 0x10000)) {
-            object->base.flags |= 0x40000;
-            object->base.unk6C = parent;
-        }
-        sub_0809CFC4(object);
-        return 1;
-    }
-    if (attack->unk56 >= gNumHumanPlayers) {
-        if ((u8)(object->type - 0x5E) <= 14 || object->type == 0xA4
-            || (object->type == 0xA3 && object->base.unk56 < gNumHumanPlayers))
-            return 0;
-    }
-    flags = attack->flags;
-    if (!(flags & 0x10000) && !(object->base.flags & 0x20000)) {
-        if ((flags & 0x100000) || (object->base.flags & 0x200000)) {
-            defense = object->base.unk5C;
-            vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
-            if ((vulnerableTypes & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)) {
+        if (parent->header.kind == 1) {
+            u8 type = ((struct Object *)parent)->type;
+            if (type != 7 && type != 14)
+                return 0;
+            if ((u8)(object->type - 0x5E) > 14)
+                return 0;
+            if (!(attack->flags & 0x10000)) {
                 object->base.flags |= 0x40000;
                 object->base.unk6C = parent;
             }
+            sub_0809CFC4(object);
+            return 1;
+        }
+        if (attack->unk56 >= gNumHumanPlayers) {
+            if ((u8)(object->type - 0x5E) <= 14 || object->type == 0xA4
+                || (object->type == 0xA3 && object->base.unk56 < gNumHumanPlayers))
+                return 0;
+        }
+        flags = attack->flags;
+        if (!(flags & 0x10000) && !(object->base.flags & 0x20000)) {
+            if ((flags & 0x100000) || (object->base.flags & 0x200000)) {
+                defense = object->base.unk5C;
+                if (((0x3FFFF8 & ~(defense & ~7)) & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)) {
+                    object->base.flags |= 0x40000;
+                    object->base.unk6C = parent;
+                }
+            } else {
+                object->base.flags |= 0x40000;
+                object->base.unk6C = parent;
+            }
+        }
+        if (attackFlags == 0x20000023) {
+            object->unk90 &= ~(3 << (attack->unk56 * 2));
+            object->unk90 |= 2 << (attack->unk56 * 2);
         } else {
-            object->base.flags |= 0x40000;
-            object->base.unk6C = parent;
+            object->unk90 &= ~(3 << (attack->unk56 * 2));
+            object->unk90 |= 1 << (attack->unk56 * 2);
         }
+        defense = object->base.unk5C;
+        if (defense & 0x20) {
+            if (object->type <= 0xD4 || !(attackFlags & 0x200000))
+                return 0;
+        }
+        if ((attackFlags & 0x200000) && (u8)(object->type - 0x5E) <= 14) {
+            attack->flags = flags & ~0x40000;
+        } else {
+                if (((0x3FFFF8 & ~(defense & ~7)) & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)) {
+                attack->flags = flags | 0x40000;
+                object->base.unk6C = parent;
+                sub_0809C380(object);
+            } else if (!(gUnk_03000510.unk4 & ((1 << object->base.unk56) | 0x10))) {
+                object->base.objBase54 += (gUnk_0203AD40 & 2) * 2;
+            }
+        }
+        return 0;
     }
-    if (attackFlags == 0x20000023)
-        object->unk90 = (object->unk90 & ~(3 << (attack->unk56 * 2))) | (2 << (attack->unk56 * 2));
-    else
-        object->unk90 = (object->unk90 & ~(3 << (attack->unk56 * 2))) | (1 << (attack->unk56 * 2));
+    flags = attack->flags;
     defense = object->base.unk5C;
-    if (defense & 0x20) {
-        if (object->type <= 0xD4 || !(attackFlags & 0x200000))
-            return 0;
-    }
-    if ((attackFlags & 0x200000) && (u8)(object->type - 0x5E) <= 14) {
-        attack->flags = flags & ~0x40000;
-    } else {
-        vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
-        if ((vulnerableTypes & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)) {
-            attack->flags = flags | 0x40000;
-            object->base.unk6C = parent;
-            sub_0809C380(object);
-        } else if (!(gUnk_03000510.unk4 & ((1 << object->base.unk56) | 0x10))) {
-            object->base.objBase54 += (gUnk_0203AD40 & 2) * 2;
+    if (!(flags & 0x10000) && !(object->base.flags & 0x20000)) {
+        if (!(flags & 0x100000) && !(object->base.flags & 0x200000)) {
+            object->base.flags |= 0x40000;
+            object->base.unk6C = attack;
+        } else if (((0x3FFFF8 & ~(defense & ~7)) & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)) {
+            object->base.flags |= 0x40000;
+            object->base.unk6C = attack;
         }
+    }
+    if (((0x3FFFF8 & ~(defense & ~7)) & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7) && !(object->base.flags & 0x8000)) {
+        if (attackFlags & 0x8000)
+            sub_0809C6D0(object);
+        else
+            sub_0809B1E4(object);
+        if (!(object->base.unk68 & 0x20000000))
+            return 1;
+        return 0;
+    }
+    if ((object->base.flags & 0x40000) && !(attackFlags & 0x800000)) {
+        if ((u8)(object->type - 0x38) > 0x1A) {
+            if (object->type != 0x6D || !(attackFlags & 0x80))
+                sub_0808845C(object, 10);
+            if (!(object->base.flags & 0x8000))
+                sub_0808520C(object, 16);
+        } else {
+            sub_0808845C(object, 10);
+            if (!(object->base.flags & 0x8000))
+                sub_0808520C(object, 16);
+        }
+        if (attack->unk68 & 0x10000)
+            sub_080884C4(object);
     }
     return 0;
 }
