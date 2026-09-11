@@ -893,13 +893,6 @@ void DrawKirbyHealthBar(struct Kirby *kirby)
     }
 }
 
-// TODO(match): The two abs() distance tests compare a value the original stores first (one shared compare after the abs join, and the y test re-reads gLocalPlayerId); a stored x distance reproduces that compare but lets the y test reuse the index product.
-#ifndef NONMATCHING
-static NAKED void UpdateTrackedHudEnemy(struct GameplayHud *hud)
-{
-    asm(".include \"asm/nonmatching/UpdateTrackedHudEnemy.inc\"");
-}
-#else
 static void UpdateTrackedHudEnemy(struct GameplayHud *hud)
 {
     struct Object *object = hud->unk1C;
@@ -947,22 +940,27 @@ static void UpdateTrackedHudEnemy(struct GameplayHud *hud)
         hud->unk1C = NULL;
         return;
     }
+    // The clearing block is written out in both arms, as in the original (the copies are cross-jumped).
     if ((u8)(tracked->type - 0x38) <= 0x1A) {
-        if (abs(gCurLevelInfo[gLocalPlayerId].viewportPosition.x + 0x7800 - tracked->base.x) <= 0xF000
-            && abs(gCurLevelInfo[gLocalPlayerId].viewportPosition.y + 0x5000 - tracked->base.y) <= 0xC800)
-            return;
+        if (abs(gCurLevelInfo[gLocalPlayerId].viewportPosition.x + 0x7800 - tracked->base.x) > 0xF000
+            || abs(gCurLevelInfo[gLocalPlayerId].viewportPosition.y + 0x5000 - tracked->base.y) > 0xC800) {
+            CpuFill16(0, (void *)(BG_VRAM + 0x77A0), 0x100);
+            hud->unk9 = 0;
+            hud->unkA = 0;
+            DrawEnemyHealthOrAreaName(NULL);
+            hud->unk1C = NULL;
+        }
     } else {
-        if (abs(gCurLevelInfo[gLocalPlayerId].viewportPosition.x + 0x7800 - tracked->base.x) <= 0xA800
-            && abs(gCurLevelInfo[gLocalPlayerId].viewportPosition.y + 0x5000 - tracked->base.y) <= 0x8000)
-            return;
+        if (abs(gCurLevelInfo[gLocalPlayerId].viewportPosition.x + 0x7800 - tracked->base.x) > 0xA800
+            || abs(gCurLevelInfo[gLocalPlayerId].viewportPosition.y + 0x5000 - tracked->base.y) > 0x8000) {
+            CpuFill16(0, (void *)(BG_VRAM + 0x77A0), 0x100);
+            hud->unk9 = 0;
+            hud->unkA = 0;
+            DrawEnemyHealthOrAreaName(NULL);
+            hud->unk1C = NULL;
+        }
     }
-    CpuFill16(0, (void *)(BG_VRAM + 0x77A0), 0x100);
-    hud->unk9 = 0;
-    hud->unkA = 0;
-    DrawEnemyHealthOrAreaName(NULL);
-    hud->unk1C = NULL;
 }
-#endif
 
 static void AnimateHudEnemyHealth(struct GameplayHud *hud)
 {
