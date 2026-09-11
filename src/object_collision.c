@@ -987,22 +987,7 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
 }
 #endif
 
-static inline bool32 CanFirstKirbyShare(struct Kirby *kirby)
-{
-    if (kirby->ability != KIRBY_ABILITY_UFO) {
-        if ((kirby->animationIndex == 0x19 || kirby->animationIndex == 0x2F)
-            && kirby->animationIndex != 0xD)
-            return TRUE;
-        if ((u16)(kirby->animationIndex - 0x38) <= 7)
-            return TRUE;
-    }
-    if (kirby->ability == KIRBY_ABILITY_UFO
-        && (kirby->animationIndex <= 0x12 || (u16)(kirby->animationIndex - 0x21) <= 13))
-        return TRUE;
-    return FALSE;
-}
-
-static inline bool32 CanSecondKirbyShare(struct Kirby *kirby)
+static inline bool32 CanKirbyShare(struct Kirby *kirby)
 {
     if (kirby->ability != KIRBY_ABILITY_UFO) {
         if ((kirby->animationIndex <= 0x15 || kirby->animationIndex == 0x19 || kirby->animationIndex == 0x2F)
@@ -1017,7 +1002,23 @@ static inline bool32 CanSecondKirbyShare(struct Kirby *kirby)
     return FALSE;
 }
 
-// TODO(match): The outer Kirby loop is rotated to a bottom test; explicit entry checks and index-width variants did not recover the original branch layout.
+static inline bool32 CanKirbyShareIndex(s32 index)
+{
+    if (gKirbys[index].ability != KIRBY_ABILITY_UFO) {
+        if ((gKirbys[index].animationIndex <= 0x15 || gKirbys[index].animationIndex == 0x19 || gKirbys[index].animationIndex == 0x2F)
+            && gKirbys[index].animationIndex != 0xD)
+            return TRUE;
+        if ((u16)(gKirbys[index].animationIndex - 0x38) <= 7)
+            return TRUE;
+    }
+    if (gKirbys[index].ability == KIRBY_ABILITY_UFO
+        && (gKirbys[index].animationIndex <= 0x12 || (u16)(gKirbys[index].animationIndex - 0x21) <= 13))
+        return TRUE;
+    return FALSE;
+}
+
+// TODO(match): The first Kirby's animation-index pointer spills to the stack instead of
+// staying in a register, so the frame is 16 rather than 12 bytes.
 #ifndef NONMATCHING
 static NAKED void ProcessKirbyContacts(void)
 {
@@ -1037,25 +1038,27 @@ static void ProcessKirbyContacts(void)
             struct Kirby *second = &gKirbys[secondId];
             bool8 overlap;
             // The original repeats the first Kirby's animation check here.
-            if ((second->base.flags & 0x3800F00) || second->stateFn == sub_080566E0
+            if ((second->base.flags & 0x3800F00) || gKirbys[secondId].stateFn == sub_080566E0
                 || (u16)(first->animationIndex - 0x4A) <= 15 || second->base.sprite.animId == 0x220
                 || second->base.roomId != first->base.roomId)
                 continue;
             overlap = KirbyCanContactOther(first, second);
-            if (overlap && first->ability != KIRBY_ABILITY_MINI && second->ability != KIRBY_ABILITY_MINI) {
-                if (first->unkE5 != 0 && !((first->unkE1 >> secondId) & 1)) {
-                    if (CanFirstKirbyShare(first) && CanSecondKirbyShare(second)
-                        && (first->base.unk56 < gNumHumanPlayers || second->base.unk56 < gNumHumanPlayers)) {
+            if (overlap && first->ability != KIRBY_ABILITY_MINI) {
+                if (gKirbys[secondId].ability != KIRBY_ABILITY_MINI
+                    && first->unkE5 != 0 && !((first->unkE1 >> secondId) & 1)) {
+                    if (CanKirbyShare(first) && CanKirbyShareIndex(secondId)
+                        && (first->base.unk56 < gNumHumanPlayers || gKirbys[secondId].base.unk56 < gNumHumanPlayers)) {
                         sub_08053DAC(first, secondId);
-                        sub_08054414(second, firstId);
+                        sub_08054414(&gKirbys[secondId], firstId);
                         first->unkE1 |= 1 << secondId;
                     }
-                } else if (second->unkE5 != 0 && !((second->unkE1 >> firstId) & 1)) {
-                    if (CanFirstKirbyShare(first) && CanSecondKirbyShare(second)
-                        && (first->base.unk56 < gNumHumanPlayers || second->base.unk56 < gNumHumanPlayers)) {
-                        sub_08053DAC(second, firstId);
+                } else if (first->ability != KIRBY_ABILITY_MINI && gKirbys[secondId].ability != KIRBY_ABILITY_MINI
+                    && gKirbys[secondId].unkE5 != 0 && !((gKirbys[secondId].unkE1 >> firstId) & 1)) {
+                    if (CanKirbyShare(first) && CanKirbyShareIndex(secondId)
+                        && (first->base.unk56 < gNumHumanPlayers || gKirbys[secondId].base.unk56 < gNumHumanPlayers)) {
+                        sub_08053DAC(&gKirbys[secondId], firstId);
                         sub_08054414(first, secondId);
-                        second->unkE1 |= 1 << firstId;
+                        gKirbys[secondId].unkE1 |= 1 << firstId;
                     }
                 }
             }
@@ -1093,7 +1096,7 @@ static void ProcessKirbyContacts(void)
                     }
                 }
                 if (!overlap) {
-                    u16 contacts = first->unk104;
+                    u32 contacts = first->unk104;
                     u32 mask = 7 << shift;
                     if ((contacts & mask) != mask) {
                         if (first->base.y > second->base.y - 0x1000)
@@ -1107,18 +1110,18 @@ static void ProcessKirbyContacts(void)
                 }
                 overlap = KirbyCanContactOther(second, first);
                 shift = firstId * 4;
-                if ((second->unk104 & (7 << shift)) && overlap) {
+                if ((gKirbys[secondId].unk104 & (7 << shift)) && overlap) {
                     if (first->base.y > second->base.y) {
                         second->base.unkC |= 0x100;
                         second->base.unk62 |= 4;
                         second->base.yspeed = 0;
-                        second->unk104 -= 1 << shift;
+                        gKirbys[secondId].unk104 -= 1 << shift;
                     } else {
                         second->base.objBase55++;
                     }
                 }
                 if (!overlap) {
-                    u16 contacts = second->unk104;
+                    u32 contacts = gKirbys[secondId].unk104;
                     u32 mask = 7 << shift;
                     if ((contacts & mask) != mask) {
                         if (second->base.y > first->base.y - 0x1000)
@@ -1128,7 +1131,7 @@ static void ProcessKirbyContacts(void)
                     } else {
                         contacts |= contacts & mask;
                     }
-                    second->unk104 = contacts;
+                    gKirbys[secondId].unk104 = contacts;
                 }
             }
         }
