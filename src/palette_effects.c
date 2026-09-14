@@ -218,7 +218,8 @@ static inline void DarkenColor(u16 *palette, struct PaletteEffect *effect)
 static inline void BrightenColor(u16 *palette, struct PaletteEffect *effect)
 {
     s8 amount = effect->unk1;
-    u32 result = gBrightenRedTable[(*palette & 31) + amount];
+    // TODO(match): Keep the accumulated color in r3 and the signed adjustment in r2.
+    register u32 result asm("r3") = gBrightenRedTable[(*palette & 31) + amount];
     result |= gBrightenGreenTable[((*palette >> 5) & 31) + amount];
     result |= gBrightenBlueTable[((*palette >> 10) & 31) + amount];
     *palette = result;
@@ -263,15 +264,22 @@ static inline void AdvancePaletteEffect(struct PaletteEffect *effect, u32 flags)
         struct PaletteEffect *e = effect;
         if (flags & 0x20) {
             if (flags & 0x40) {
-                e->unkC = e->unk2 << 8;
+                e->unkC = e->unk2 * 0x100;
                 e->unk1 = target;
             } else {
-                u32 newFlags = (flags | 1) & 0xFF59;
-                e->unk8 = newFlags;
+                u16 newFlags = flags | 1;
+                // TODO(match): Materialize the halfword before masking to preserve the r0 flag-update result.
+                asm("" : : "r"(newFlags));
+                e->unk8 = newFlags & 0xFF59;
             }
         } else {
             e->unk1 = target;
-            e->unk8 = flags | 0x20;
+            {
+                u16 newFlags = flags | 0x20;
+                // TODO(match): Keep the OR result separate from the previous flags until the shared store.
+                asm("" : : "r"(newFlags));
+                e->unk8 = newFlags;
+            }
         }
     }
 }
@@ -294,16 +302,6 @@ static inline void AdvancePaletteEffect(struct PaletteEffect *effect, u32 flags)
     ++palette; transform(palette, effect); \
     ++palette; transform(palette, effect);
 
-// TODO(match): Only the `effect->unk8 |= 1; effect->unk8 &= 0xFF79;` tail differs: the OR keeps its
-// result in the flags register instead of the register holding the constant, so the following AND and
-// store name two registers the other way round. The same tail shape differs in the other ApplyPalette*
-// functions.
-#ifndef NONMATCHING
-NAKED void ApplyPaletteDarkening(struct PaletteEffect *effect)
-{
-    asm(".include \"asm/nonmatching/ApplyPaletteDarkening.inc\"");
-}
-#else
 void ApplyPaletteDarkening(struct PaletteEffect *effect)
 {
     u16 *palette;
@@ -336,8 +334,10 @@ void ApplyPaletteDarkening(struct PaletteEffect *effect)
             if (flags & 0x40)
                 effect->unk1 = effect->unk2;
             else {
-                effect->unk8 |= 1;
-                effect->unk8 &= 0xFF79;
+                u16 newFlags = flags | 1;
+                // TODO(match): Materialize the halfword result so OR and AND use r0 rather than r2.
+                asm("" : : "r"(newFlags));
+                effect->unk8 = newFlags & 0xFF79;
             }
         } else {
             effect->unkC += effect->unkA;
@@ -345,20 +345,14 @@ void ApplyPaletteDarkening(struct PaletteEffect *effect)
         }
     }
 }
-#endif
 
-// TODO(match): Channel extraction uses shifts/masks instead of the reference narrowing sequence; the original inline color temporary remains unresolved.
-#ifndef NONMATCHING
-NAKED void ApplyPaletteBrightening(struct PaletteEffect *effect)
-{
-    asm(".include \"asm/nonmatching/ApplyPaletteBrightening.inc\"");
-}
-#else
 void ApplyPaletteBrightening(struct PaletteEffect *effect)
 {
     u16 *palette;
     u16 bank;
+    u32 finished;
     u32 flags;
+    u32 savedFlags;
     if (effect->unk8 & 2) {
         palette = gBgPalette;
         for (bank = 0; bank < 16; bank++) {
@@ -383,23 +377,19 @@ void ApplyPaletteBrightening(struct PaletteEffect *effect)
         gMainFlags |= MAIN_FLAG_BG_PALETTE_SYNC_ENABLE | MAIN_FLAG_OBJ_PALETTE_SYNC_ENABLE;
     }
     flags = effect->unk8;
-    if (!(flags & 1) && (!(gMainFlags & 0x800) || (flags & 0x80)))
-        AdvancePaletteEffect(effect, flags);
+    finished = flags & 1;
+    savedFlags = flags;
+    if (!finished && (!(gMainFlags & 0x800) || (savedFlags & 0x80)))
+        AdvancePaletteEffect(effect, savedFlags);
 }
-#endif
 
-// TODO(match): Channel extraction uses shifts/masks instead of the reference narrowing sequence; the original inline color temporary remains unresolved.
-#ifndef NONMATCHING
-NAKED void ApplyPaletteTableDarkening(struct PaletteEffect *effect)
-{
-    asm(".include \"asm/nonmatching/ApplyPaletteTableDarkening.inc\"");
-}
-#else
 void ApplyPaletteTableDarkening(struct PaletteEffect *effect)
 {
     u16 *palette;
     u16 bank;
+    u32 finished;
     u32 flags;
+    u32 savedFlags;
     if (effect->unk8 & 2) {
         palette = gBgPalette;
         for (bank = 0; bank < 16; bank++) {
@@ -424,23 +414,19 @@ void ApplyPaletteTableDarkening(struct PaletteEffect *effect)
         gMainFlags |= MAIN_FLAG_BG_PALETTE_SYNC_ENABLE | MAIN_FLAG_OBJ_PALETTE_SYNC_ENABLE;
     }
     flags = effect->unk8;
-    if (!(flags & 1) && (!(gMainFlags & 0x800) || (flags & 0x80)))
-        AdvancePaletteEffect(effect, flags);
+    finished = flags & 1;
+    savedFlags = flags;
+    if (!finished && (!(gMainFlags & 0x800) || (savedFlags & 0x80)))
+        AdvancePaletteEffect(effect, savedFlags);
 }
-#endif
 
-// TODO(match): Channel extraction and table offsets use different lifetimes; the original inline color temporary remains unresolved.
-#ifndef NONMATCHING
-NAKED void ApplyPaletteRedTint(struct PaletteEffect *effect)
-{
-    asm(".include \"asm/nonmatching/ApplyPaletteRedTint.inc\"");
-}
-#else
 void ApplyPaletteRedTint(struct PaletteEffect *effect)
 {
     u16 *palette;
     u16 bank;
+    u32 finished;
     u32 flags;
+    u32 savedFlags;
     if (effect->unk8 & 2) {
         palette = gBgPalette;
         for (bank = 0; bank < 16; bank++) {
@@ -465,25 +451,21 @@ void ApplyPaletteRedTint(struct PaletteEffect *effect)
         gMainFlags |= MAIN_FLAG_BG_PALETTE_SYNC_ENABLE | MAIN_FLAG_OBJ_PALETTE_SYNC_ENABLE;
     }
     flags = effect->unk8;
-    if (!(flags & 1) && (!(gMainFlags & 0x800) || (flags & 0x80)))
-        AdvancePaletteEffect(effect, flags);
+    finished = flags & 1;
+    savedFlags = flags;
+    if (!finished && (!(gMainFlags & 0x800) || (savedFlags & 0x80)))
+        AdvancePaletteEffect(effect, savedFlags);
 }
-#endif
 
-// TODO(match): The fixed-point endpoint test uses different temporaries; signed accumulator and shared fill-scratch variants still differ.
-#ifndef NONMATCHING
-NAKED void ApplyPaletteWhiteFill(struct PaletteEffect *effect)
-{
-    asm(".include \"asm/nonmatching/ApplyPaletteWhiteFill.inc\"");
-}
-#else
 void ApplyPaletteWhiteFill(struct PaletteEffect *effect)
 {
-    u16 *palette;
+    // TODO(match): Preserve the bank cursor in r4 and effect pointer in r6 across CpuSet.
+    register u16 *palette asm("r4");
     u32 fill;
     u16 bgBank;
     u16 objBank;
-    u32 flags;
+    // TODO(match): Keep the flags in r1 so the inline update uses r4 for the current adjustment.
+    register u32 flags asm("r1");
     if (effect->unk8 & 2) {
         palette = gBgPalette;
         for (bgBank = 0; bgBank < 16; bgBank++) {
@@ -507,7 +489,6 @@ void ApplyPaletteWhiteFill(struct PaletteEffect *effect)
     if (!(flags & 1))
         AdvancePaletteEffect(effect, flags);
 }
-#endif
 
 #undef TRANSFORM_VISIBLE_COLORS
 
@@ -898,13 +879,6 @@ static inline s8 ClampPaletteChannel(s32 value)
     return result;
 }
 
-// TODO(match): Only the red channel's two masks differ: the original masks the loaded bytes into fresh registers, this masks them in place.
-#ifndef NONMATCHING
-NAKED void BlendSpriteAnimationPalettes(u8 paletteId, u16 sourceAnim, u8 sourceVariant, u16 targetAnim, u8 targetVariant, u16 amount)
-{
-    asm(".include \"asm/nonmatching/BlendSpriteAnimationPalettes.inc\"");
-}
-#else
 void BlendSpriteAnimationPalettes(u8 paletteId, u16 sourceAnim, u8 sourceVariant, u16 targetAnim, u8 targetVariant, u16 amount)
 {
     u16 source[16];
@@ -939,15 +913,29 @@ void BlendSpriteAnimationPalettes(u8 paletteId, u16 sourceAnim, u8 sourceVariant
         u8 srcLow, dstLow;
         u16 srcChannel, dstChannel;
         u16 color;
+        s32 difference;
+        s32 mask = 31;
         srcLow = source[i];
         dstLow = target[i];
-        color = ClampPaletteChannel(((amount * ((dstLow & 31) - (srcLow & 31))) >> 8) + (srcLow & 31));
+        {
+            s32 sourceRed, targetRed;
+            // TODO(match): Preserve separate mask copies for the two byte-channel ANDs.
+            targetRed = mask;
+            asm("" : "+r"(targetRed));
+            targetRed &= dstLow;
+            sourceRed = mask;
+            asm("" : "+r"(sourceRed));
+            sourceRed &= srcLow;
+            color = ClampPaletteChannel(sourceRed + ((amount * (targetRed - sourceRed)) >> 8));
+        }
         srcChannel = source[i] >> 5;
         dstChannel = target[i] >> 5;
-        color |= ClampPaletteChannel(((amount * ((dstChannel & 31) - (srcChannel & 31))) >> 8) + (srcChannel & 31)) * 32;
+        difference = (dstChannel & mask) - (srcChannel & mask);
+        color |= ClampPaletteChannel((srcChannel & mask) + ((amount * difference) >> 8)) * 32;
         srcChannel = source[i] >> 10;
         dstChannel = target[i] >> 10;
-        color |= ClampPaletteChannel(((amount * ((dstChannel & 31) - (srcChannel & 31))) >> 8) + (srcChannel & 31)) * 1024;
+        difference = (dstChannel & mask) - (srcChannel & mask);
+        color |= ClampPaletteChannel((srcChannel & mask) + ((amount * difference) >> 8)) * 1024;
         source[i] = color;
     }
     if (gMainFlags & 0x20000)
@@ -958,15 +946,7 @@ void BlendSpriteAnimationPalettes(u8 paletteId, u16 sourceAnim, u8 sourceVariant
     }
     SaveObjPaletteColors(paletteId * 16, 16);
 }
-#endif
 
-// TODO(match): One instruction differs: the original copies the sign-extended red offset before multiplying it by the amount.
-#ifndef NONMATCHING
-NAKED void OffsetSpriteAnimationPalette(u8 paletteId, u16 anim, u8 variant, s8 red, s8 green, s8 blue, u16 amount)
-{
-    asm(".include \"asm/nonmatching/OffsetSpriteAnimationPalette.inc\"");
-}
-#else
 void OffsetSpriteAnimationPalette(u8 paletteId, u16 anim, u8 variant, s8 red, s8 green, s8 blue, u16 amount)
 {
     u16 colors[16];
@@ -990,14 +970,27 @@ void OffsetSpriteAnimationPalette(u8 paletteId, u16 anim, u8 variant, s8 red, s8
     CpuCopy16(&gObjPalette[paletteId * 16], colors, sizeof(colors));
     for (i = 1; !(i & 0xF0); i++) {
         u8 low;
-        u16 channel;
         u16 color;
+        s32 mask = 31;
         low = colors[i];
-        color = ClampPaletteChannel(((amount * red) >> 8) + (low & 31));
-        channel = colors[i] >> 5;
-        color |= ClampPaletteChannel(((amount * green) >> 8) + (channel & 31)) * 32;
-        channel = colors[i] >> 10;
-        color |= ClampPaletteChannel(((amount * blue) >> 8) + (channel & 31)) * 1024;
+        {
+            s32 delta = (red * amount) >> 8;
+            s32 redChannel;
+            // TODO(match): Keep a separate red-channel mask copy; the tied input preserves its value.
+            asm("" : "=r"(redChannel) : "0"(mask));
+            redChannel &= low;
+            color = ClampPaletteChannel(redChannel + delta);
+        }
+        {
+            u32 channel = colors[i] >> 5;
+            s32 delta = (amount * green) >> 8;
+            color |= ClampPaletteChannel((channel & mask) + delta) * 32;
+        }
+        {
+            u32 channel = colors[i] >> 10;
+            s32 delta = (amount * blue) >> 8;
+            color |= ClampPaletteChannel((channel & mask) + delta) * 1024;
+        }
         colors[i] = color;
     }
     if (gMainFlags & 0x20000)
@@ -1009,7 +1002,6 @@ void OffsetSpriteAnimationPalette(u8 paletteId, u16 anim, u8 variant, s8 red, s8
     gMainFlags |= MAIN_FLAG_OBJ_PALETTE_SYNC_ENABLE;
     SaveObjPaletteColors(paletteId * 16, 16);
 }
-#endif
 
 const u16 gBrightenRedTable[64] = {
     0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0008,

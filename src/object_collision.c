@@ -111,27 +111,19 @@ s32 HandleKirbyCollision(struct ObjectBase *attack, struct ObjectBase *other)
     return 0;
 }
 
-// TODO(match): The vulnerability mask reassociates to (0x3FFFF8 & attackFlags) & ~(defense & ~7),
-// so the two ANDs are emitted in the wrong order at all six test sites.
-#ifndef NONMATCHING
-NAKED s32 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
-{
-    asm(".include \"asm/nonmatching/HandleObjectCollision.inc\"");
-}
-#else
 s32 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
 {
-    struct Object *object = (struct Object *)other;
     struct ObjectBase *parent;
-    s32 attackFlags;
+    s32 attackFlags, loadedAttackFlags;
+    u32 grab;
     u32 flags, defense;
     if (attack->header.kind == 2) {
-        if (object->type == 0x46 && attack->xspeed < 0)
+        if (((struct Object *)other)->type == 0x46 && attack->xspeed < 0)
             return 0;
-        if (attack->header.kind == 2 && attack->parent == object)
+        if (attack->header.kind == 2 && attack->parent == other)
             return 0;
     }
-    if (object->base.flags & 0x1000000) {
+    if (other->flags & 0x1000000) {
         if (attack->flags & 0x40000)
             return 0;
         if (attack->unk68 & 0x80)
@@ -139,9 +131,15 @@ s32 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
     }
     parent = attack->parent;
     if (parent != NULL && parent->header.kind == 0 && attack->unk56 == gLocalPlayerId)
-        TryTrackHudEnemy(object);
-    attackFlags = attack->unk68;
-    if (attackFlags & 0x20) {
+        TryTrackHudEnemy((struct Object *)other);
+    loadedAttackFlags = attack->unk68;
+    grab = loadedAttackFlags & 0x20;
+    attackFlags = loadedAttackFlags;
+    if (grab) {
+        struct Object *object = (struct Object *)other;
+        struct ObjectBase *parent;
+        u32 flags, loadedFlags, noContact;
+        u32 loadedDefense, resistant;
         parent = attack->parent;
         if (parent == NULL)
             return 0;
@@ -149,25 +147,28 @@ s32 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
             u8 type = ((struct Object *)parent)->type;
             if (type != 7 && type != 14)
                 return 0;
-            if ((u8)(object->type - 0x5E) > 14)
+            if ((u8)(((struct Object *)other)->type - 0x5E) > 14)
                 return 0;
             if (!(attack->flags & 0x10000)) {
-                object->base.flags |= 0x40000;
-                object->base.unk6C = parent;
+                other->flags |= 0x40000;
+                other->unk6C = parent;
             }
-            sub_0809CFC4(object);
+            sub_0809CFC4((struct Object *)other);
             return 1;
         }
         if (attack->unk56 >= gNumHumanPlayers) {
-            if ((u8)(object->type - 0x5E) <= 14 || object->type == 0xA4
-                || (object->type == 0xA3 && object->base.unk56 < gNumHumanPlayers))
+            if ((u8)(((struct Object *)other)->type - 0x5E) <= 14 || ((struct Object *)other)->type == 0xA4
+                || (((struct Object *)other)->type == 0xA3 && other->unk56 < gNumHumanPlayers))
                 return 0;
         }
-        flags = attack->flags;
-        if (!(flags & 0x10000) && !(object->base.flags & 0x20000)) {
-            if ((flags & 0x100000) || (object->base.flags & 0x200000)) {
-                defense = object->base.unk5C;
-                if (((0x3FFFF8 & ~(defense & ~7)) & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)) {
+        loadedFlags = attack->flags;
+        noContact = loadedFlags & 0x10000;
+        flags = loadedFlags;
+        if (!noContact && !(other->flags & 0x20000)) {
+            if ((flags & 0x100000) || (other->flags & 0x200000)) {
+                u32 defense = other->unk5C;
+                u32 vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
+                if ((vulnerableTypes & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)) {
                     object->base.flags |= 0x40000;
                     object->base.unk6C = parent;
                 }
@@ -183,49 +184,72 @@ s32 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
             object->unk90 &= ~(3 << (attack->unk56 * 2));
             object->unk90 |= 1 << (attack->unk56 * 2);
         }
-        defense = object->base.unk5C;
-        if (defense & 0x20) {
+        loadedDefense = other->unk5C;
+        resistant = loadedDefense & 0x20;
+        defense = loadedDefense;
+        if (resistant) {
             if (object->type <= 0xD4 || !(attackFlags & 0x200000))
                 return 0;
         }
         if ((attackFlags & 0x200000) && (u8)(object->type - 0x5E) <= 14) {
             attack->flags = flags & ~0x40000;
         } else {
-                if (((0x3FFFF8 & ~(defense & ~7)) & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)) {
+            u32 vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
+            if ((vulnerableTypes & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)) {
                 attack->flags = flags | 0x40000;
                 object->base.unk6C = parent;
                 sub_0809C380(object);
-            } else if (!(gUnk_03000510.unk4 & ((1 << object->base.unk56) | 0x10))) {
-                object->base.objBase54 += (gUnk_0203AD40 & 2) * 2;
+            } else if (!(gUnk_03000510.unk4 & ((1 << other->unk56) | 0x10))) {
+                other->objBase54 += (gUnk_0203AD40 & 2) * 2;
             }
         }
         return 0;
     }
-    flags = attack->flags;
-    defense = object->base.unk5C;
-    if (!(flags & 0x10000) && !(object->base.flags & 0x20000)) {
-        if (!(flags & 0x100000) && !(object->base.flags & 0x200000)) {
-            object->base.flags |= 0x40000;
-            object->base.unk6C = attack;
-        } else if (((0x3FFFF8 & ~(defense & ~7)) & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)) {
-            object->base.flags |= 0x40000;
-            object->base.unk6C = attack;
+    {
+        u32 attackStateFlags = attack->flags;
+        u32 noContact = attackStateFlags & 0x10000;
+        u32 vulnerableTypes, damageTypes;
+        defense = other->unk5C;
+        if (!noContact) {
+            u32 initialOtherFlags = other->flags;
+            u32 intangible = initialOtherFlags & 0x20000;
+            flags = initialOtherFlags;
+            if (!intangible) {
+                if ((attackStateFlags & 0x100000) || (flags & 0x200000)) {
+                    u32 vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
+                    if (!(vulnerableTypes & attackFlags))
+                        goto contactEffects;
+                    if ((u32)(attackFlags & 7) >= (defense & 7)) {
+                        other->flags = flags | 0x40000;
+                        other->unk6C = attack;
+                    }
+                } else {
+                    other->flags = flags | 0x40000;
+                    other->unk6C = attack;
+                }
+            }
+        }
+        vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
+        damageTypes = vulnerableTypes & attackFlags;
+        flags = other->flags;
+        if (damageTypes && (u32)(attackFlags & 7) >= (defense & 7) && !(flags & 0x8000)) {
+            if (attackFlags & 0x8000)
+                sub_0809C6D0((struct Object *)other);
+            else
+                sub_0809B1E4((struct Object *)other);
+            if (!(other->unk68 & 0x20000000))
+                return 1;
+            return 0;
         }
     }
-    if (((0x3FFFF8 & ~(defense & ~7)) & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7) && !(object->base.flags & 0x8000)) {
-        if (attackFlags & 0x8000)
-            sub_0809C6D0(object);
-        else
-            sub_0809B1E4(object);
-        if (!(object->base.unk68 & 0x20000000))
-            return 1;
-        return 0;
-    }
-    if ((object->base.flags & 0x40000) && !(attackFlags & 0x800000)) {
+contactEffects:
+    if (flags & 0x40000) {
+        struct Object *object = (struct Object *)other;
+        if (attackFlags & 0x800000) return 0;
         if ((u8)(object->type - 0x38) > 0x1A) {
             if (object->type != 0x6D || !(attackFlags & 0x80))
                 sub_0808845C(object, 10);
-            if (!(object->base.flags & 0x8000))
+            if (!(other->flags & 0x8000))
                 sub_0808520C(object, 16);
         } else {
             sub_0808845C(object, 10);
@@ -237,21 +261,16 @@ s32 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
     }
     return 0;
 }
-#endif
 
-// TODO(match): Sizes agree; the shared `break` tail of the grab switch lands on the first case instead of the last, and the 0x400000 mask does not get its own register.
-#ifndef NONMATCHING
-NAKED s32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *attack)
-{
-    asm(".include \"asm/nonmatching/HandleAttackObjectCollision.inc\"");
-}
-#else
 s32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *attack)
 {
     struct ObjectBase *parent;
-    bool8 handled;
-    s32 attackFlags;
+    // TODO(match): Shift each returned byte before the shared test; a bool8 temporary adds an LSR after the shared LSL.
+    u32 handled;
+    s32 attackFlags, initialFlags;
+    u32 grab;
     u32 flags, defense, vulnerableTypes;
+    u32 initialOtherFlags, intangible;
     if (other->header.kind == 1 && ((struct Object *)other)->type == 0x46 && attack->xspeed < 0)
         return 0;
     parent = attack->parent;
@@ -259,8 +278,10 @@ s32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *att
         return 0;
     if (other->header.kind == 1 && (other->flags & 0x1000000) && (attack->flags & 0x40000))
         return 0;
-    attackFlags = attack->unk68;
-    if (attackFlags & 0x20) {
+    initialFlags = attack->unk68;
+    grab = initialFlags & 0x20;
+    attackFlags = initialFlags;
+    if (grab) {
         attack->unk6C = other;
         defense = other->unk5C;
         vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
@@ -270,67 +291,67 @@ s32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *att
             if (parent != NULL) {
                 parent->unkC &= ~0x40;
                 if (parent->header.kind == 1) {
-                    switch (object->type) {
+                    switch (((struct Object *)parent)->type) {
                     case 0x32:
                         if (other->flags & 0x8000)
                             return 0;
-                        handled = sub_080A049C(object, (struct Kirby *)other);
+                        handled = (u32)sub_080A049C((struct Object *)parent, (struct Kirby *)other) << 24;
                         break;
                     case 0x33:
                         if (other->flags & 0x8000)
                             return 0;
-                        handled = sub_080A1804(object, (struct Kirby *)other);
+                        handled = (u32)sub_080A1804((struct Object *)parent, (struct Kirby *)other) << 24;
                         break;
                     case 0x38:
                         if (other->flags & 0x8000)
                             return 0;
-                        handled = sub_080CC6F0(object, (struct Kirby *)other);
+                        handled = (u32)sub_080CC6F0((struct Object *)parent, (struct Kirby *)other) << 24;
                         break;
                     case 0x9E:
                     case 0xAE:
                         if (other->flags & 0x8000)
                             return 0;
-                        handled = sub_080B6368(object, (struct Kirby *)other);
+                        handled = (u32)sub_080B6368(object, (struct Kirby *)other) << 24;
                         break;
                     case 0x3A:
                         if (other->flags & 0x8000)
                             return 0;
-                        handled = sub_080CE94C(object, (struct Kirby *)other);
+                        handled = (u32)sub_080CE94C((struct Object *)parent, (struct Kirby *)other) << 24;
                         break;
                     case 15:
                         if (other->flags & 0x8000)
                             return 0;
-                        handled = sub_080B0758(object, (struct Kirby *)other);
+                        handled = (u32)sub_080B0758((struct Object *)parent, (struct Kirby *)other) << 24;
                         break;
                     case 0x48:
                         if (other->flags & 0x8000)
                             return 0;
-                        handled = sub_080E588C((struct Gobbler *)object, (struct Kirby *)other);
+                        handled = (u32)sub_080E588C((struct Gobbler *)parent, (struct Kirby *)other) << 24;
                         break;
                     case 0x9F:
                         if (other->flags & 0x8000)
                             return 0;
-                        handled = sub_080E74E4(object, (struct Kirby *)other);
+                        handled = (u32)sub_080E74E4((struct Object *)parent, (struct Kirby *)other) << 24;
                         break;
                     case 0x3E:
                         if (other->flags & 0x8000)
                             return 0;
-                        handled = sub_080D4004(object, (struct Kirby *)other);
+                        handled = (u32)sub_080D4004((struct Object *)parent, (struct Kirby *)other) << 24;
                         break;
                     case 0x47:
                     case 0x4D:
                         if (other->flags & 0x8000)
                             return 0;
-                        handled = sub_080E1B8C((struct CrazyHand *)object, (struct Kirby *)other);
+                        handled = (u32)sub_080E1B8C((struct CrazyHand *)object, (struct Kirby *)other) << 24;
                         break;
                     case 0x3C:
                         if (other->flags & 0x8000)
                             return 0;
-                        handled = sub_080C8548(object, (struct Kirby *)other);
+                        handled = (u32)sub_080C8548((struct Object *)parent, (struct Kirby *)other) << 24;
                         break;
                     case 7:
                     case 14:
-                        handled = sub_080AC5E0(object, &other->header);
+                        handled = (u32)sub_080AC5E0(object, &other->header) << 24;
                         break;
                     default:
                         return 0;
@@ -342,15 +363,17 @@ s32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *att
             }
         }
     } else {
-        flags = other->flags;
-        if (!(flags & 0x10000)) {
+        initialOtherFlags = other->flags;
+        intangible = initialOtherFlags & 0x10000;
+        flags = initialOtherFlags;
+        if (!intangible) {
             u32 attackObjectFlags = attack->flags;
             if (!(attackObjectFlags & 0x20000)) {
                 if (!(flags & 0x100000) && !(attackObjectFlags & 0x200000)) {
                     attack->flags = attackObjectFlags | 0x4000000;
                     attack->unk6C = other;
                 } else {
-                    defense = other->unk5C;
+                    u32 defense = other->unk5C;
                     vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
                     if ((vulnerableTypes & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)) {
                         attack->flags = attackObjectFlags | 0x4000000;
@@ -359,45 +382,48 @@ s32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *att
                 }
             }
         }
-        if ((attackFlags & 0x10000000) && !(other->flags & 0x400000) && !(flags & 0x10000)) {
-            if (other->flags & 0x100000) {
-                defense = other->unk5C;
-                vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
-                if (!(vulnerableTypes & attackFlags))
-                    return 0;
-                if ((u32)(attackFlags & 7) < (defense & 7))
-                    goto CheckDamage;
+        {
+            s32 interactionFlags = attackFlags;
+            // TODO(match): Keep the interaction test in a separate register from the attack flags used afterward.
+            asm("" : "+r"(interactionFlags));
+            if (interactionFlags & 0x10000000) {
+                u32 attackTypeMask = 0x400000;
+                if (!(flags & attackTypeMask) && !(flags & 0x10000)) {
+                    if (flags & 0x100000) {
+                        defense = other->unk5C;
+                        vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
+                        if (!(vulnerableTypes & interactionFlags))
+                            return 0;
+                        if ((u32)(interactionFlags & 7) < (defense & 7))
+                            goto CheckDamage;
+                    }
+                    if (!(attackFlags & attackTypeMask) || !(other->unk5C & attackTypeMask))
+                        sub_080853C8((struct Kirby *)parent, 4);
+                }
             }
-            if (!(attackFlags & 0x400000) || !(other->unk5C & 0x400000))
-                sub_080853C8((struct Kirby *)parent, 4);
         }
 CheckDamage:
-        defense = other->unk5C;
-        attackFlags = attack->unk68;
-        vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
-        if ((vulnerableTypes & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)
-            && !(other->flags & 0x8000) && !(attackFlags & 0x20000000))
-            return 1;
+        {
+            s32 damageFlags;
+            defense = other->unk5C;
+            vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
+            damageFlags = attack->unk68;
+            if ((vulnerableTypes & damageFlags) && (u32)(damageFlags & 7) >= (defense & 7)
+                && !(other->flags & 0x8000) && !(damageFlags & 0x20000000))
+                return 1;
+        }
     }
     return 0;
 }
-#endif
 
-// TODO(match): The frame is 44 rather than 48 bytes; the column counter still compares against 255 and the width/clip sum is not folded into a cmn.
-#ifndef NONMATCHING
-NAKED void ProcessAttackTileCollisions(struct ObjectBase *attack)
-{
-    asm(".include \"asm/nonmatching/ProcessAttackTileCollisions.inc\"");
-}
-#else
 void ProcessAttackTileCollisions(struct ObjectBase *attack)
 {
     s8 bounds[4];
-    u8 width, height, row, column;
+    u8 row, width, height, column;
     u16 tileX, tileY;
     if (attack->unk68 & 0x20) {
+        s16 maxX, minX, maxY, minY;
         s8 direction = 1;
-        s16 minX, maxX, minY, maxY;
         if (attack->flags & 0x40000)
             return;
         maxX = gCurLevelInfo[attack->unk56].levelMaxPosition.x >> 12;
@@ -436,7 +462,7 @@ void ProcessAttackTileCollisions(struct ObjectBase *attack)
                     tileX += direction;
                 }
                 if (row & 1)
-                    tileY = tileY + 1 + row;
+                    tileY += row + 1;
                 else
                     tileY = (u16)(tileY - 1) - row;
             }
@@ -464,7 +490,7 @@ void ProcessAttackTileCollisions(struct ObjectBase *attack)
         }
         clip = tileX - (gCurLevelInfo[attack->unk56].levelMinPosition.x >> 12);
         if (clip & 0x8000) {
-            if (width + clip < 0)
+            if (width < -clip)
                 return;
             tileX -= clip;
             width += clip;
@@ -477,7 +503,7 @@ void ProcessAttackTileCollisions(struct ObjectBase *attack)
         }
         clip = tileY - (gCurLevelInfo[attack->unk56].levelMinPosition.y >> 12);
         if (clip & 0x8000) {
-            if (height + clip < 0)
+            if (height < -clip)
                 return;
             tileY -= clip;
             height += clip;
@@ -485,11 +511,11 @@ void ProcessAttackTileCollisions(struct ObjectBase *attack)
         for (row = height + 1; row != 0;) {
             --row;
             for (column = width + 1; column != 0;) {
-                s32 x, y;
                 u32 attributes;
                 --column;
-                y = row + tileY;
-                attributes = gCollisionAttributes[GetCollisionTile(attack->unk56, tileX + column, y)];
+                attributes = gCollisionAttributes[GetCollisionTile(attack->unk56, tileX + column, row + tileY)];
+                // TODO(match): Three input references prioritize attack over column in agbcc; two swap r6/r7.
+                asm("" : : "r"(attack), "r"(attack), "r"(attack));
                 if (attributes & 0x1000) {
                     switch (attributes & 0xF00000) {
                     case 0x200000:
@@ -502,17 +528,16 @@ void ProcessAttackTileCollisions(struct ObjectBase *attack)
                         if (!(attack->unk68 & 0x800)) continue;
                         break;
                     }
-                    x = column + tileX;
                     if (attributes & 0x20) {
-                        sub_08001408(attack->unk56, sub_080025AC(attack->unk56, x, y), NULL, NULL);
-                        sub_0800E0E4((struct Object *)attack, x, y);
+                        sub_08001408(attack->unk56, sub_080025AC(attack->unk56, column + tileX, row + tileY), NULL, NULL);
+                        sub_0800E0E4((struct Object *)attack, column + tileX, row + tileY);
                         PlaySfx(attack, SE_BLOCK_BREAK);
                     } else {
                         struct EffectObject *effect;
-                        sub_08001408(attack->unk56, sub_080025AC(attack->unk56, x, y), NULL, NULL);
+                        sub_08001408(attack->unk56, sub_080025AC(attack->unk56, column + tileX, row + tileY), NULL, NULL);
                         effect = CreateEffectObject(attack, 0, 0x28D, 0);
-                        effect->x = (x * 0x1000) + 0x800;
-                        effect->y = (y * 0x1000) + 0x800;
+                        effect->x = ((column + tileX) * 0x1000) + 0x800;
+                        effect->y = ((row + tileY) * 0x1000) + 0x800;
                         PlaySfx(attack, SE_BLOCK_BREAK);
                         if (attack->unk68 & 0x10000000) {
                             sub_08085328(attack->parent);
@@ -525,7 +550,6 @@ void ProcessAttackTileCollisions(struct ObjectBase *attack)
         }
     }
 }
-#endif
 
 extern s32 (*const gObjectCollisionCallbacks[3])(struct ObjectBase *, struct ObjectBase *);
 
@@ -748,21 +772,13 @@ static void ProcessObjectCollisionLists(void)
 }
 #endif
 
-// TODO(match): The collision scratch uses 40 rather than 36 stack bytes; direct bounds arrays and position records did not recover the original lifetimes.
-#ifndef NONMATCHING
-NAKED void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid)
-{
-    asm(".include \"asm/nonmatching/ResolveSolidObjectCollision.inc\"");
-}
-#else
 void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid)
 {
     s8 a[4], b[4];
     bool32 previousOverlap[2];
     u8 widthA, widthB, heightA, heightB;
-    bool32 overlapX, overlapY;
-    u32 solidFlags;
-    s32 tolerance;
+    bool8 overlapX, overlapY;
+    u32 solidFlags, savedFlags, facing;
 
     if (object->flags & 1) {
         a[2] = -object->unk3C;
@@ -774,7 +790,9 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
     a[1] = object->unk3D;
     a[3] = object->unk3F;
     solidFlags = solid->base.flags;
-    if (solidFlags & 1) {
+    facing = solidFlags & 1;
+    savedFlags = solidFlags;
+    if (facing) {
         b[2] = -solid->base.unk3C;
         b[0] = -solid->base.unk3E;
     } else {
@@ -792,7 +810,7 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
     overlapX = COLLISION_AXIS_OVERLAP(object->x + a[0] * 256, widthA * 256, solid->base.x + b[0] * 256, widthB * 256);
     overlapY = COLLISION_AXIS_OVERLAP(object->y + a[1] * 256, heightA * 256, solid->base.y + b[1] * 256, heightB * 256);
     if (overlapX && overlapY) {
-        if (solidFlags & 0x80) {
+        if (savedFlags & 0x80) {
             object->unk62 |= 0x10;
             object->unk6C = solid;
             return;
@@ -801,7 +819,7 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
             && object->x != solid->base.x + (b[2] - a[0]) * 256
             && object->x != solid->base.x + (b[0] - a[2]) * 256) {
             if (object->yspeed > 0) {
-                tolerance = object->yspeed + 0x300;
+                s32 tolerance = object->yspeed + 0x300;
                 if (abs((object->y + a[1] * 256) - (solid->base.y + b[3] * 256)) < tolerance) {
                     object->unk62 |= 8;
                     solid->base.unk62 |= 4;
@@ -810,7 +828,7 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
                 }
             }
             if (object->yspeed <= 0 || solid->base.yspeed != 0) {
-                tolerance = 0x300 - object->yspeed;
+                s32 tolerance = 0x300 - object->yspeed;
                 if (abs((object->y + a[3] * 256) - (solid->base.y + b[1] * 256)) < tolerance) {
                     object->unk62 |= 4;
                     solid->base.unk62 |= 8;
@@ -824,7 +842,7 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
             }
         }
         if (!previousOverlap[0] && previousOverlap[1]) {
-            tolerance = 0x200 - object->yspeed;
+            s32 tolerance = 0x200 - object->yspeed;
             if (abs((object->y + a[3] * 256) - (solid->base.y + b[1] * 256)) > tolerance) {
                 if (object->x > solid->base.x) {
                     s32 distance = solid->base.xspeed - (object->xspeed - 0x400);
@@ -860,9 +878,11 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
             }
         }
         if (!previousOverlap[0] && !previousOverlap[1]) {
+            s32 tolerance;
+
             if (object->y > solid->base.y) {
                 if (object->yspeed > 0) {
-                    tolerance = object->yspeed + 0x300;
+                    s32 tolerance = object->yspeed + 0x300;
                     if (abs((object->y + a[1] * 256) - (solid->base.y + b[3] * 256)) < tolerance) {
                         object->unk62 |= 8;
                         solid->base.unk62 |= 4;
@@ -871,7 +891,7 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
                     }
                 }
             } else if (object->yspeed <= 0) {
-                tolerance = 0x300 - object->yspeed;
+                s32 tolerance = 0x300 - object->yspeed;
                 if (abs((object->y + a[3] * 256) - (solid->base.y + b[1] * 256)) < tolerance) {
                     object->unk62 |= 4;
                     solid->base.unk62 |= 8;
@@ -919,9 +939,11 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
             }
         }
         if (previousOverlap[0] && previousOverlap[1]) {
+            s32 tolerance;
+
             if (object->x != solid->base.x + (b[2] - a[0]) * 256
                 && object->x != solid->base.x + (b[0] - a[2]) * 256) {
-                tolerance = 0x300 - object->yspeed;
+                s32 tolerance = 0x300 - object->yspeed;
                 if (abs((object->y + a[3] * 256) - (solid->base.y + b[1] * 256)) < tolerance) {
                     object->unk62 |= 4;
                     solid->base.unk62 |= 8;
@@ -932,7 +954,7 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
                         object->yspeed = 0;
                     object->kirby2 = (struct Kirby *)solid;
                 } else if (object->yspeed > 0) {
-                    tolerance = object->yspeed + 0x300;
+                    s32 tolerance = object->yspeed + 0x300;
                     if (abs((object->y + a[1] * 256) - (solid->base.y + b[3] * 256)) < tolerance) {
                         object->unk62 |= 8;
                         solid->base.unk62 |= 4;
@@ -978,54 +1000,58 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
         }
     }
 }
-#endif
 
-static inline bool32 CanKirbyShare(struct Kirby *kirby)
+#define CanKirbyShare(kirby) \
+    (((kirby)->ability != KIRBY_ABILITY_UFO \
+        && ((((kirby)->animationIndex <= 0x15 || (kirby)->animationIndex == 0x19 || (kirby)->animationIndex == 0x2F) \
+                && (kirby)->animationIndex != 0xD) \
+            || (u16)((kirby)->animationIndex - 0x38) <= 7)) \
+        || ((kirby)->ability == KIRBY_ABILITY_UFO \
+            && ((kirby)->animationIndex <= 0x12 || (u16)((kirby)->animationIndex - 0x21) <= 13)))
+
+static inline bool32 CanKirbyShareIndex(struct Kirby *kirbys, s32 index)
 {
-    if (kirby->ability != KIRBY_ABILITY_UFO) {
-        if ((kirby->animationIndex <= 0x15 || kirby->animationIndex == 0x19 || kirby->animationIndex == 0x2F)
-            && kirby->animationIndex != 0xD)
+    if (kirbys[index].ability != KIRBY_ABILITY_UFO) {
+        if ((kirbys[index].animationIndex <= 0x15 || kirbys[index].animationIndex == 0x19 || kirbys[index].animationIndex == 0x2F)
+            && kirbys[index].animationIndex != 0xD)
             return TRUE;
-        if ((u16)(kirby->animationIndex - 0x38) <= 7)
+        if ((u16)(kirbys[index].animationIndex - 0x38) <= 7)
             return TRUE;
     }
-    if (kirby->ability == KIRBY_ABILITY_UFO
-        && (kirby->animationIndex <= 0x12 || (u16)(kirby->animationIndex - 0x21) <= 13))
+    if (kirbys[index].ability == KIRBY_ABILITY_UFO
+        && (kirbys[index].animationIndex <= 0x12 || (u16)(kirbys[index].animationIndex - 0x21) <= 13))
         return TRUE;
     return FALSE;
 }
 
-static inline bool32 CanKirbyShareIndex(s32 index)
+static inline bool32 CanKirbyShareIndexLoaded(struct Kirby *kirbys, s32 index, u8 ability)
 {
-    if (gKirbys[index].ability != KIRBY_ABILITY_UFO) {
-        if ((gKirbys[index].animationIndex <= 0x15 || gKirbys[index].animationIndex == 0x19 || gKirbys[index].animationIndex == 0x2F)
-            && gKirbys[index].animationIndex != 0xD)
+    if (ability != KIRBY_ABILITY_UFO) {
+        if ((kirbys[index].animationIndex <= 0x15 || kirbys[index].animationIndex == 0x19 || kirbys[index].animationIndex == 0x2F)
+            && kirbys[index].animationIndex != 0xD)
             return TRUE;
-        if ((u16)(gKirbys[index].animationIndex - 0x38) <= 7)
-            return TRUE;
+        {
+            struct Kirby *current = kirbys;
+            if ((u16)(current[index].animationIndex - 0x38) <= 7)
+                return TRUE;
+            if (current[index].ability != KIRBY_ABILITY_UFO)
+                return FALSE;
+        }
     }
-    if (gKirbys[index].ability == KIRBY_ABILITY_UFO
-        && (gKirbys[index].animationIndex <= 0x12 || (u16)(gKirbys[index].animationIndex - 0x21) <= 13))
+    if (kirbys[index].animationIndex <= 0x12 || (u16)(kirbys[index].animationIndex - 0x21) <= 13)
         return TRUE;
     return FALSE;
 }
 
-// TODO(match): The first Kirby's animation-index pointer spills to the stack instead of
-// staying in a register, so the frame is 16 rather than 12 bytes.
-#ifndef NONMATCHING
-static NAKED void ProcessKirbyContacts(void)
-{
-    asm(".include \"asm/nonmatching/ProcessKirbyContacts.inc\"");
-}
-#else
 static void ProcessKirbyContacts(void)
 {
     u8 firstId, secondId;
     for (firstId = 0; firstId < gNumKirbys; ++firstId) {
-        struct Kirby *first = &gKirbys[firstId];
+        struct ObjectBase *firstBase = &gKirbys[firstId].base;
+        struct Kirby *first = (struct Kirby *)firstBase;
         if ((gUnk_03000510.unk4 & (0x10 | (1 << firstId)))
-            || (first->base.flags & 0x3800F00) || first->stateFn == sub_080566E0
-            || (u16)(first->animationIndex - 0x4A) <= 15 || first->base.sprite.animId == 0x220)
+            || (firstBase->flags & 0x3800F00) || first->stateFn == sub_080566E0
+            || (u16)(first->animationIndex - 0x4A) <= 15 || firstBase->sprite.animId == 0x220)
             continue;
         for (secondId = firstId + 1; secondId < gNumKirbys; ++secondId) {
             struct Kirby *second = &gKirbys[secondId];
@@ -1033,78 +1059,100 @@ static void ProcessKirbyContacts(void)
             // The original repeats the first Kirby's animation check here.
             if ((second->base.flags & 0x3800F00) || gKirbys[secondId].stateFn == sub_080566E0
                 || (u16)(first->animationIndex - 0x4A) <= 15 || second->base.sprite.animId == 0x220
-                || second->base.roomId != first->base.roomId)
+                || second->base.roomId != firstBase->roomId)
                 continue;
-            overlap = KirbyCanContactOther(first, second);
+            overlap = KirbyCanContactOther((struct Kirby *)firstBase, second);
             if (overlap && first->ability != KIRBY_ABILITY_MINI) {
                 if (gKirbys[secondId].ability != KIRBY_ABILITY_MINI
                     && first->unkE5 != 0 && !((first->unkE1 >> secondId) & 1)) {
-                    if (CanKirbyShare(first) && CanKirbyShareIndex(secondId)
-                        && (first->base.unk56 < gNumHumanPlayers || gKirbys[secondId].base.unk56 < gNumHumanPlayers)) {
-                        sub_08053DAC(first, secondId);
-                        sub_08054414(&gKirbys[secondId], firstId);
-                        first->unkE1 |= 1 << secondId;
+                    if (CanKirbyShare(first)) {
+                        u8 ability = gKirbys[secondId].ability;
+                        struct Kirby *kirbys = gKirbys;
+                        if (CanKirbyShareIndexLoaded(kirbys, secondId, ability)
+                            && (first->base.unk56 < gNumHumanPlayers || kirbys[secondId].base.unk56 < gNumHumanPlayers)) {
+                            sub_08053DAC(first, secondId);
+                            sub_08054414(&gKirbys[secondId], firstId);
+                            first->unkE1 |= 1 << secondId;
+                            continue;
+                        }
                     }
-                } else if (first->ability != KIRBY_ABILITY_MINI && gKirbys[secondId].ability != KIRBY_ABILITY_MINI
-                    && gKirbys[secondId].unkE5 != 0 && !((gKirbys[secondId].unkE1 >> firstId) & 1)) {
-                    if (CanKirbyShare(first) && CanKirbyShareIndex(secondId)
-                        && (first->base.unk56 < gNumHumanPlayers || gKirbys[secondId].base.unk56 < gNumHumanPlayers)) {
-                        sub_08053DAC(&gKirbys[secondId], firstId);
-                        sub_08054414(first, secondId);
-                        gKirbys[secondId].unkE1 |= 1 << firstId;
+                } else if (first->ability != KIRBY_ABILITY_MINI) {
+                    u8 ability = gKirbys[secondId].ability;
+                    struct Kirby *kirbys = gKirbys;
+                    if (ability != KIRBY_ABILITY_MINI
+                        && gKirbys[secondId].unkE5 != 0 && !((gKirbys[secondId].unkE1 >> firstId) & 1)) {
+                        if (CanKirbyShare(first)) {
+                            if (CanKirbyShareIndex(kirbys, secondId)
+                                && (first->base.unk56 < gNumHumanPlayers || kirbys[secondId].base.unk56 < gNumHumanPlayers)) {
+                                u32 offset = secondId * sizeof(struct Kirby);
+                                // TODO(match): Typed pointer arithmetic reverses the ADD operands (r3, r4 instead of r4, r3).
+                                sub_08053DAC((struct Kirby *)(offset + (u32)kirbys), firstId);
+                                sub_08054414(first, secondId);
+                                kirbys[secondId].unkE1 |= 1 << firstId;
+                                continue;
+                            }
+                        }
                     }
                 }
             }
-            if ((first->base.unk62 & 4) && (second->base.unk62 & 4)) {
+            if ((firstBase->unk62 & 4) && (second->base.unk62 & 4)) {
                 if (overlap) {
-                    if (first->base.x > second->base.x) {
-                        if ((!(first->base.unk62 & 1) || (first->base.flags & 1))
-                            && (!(first->base.unk62 & 2) || !(first->base.flags & 1)))
+                    if (firstBase->x > second->base.x) {
+                        if ((!(firstBase->unk62 & 1) || (firstBase->flags & 1))
+                            && (!(firstBase->unk62 & 2) || !(firstBase->flags & 1)))
                             first->unkF4 += 0x80;
                         // Both pushes use the first Kirby's wall-contact flags.
-                        if ((!(first->base.unk62 & 1) || !(first->base.flags & 1))
-                            && (!(first->base.unk62 & 2) || (first->base.flags & 1)))
+                        if ((!(firstBase->unk62 & 1) || !(firstBase->flags & 1))
+                            && (!(firstBase->unk62 & 2) || (firstBase->flags & 1)))
                             second->unkF4 -= 0x40;
                     } else {
-                        if ((!(first->base.unk62 & 1) || !(first->base.flags & 1))
-                            && (!(first->base.unk62 & 2) || (first->base.flags & 1)))
+                        if ((!(firstBase->unk62 & 1) || !(firstBase->flags & 1))
+                            && (!(firstBase->unk62 & 2) || (firstBase->flags & 1)))
                             first->unkF4 -= 0x80;
-                        if ((!(first->base.unk62 & 1) || (first->base.flags & 1))
-                            && (!(first->base.unk62 & 2) || !(first->base.flags & 1)))
+                        if ((!(firstBase->unk62 & 1) || (firstBase->flags & 1))
+                            && (!(firstBase->unk62 & 2) || !(firstBase->flags & 1)))
                             second->unkF4 += 0x40;
                     }
                 } else {
                     first->unk104 |= 7 << (secondId * 4);
                 }
             } else {
-                u32 shift = secondId * 4;
-                if ((first->unk104 & (7 << shift)) && overlap) {
-                    if (first->base.y < second->base.y) {
-                        first->base.unkC |= 0x100;
-                        first->base.unk62 |= 4;
-                        first->base.yspeed = 0;
+                u32 shift, testShift, contactBits;
+                contactBits = first->unk104;
+                testShift = secondId * 4;
+                contactBits &= 7 << testShift;
+                shift = testShift;
+                if (contactBits && overlap) {
+                    if (firstBase->y < second->base.y) {
+                        firstBase->unkC |= 0x100;
+                        firstBase->unk62 |= 4;
+                        firstBase->yspeed = 0;
                         first->unk104 -= 1 << shift;
                     } else {
-                        first->base.objBase55++;
+                        firstBase->objBase55++;
                     }
                 }
                 if (!overlap) {
-                    u32 contacts = first->unk104;
+                    u16 *contactField = &first->unk104;
+                    u32 contacts = *contactField;
                     u32 mask = 7 << shift;
                     if ((contacts & mask) != mask) {
-                        if (first->base.y > second->base.y - 0x1000)
+                        if (firstBase->y > second->base.y - 0x1000)
                             contacts &= ~mask;
                         else
                             contacts |= mask;
                     } else {
                         contacts |= contacts & mask;
                     }
-                    first->unk104 = contacts;
+                    *contactField = contacts;
                 }
-                overlap = KirbyCanContactOther(second, first);
-                shift = firstId * 4;
-                if ((gKirbys[secondId].unk104 & (7 << shift)) && overlap) {
-                    if (first->base.y > second->base.y) {
+                overlap = KirbyCanContactOther(second, (struct Kirby *)firstBase);
+                contactBits = gKirbys[secondId].unk104;
+                testShift = firstId * 4;
+                contactBits &= 7 << testShift;
+                shift = testShift;
+                if (contactBits && overlap) {
+                    if (firstBase->y > second->base.y) {
                         second->base.unkC |= 0x100;
                         second->base.unk62 |= 4;
                         second->base.yspeed = 0;
@@ -1114,23 +1162,26 @@ static void ProcessKirbyContacts(void)
                     }
                 }
                 if (!overlap) {
-                    u32 contacts = gKirbys[secondId].unk104;
+                    struct Kirby *contactKirby = &gKirbys[secondId];
+                    u16 *contactField = &contactKirby->unk104;
+                    u32 contacts = *contactField;
                     u32 mask = 7 << shift;
                     if ((contacts & mask) != mask) {
-                        if (second->base.y > first->base.y - 0x1000)
+                        if (second->base.y > firstBase->y - 0x1000)
                             contacts &= ~mask;
                         else
                             contacts |= mask;
                     } else {
                         contacts |= contacts & mask;
                     }
-                    gKirbys[secondId].unk104 = contacts;
+                    *contactField = contacts;
                 }
             }
+            // TODO(match): Six input references keep secondId in r5; five allocate r6 and change 116 instruction entries.
+            asm("" : : "r"(secondId), "r"(secondId), "r"(secondId), "r"(secondId), "r"(secondId), "r"(secondId));
         }
     }
 }
-#endif
 
 u8 KirbyCanContactOther(struct Kirby *first, struct Kirby *second)
 {
