@@ -265,12 +265,13 @@ contactEffects:
 s32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *attack)
 {
     struct ObjectBase *parent;
-    // TODO(match): Shift each returned byte before the shared test; a bool8 temporary adds an LSR after the shared LSL.
+    // Each returned byte is shifted before the shared test; a bool8 local adds an LSR.
     u32 handled;
     s32 attackFlags, initialFlags;
     u32 grab;
     u32 flags, defense, vulnerableTypes;
     u32 initialOtherFlags, intangible;
+    s32 typeFlags;
     if (other->header.kind == 1 && ((struct Object *)other)->type == 0x46 && attack->xspeed < 0)
         return 0;
     parent = attack->parent;
@@ -382,36 +383,29 @@ s32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *att
                 }
             }
         }
-        {
-            s32 interactionFlags = attackFlags;
-            // TODO(match): Keep the interaction test in a separate register from the attack flags used afterward.
-            asm("" : "+r"(interactionFlags));
-            if (interactionFlags & 0x10000000) {
-                u32 attackTypeMask = 0x400000;
-                if (!(flags & attackTypeMask) && !(flags & 0x10000)) {
-                    if (flags & 0x100000) {
-                        defense = other->unk5C;
-                        vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
-                        if (!(vulnerableTypes & interactionFlags))
-                            return 0;
-                        if ((u32)(interactionFlags & 7) < (defense & 7))
-                            goto CheckDamage;
-                    }
-                    if (!(attackFlags & attackTypeMask) || !(other->unk5C & attackTypeMask))
-                        sub_080853C8((struct Kirby *)parent, 4);
+        typeFlags = attackFlags;
+        if (typeFlags & 0x10000000) {
+            u32 attackTypeMask = 0x400000;
+            if (!(flags & attackTypeMask) && !(flags & 0x10000)) {
+                if (flags & 0x100000) {
+                    defense = other->unk5C;
+                    vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
+                    if (!(vulnerableTypes & typeFlags))
+                        return 0;
+                    if ((u32)(typeFlags & 7) < (defense & 7))
+                        goto CheckDamage;
                 }
+                if (!(attackFlags & attackTypeMask) || !(other->unk5C & attackTypeMask))
+                    sub_080853C8((struct Kirby *)parent, 4);
             }
         }
 CheckDamage:
-        {
-            s32 damageFlags;
-            defense = other->unk5C;
-            vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
-            damageFlags = attack->unk68;
-            if ((vulnerableTypes & damageFlags) && (u32)(damageFlags & 7) >= (defense & 7)
-                && !(other->flags & 0x8000) && !(damageFlags & 0x20000000))
-                return 1;
-        }
+        defense = other->unk5C;
+        vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
+        typeFlags = attack->unk68;
+        if ((vulnerableTypes & typeFlags) && (u32)(typeFlags & 7) >= (defense & 7)
+            && !(other->flags & 0x8000) && !(typeFlags & 0x20000000))
+            return 1;
     }
     return 0;
 }
