@@ -1051,6 +1051,7 @@ static void ProcessKirbyContacts(void)
         while (secondId < gNumKirbys) {
             struct Kirby *second = &gKirbys[secondId];
             bool8 overlap;
+            u32 shift, testShift, contactBits;
             // The original repeats the first Kirby's animation check here.
             if ((second->base.flags & 0x3800F00) || gKirbys[secondId].stateFn == sub_080566E0
                 || (u16)(first->animationIndex - 0x4A) <= 15 || second->base.sprite.animId == 0x220
@@ -1116,68 +1117,67 @@ static void ProcessKirbyContacts(void)
                     first->unk104 |= 7 << (secondId * 4);
                 }
                 ++secondId;
-            } else {
-                u32 shift, testShift, contactBits;
-                contactBits = first->unk104;
-                testShift = secondId * 4;
-                contactBits &= 7 << testShift;
-                shift = testShift;
-                if (contactBits && overlap) {
-                    if (firstBase->y < second->base.y) {
-                        firstBase->unkC |= 0x100;
-                        firstBase->unk62 |= 4;
-                        firstBase->yspeed = 0;
-                        first->unk104 -= 1 << shift;
-                    } else {
-                        firstBase->objBase55++;
-                    }
-                }
-                if (!overlap) {
-                    u16 *contactField = &first->unk104;
-                    u32 contacts = *contactField;
-                    u32 mask = 7 << shift;
-                    if ((contacts & mask) != mask) {
-                        if (firstBase->y > second->base.y - 0x1000)
-                            contacts &= ~mask;
-                        else
-                            contacts |= mask;
-                    } else {
-                        contacts |= contacts & mask;
-                    }
-                    *contactField = contacts;
-                }
-                overlap = KirbyCanContactOther(second, (struct Kirby *)firstBase);
-                contactBits = gKirbys[secondId].unk104;
-                testShift = firstId * 4;
-                contactBits &= 7 << testShift;
-                shift = testShift;
-                if (contactBits && overlap) {
-                    if (firstBase->y > second->base.y) {
-                        second->base.unkC |= 0x100;
-                        second->base.unk62 |= 4;
-                        second->base.yspeed = 0;
-                        gKirbys[secondId].unk104 -= 1 << shift;
-                    } else {
-                        second->base.objBase55++;
-                    }
-                }
-                if (!overlap) {
-                    struct Kirby *contactKirby = &gKirbys[secondId];
-                    u16 *contactField = &contactKirby->unk104;
-                    u32 contacts = *contactField;
-                    u32 mask = 7 << shift;
-                    if ((contacts & mask) != mask) {
-                        if (second->base.y > firstBase->y - 0x1000)
-                            contacts &= ~mask;
-                        else
-                            contacts |= mask;
-                    } else {
-                        contacts |= contacts & mask;
-                    }
-                    *contactField = contacts;
-                }
-                ++secondId;
+                continue;
             }
+            contactBits = first->unk104;
+            testShift = secondId * 4;
+            contactBits &= 7 << testShift;
+            shift = testShift;
+            if (contactBits && overlap) {
+                if (firstBase->y < second->base.y) {
+                    firstBase->unkC |= 0x100;
+                    firstBase->unk62 |= 4;
+                    firstBase->yspeed = 0;
+                    first->unk104 -= 1 << shift;
+                } else {
+                    firstBase->objBase55++;
+                }
+            }
+            if (!overlap) {
+                u16 *contactField = &first->unk104;
+                u32 contacts = *contactField;
+                u32 mask = 7 << shift;
+                if ((contacts & mask) != mask) {
+                    if (firstBase->y > second->base.y - 0x1000)
+                        contacts &= ~mask;
+                    else
+                        contacts |= mask;
+                } else {
+                    contacts |= contacts & mask;
+                }
+                *contactField = contacts;
+            }
+            overlap = KirbyCanContactOther(second, (struct Kirby *)firstBase);
+            contactBits = gKirbys[secondId].unk104;
+            testShift = firstId * 4;
+            contactBits &= 7 << testShift;
+            shift = testShift;
+            if (contactBits && overlap) {
+                if (firstBase->y > second->base.y) {
+                    second->base.unkC |= 0x100;
+                    second->base.unk62 |= 4;
+                    second->base.yspeed = 0;
+                    gKirbys[secondId].unk104 -= 1 << shift;
+                } else {
+                    second->base.objBase55++;
+                }
+            }
+            if (!overlap) {
+                struct Kirby *contactKirby = &gKirbys[secondId];
+                u16 *contactField = &contactKirby->unk104;
+                u32 contacts = *contactField;
+                u32 mask = 7 << shift;
+                if ((contacts & mask) != mask) {
+                    if (second->base.y > firstBase->y - 0x1000)
+                        contacts &= ~mask;
+                    else
+                        contacts |= mask;
+                } else {
+                    contacts |= contacts & mask;
+                }
+                *contactField = contacts;
+            }
+            ++secondId;
         }
     }
 }
