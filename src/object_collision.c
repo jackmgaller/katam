@@ -610,9 +610,9 @@ static void ProcessObjectCollisionLists(void)
                 }
                 otherSlot = &gUnk_02022F50[group * 64];
                 for (otherCount = gUnk_02022EB0[0][group * 2]; otherCount != 0; --otherCount, ++otherSlot) {
-                    other = *otherSlot;
-                    if ((other->unkC & 0x1000) && (*slot)->roomId == other->roomId && !(other->flags & 0x100))
-                        ResolveSolidObjectCollision(other, (struct Object *)*slot);
+                    struct ObjectBase *object = *otherSlot;
+                    if ((object->unkC & 0x1000) && (*slot)->roomId == object->roomId && !(object->flags & 0x100))
+                        ResolveSolidObjectCollision(object, (struct Object *)*slot);
                 }
             }
         }
@@ -640,9 +640,8 @@ static void ProcessObjectCollisionLists(void)
                     else
                         bx = (other->x >> 8) + other->unk38;
                     by = (other->y >> 8) + other->unk39;
-                    if ((*slot)->unk3A != 0 && (*slot)->unk3B != 0
-                        && COLLISION_AXIS_OVERLAP(ax, (*slot)->unk3A * 2, bx, other->unk3A * 2)
-                        && COLLISION_AXIS_OVERLAP(ay, (*slot)->unk3B * 2, by, other->unk3B * 2)) {
+                    if (((*slot)->unk3A != 0 && (*slot)->unk3B != 0 && COLLISION_AXIS_OVERLAP(ax, (*slot)->unk3A * 2, bx, other->unk3A * 2) && COLLISION_AXIS_OVERLAP(ay, (*slot)->unk3B * 2, by, other->unk3B * 2))
+                        || ((*slot)->sprite.unk20[0].unk0 == 0 && COLLISION_AXIS_OVERLAP(((*slot)->x >> 8) + (*slot)->sprite.unk20[0].unk4, (*slot)->sprite.unk20[0].unk6 - (*slot)->sprite.unk20[0].unk4, bx, other->unk3A * 2) && COLLISION_AXIS_OVERLAP(((*slot)->y >> 8) + (*slot)->sprite.unk20[0].unk5, (*slot)->sprite.unk20[0].unk7 - (*slot)->sprite.unk20[0].unk5, by, other->unk3B * 2))) {
                         u8 consumed = gObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
                         if ((u16)gObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot))
                             *otherSlot = NULL;
@@ -650,21 +649,6 @@ static void ProcessObjectCollisionLists(void)
                             CommitAttackContact(*slot);
                             *slot = NULL;
                             break;
-                        }
-                    } else if ((*slot)->sprite.unk20[0].unk0 == 0) {
-                        s32 left = ((*slot)->x >> 8) + (*slot)->sprite.unk20[0].unk4;
-                        if (COLLISION_AXIS_OVERLAP(left, (*slot)->sprite.unk20[0].unk6 - (*slot)->sprite.unk20[0].unk4, bx, other->unk3A * 2)) {
-                            s32 top = ((*slot)->y >> 8) + (*slot)->sprite.unk20[0].unk5;
-                            if (COLLISION_AXIS_OVERLAP(top, (*slot)->sprite.unk20[0].unk7 - (*slot)->sprite.unk20[0].unk5, by, other->unk3B * 2)) {
-                                u8 consumed = gObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
-                                if ((u16)gObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot))
-                                    *otherSlot = NULL;
-                                if (consumed) {
-                                    CommitAttackContact(*slot);
-                                    *slot = NULL;
-                                    break;
-                                }
-                            }
                         }
                     }
                 }
