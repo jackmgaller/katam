@@ -462,8 +462,9 @@ void ApplyPaletteWhiteFill(struct PaletteEffect *effect)
     u32 fill;
     u16 bgBank;
     u16 objBank;
-    // TODO(match): Keep the flags in r1 so the inline update uses r4 for the current adjustment.
-    register u32 flags asm("r1");
+    u32 finished;
+    u32 flags;
+    u32 savedFlags;
     if (effect->unk8 & 2) {
         palette = gBgPalette;
         for (bgBank = 0; bgBank < 16; bgBank++) {
@@ -488,8 +489,10 @@ void ApplyPaletteWhiteFill(struct PaletteEffect *effect)
         gMainFlags |= MAIN_FLAG_BG_PALETTE_SYNC_ENABLE | MAIN_FLAG_OBJ_PALETTE_SYNC_ENABLE;
     }
     flags = effect->unk8;
-    if (!(flags & 1))
-        AdvancePaletteEffect(effect, flags);
+    finished = flags & 1;
+    savedFlags = flags;
+    if (!finished)
+        AdvancePaletteEffect(effect, savedFlags);
 }
 
 #undef TRANSFORM_VISIBLE_COLORS
