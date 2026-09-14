@@ -608,7 +608,7 @@ static void ProcessObjectCollisionLists(void)
                     if ((*slot)->roomId == other->roomId && !(other->flags & 0x100))
                         ResolveSolidObjectCollision(other, (struct Object *)*slot);
                 }
-                otherSlot = &gUnk_02022F50[group * 64];
+                otherSlot = &gUnk_02022F50[group << 6];
                 for (otherCount = gUnk_02022EB0[0][group * 2]; otherCount != 0; --otherCount, ++otherSlot) {
                     struct ObjectBase *object = *otherSlot;
                     if ((object->unkC & 0x1000) && (*slot)->roomId == object->roomId && !(object->flags & 0x100))
@@ -626,7 +626,7 @@ static void ProcessObjectCollisionLists(void)
                 ax = ((*slot)->x >> 8) + (*slot)->unk38;
             ay = ((*slot)->y >> 8) + (*slot)->unk39;
             if ((*slot)->flags & 0x20000000) {
-                otherSlot = &gUnk_02022F50[group * 64];
+                otherSlot = &gUnk_02022F50[group << 6];
                 for (otherCount = gUnk_02022EB0[0][group * 2]; otherCount != 0; --otherCount, ++otherSlot) {
                     other = *otherSlot;
                     if (other == NULL)
@@ -755,7 +755,7 @@ static void ProcessObjectCollisionLists(void)
             if ((s32)(*slot)->flags < 0)
                 ProcessAttackTileCollisions(*slot);
         }
-        slot = &gUnk_02022F50[group * 64];
+        slot = &gUnk_02022F50[group << 6];
         for (count = gUnk_02022EB0[0][group * 2]; count != 0; --count, ++slot) {
             if (*slot == NULL)
                 continue;
@@ -765,7 +765,7 @@ static void ProcessObjectCollisionLists(void)
                 ax = ((*slot)->x >> 8) + (*slot)->unk38;
             ay = ((*slot)->y >> 8) + (*slot)->unk39;
             if ((*slot)->flags & 0x20000000) {
-                otherSlot = &gUnk_02022F50[group * 64];
+                otherSlot = &gUnk_02022F50[group << 6];
                 for (otherCount = gUnk_02022EB0[0][group * 2]; otherCount != 0; --otherCount, ++otherSlot) {
                     other = *otherSlot;
                     if (other == NULL)
