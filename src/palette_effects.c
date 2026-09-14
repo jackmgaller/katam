@@ -218,11 +218,12 @@ static inline void DarkenColor(u16 *palette, struct PaletteEffect *effect)
 static inline void BrightenColor(u16 *palette, struct PaletteEffect *effect)
 {
     s8 amount = effect->unk1;
-    // TODO(match): Keep the accumulated color in r3 and the signed adjustment in r2.
-    register u32 result asm("r3") = gBrightenRedTable[(*palette & 31) + amount];
+    u32 result = gBrightenRedTable[(*palette & 31) + amount];
     result |= gBrightenGreenTable[((*palette >> 5) & 31) + amount];
-    result |= gBrightenBlueTable[((*palette >> 10) & 31) + amount];
-    *palette = result;
+    {
+        u32 color = gBrightenBlueTable[((*palette >> 10) & 31) + amount] | result;
+        *palette = color;
+    }
 }
 
 static inline void DarkenColorWithTable(u16 *palette, struct PaletteEffect *effect)
@@ -342,6 +343,13 @@ void ApplyPaletteDarkening(struct PaletteEffect *effect)
     }
 }
 
+// TODO(match): Each color's final OR and store land in r0, where the original keeps the accumulated color in r3.
+#ifndef NONMATCHING
+NAKED void ApplyPaletteBrightening(struct PaletteEffect *effect)
+{
+    asm(".include \"asm/nonmatching/ApplyPaletteBrightening.inc\"");
+}
+#else
 void ApplyPaletteBrightening(struct PaletteEffect *effect)
 {
     u16 *palette;
@@ -378,6 +386,7 @@ void ApplyPaletteBrightening(struct PaletteEffect *effect)
     if (!finished && (!(gMainFlags & 0x800) || (savedFlags & 0x80)))
         AdvancePaletteEffect(effect, savedFlags);
 }
+#endif
 
 void ApplyPaletteTableDarkening(struct PaletteEffect *effect)
 {
