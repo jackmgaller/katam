@@ -595,16 +595,16 @@ static NAKED void ProcessObjectCollisionLists(void)
 static void ProcessObjectCollisionLists(void)
 {
     u8 group;
+    struct ObjectBase **slot, **otherSlot;
+    struct ObjectBase *other;
+    s32 ax, ay, bx, by;
+    u8 count, otherCount;
     for (group = 0; group < gNumKirbys; ++group) {
-        struct ObjectBase **slot = (struct ObjectBase **)gUnk_02022EC0[group];
-        struct ObjectBase **otherSlot;
-        struct ObjectBase *other;
-        s32 ax, ay, bx, by;
-        u8 count, otherCount, player;
+        slot = (struct ObjectBase **)gUnk_02022EC0[group];
         for (count = gUnk_02022F40[group]; count != 0; --count, ++slot) {
             if (*slot != NULL) {
-                for (player = 0; player < gNumKirbys; ++player) {
-                    other = &gKirbys[player].base;
+                for (otherCount = 0; otherCount < gNumKirbys; ++otherCount) {
+                    other = &gKirbys[otherCount].base;
                     if ((*slot)->roomId == other->roomId && !(other->flags & 0x100))
                         ResolveSolidObjectCollision(other, (struct Object *)*slot);
                 }
@@ -673,8 +673,8 @@ static void ProcessObjectCollisionLists(void)
                 CommitAttackContact(*slot);
             }
             if ((*slot)->flags & 0x10000000) {
-                for (player = 0; player < gNumKirbys; ++player) {
-                    other = &gKirbys[player].base;
+                for (otherCount = 0; otherCount < gNumKirbys; ++otherCount) {
+                    other = &gKirbys[otherCount].base;
                     if ((*slot)->roomId != other->roomId)
                         continue;
                     if ((*slot)->flags & 0x200)
@@ -830,8 +830,8 @@ static void ProcessObjectCollisionLists(void)
                     continue;
             }
             if ((*slot)->flags & 0x10000000) {
-                for (player = 0; player < gNumKirbys; ++player) {
-                    other = &gKirbys[player].base;
+                for (otherCount = 0; otherCount < gNumKirbys; ++otherCount) {
+                    other = &gKirbys[otherCount].base;
                     if ((*slot)->roomId == other->roomId) {
                         if ((*slot)->flags & 0x200)
                             break;
