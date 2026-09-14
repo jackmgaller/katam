@@ -458,8 +458,7 @@ void ApplyPaletteRedTint(struct PaletteEffect *effect)
 
 void ApplyPaletteWhiteFill(struct PaletteEffect *effect)
 {
-    // TODO(match): Preserve the bank cursor in r4 and effect pointer in r6 across CpuSet.
-    register u16 *palette asm("r4");
+    u16 *palette;
     u32 fill;
     u16 bgBank;
     u16 objBank;
@@ -471,16 +470,20 @@ void ApplyPaletteWhiteFill(struct PaletteEffect *effect)
             if ((effect->unk6 >> bgBank) & 1) {
                 fill = 0xFFFFFFFF;
                 CpuSet(&fill, palette, CPU_SET_SRC_FIXED | CPU_SET_32BIT | 8);
+                palette += 16;
+            } else {
+                palette += 16;
             }
-            palette += 16;
         }
         palette = gObjPalette;
         for (objBank = 0; objBank < 16; objBank++) {
             if ((effect->unk4 >> objBank) & 1) {
                 fill = 0xFFFFFFFF;
                 CpuSet(&fill, palette, CPU_SET_SRC_FIXED | CPU_SET_32BIT | 8);
+                palette += 16;
+            } else {
+                palette += 16;
             }
-            palette += 16;
         }
         gMainFlags |= MAIN_FLAG_BG_PALETTE_SYNC_ENABLE | MAIN_FLAG_OBJ_PALETTE_SYNC_ENABLE;
     }
