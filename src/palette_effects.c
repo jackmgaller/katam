@@ -884,6 +884,13 @@ static inline s8 ClampPaletteChannel(s32 value)
     return result;
 }
 
+// TODO(match): Only the red channel differs: the original masks the two loaded bytes into fresh copies of the mask, this masks them in place.
+#ifndef NONMATCHING
+NAKED void BlendSpriteAnimationPalettes(u8 paletteId, u16 sourceAnim, u8 sourceVariant, u16 targetAnim, u8 targetVariant, u16 amount)
+{
+    asm(".include \"asm/nonmatching/BlendSpriteAnimationPalettes.inc\"");
+}
+#else
 void BlendSpriteAnimationPalettes(u8 paletteId, u16 sourceAnim, u8 sourceVariant, u16 targetAnim, u8 targetVariant, u16 amount)
 {
     u16 source[16];
@@ -922,17 +929,8 @@ void BlendSpriteAnimationPalettes(u8 paletteId, u16 sourceAnim, u8 sourceVariant
         s32 mask = 31;
         srcLow = source[i];
         dstLow = target[i];
-        {
-            s32 sourceRed, targetRed;
-            // TODO(match): Preserve separate mask copies for the two byte-channel ANDs.
-            targetRed = mask;
-            asm("" : "+r"(targetRed));
-            targetRed &= dstLow;
-            sourceRed = mask;
-            asm("" : "+r"(sourceRed));
-            sourceRed &= srcLow;
-            color = ClampPaletteChannel(sourceRed + ((amount * (targetRed - sourceRed)) >> 8));
-        }
+        difference = (dstLow & mask) - (srcLow & mask);
+        color = ClampPaletteChannel((srcLow & mask) + ((amount * difference) >> 8));
         srcChannel = source[i] >> 5;
         dstChannel = target[i] >> 5;
         difference = (dstChannel & mask) - (srcChannel & mask);
@@ -951,6 +949,7 @@ void BlendSpriteAnimationPalettes(u8 paletteId, u16 sourceAnim, u8 sourceVariant
     }
     SaveObjPaletteColors(paletteId * 16, 16);
 }
+#endif
 
 void OffsetSpriteAnimationPalette(u8 paletteId, u16 anim, u8 variant, s8 red, s8 green, s8 blue, u16 amount)
 {
