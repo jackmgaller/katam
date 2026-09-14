@@ -548,31 +548,6 @@ void ProcessAttackTileCollisions(struct ObjectBase *attack)
 
 extern s32 (*const gObjectCollisionCallbacks[3])(struct ObjectBase *, struct ObjectBase *);
 
-static inline bool32 AttackOverlapsObject(struct ObjectBase *attack, s32 ax, s32 ay,
-    struct ObjectBase *other, bool32 requireArea)
-{
-    s32 bx, by;
-    if (other->flags & 1)
-        bx = (other->x >> 8) + (-other->unk38 - other->unk3A * 2);
-    else
-        bx = (other->x >> 8) + other->unk38;
-    by = (other->y >> 8) + other->unk39;
-    if ((!requireArea || (attack->unk3A != 0 && attack->unk3B != 0))
-        && COLLISION_AXIS_OVERLAP(ax, attack->unk3A * 2, bx, other->unk3A * 2)
-        && COLLISION_AXIS_OVERLAP(ay, attack->unk3B * 2, by, other->unk3B * 2))
-        return TRUE;
-    if (attack->sprite.unk20[0].unk0 == 0) {
-        s32 left = (attack->x >> 8) + attack->sprite.unk20[0].unk4;
-        s32 top = (attack->y >> 8) + attack->sprite.unk20[0].unk5;
-        if (COLLISION_AXIS_OVERLAP(left, attack->sprite.unk20[0].unk6 - attack->sprite.unk20[0].unk4,
-                bx, other->unk3A * 2)
-            && COLLISION_AXIS_OVERLAP(top, attack->sprite.unk20[0].unk7 - attack->sprite.unk20[0].unk5,
-                by, other->unk3B * 2))
-            return TRUE;
-    }
-    return FALSE;
-}
-
 static inline void CommitAttackContact(struct ObjectBase *attack)
 {
     if (attack->flags & 0x4000000)
