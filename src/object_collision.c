@@ -638,10 +638,10 @@ static void ProcessObjectCollisionLists(void)
                         break;
                     if (other->flags & 0x200)
                         continue;
-                    if (other->flags & 1)
-                        bx = (other->x >> 8) + (-other->unk38 - other->unk3A * 2);
+                    if ((*otherSlot)->flags & 1)
+                        bx = ((*otherSlot)->x >> 8) + (-(*otherSlot)->unk38 - (*otherSlot)->unk3A * 2);
                     else
-                        bx = (other->x >> 8) + other->unk38;
+                        bx = ((*otherSlot)->x >> 8) + (*otherSlot)->unk38;
                     by = (other->y >> 8) + other->unk39;
                     if (((*slot)->unk3A != 0 && (*slot)->unk3B != 0 && COLLISION_AXIS_OVERLAP(ax, (*slot)->unk3A * 2, bx, other->unk3A * 2) && COLLISION_AXIS_OVERLAP(ay, (*slot)->unk3B * 2, by, other->unk3B * 2))
                         || ((*slot)->sprite.unk20[0].unk0 == 0 && COLLISION_AXIS_OVERLAP(((*slot)->x >> 8) + (*slot)->sprite.unk20[0].unk4, (*slot)->sprite.unk20[0].unk6 - (*slot)->sprite.unk20[0].unk4, bx, other->unk3A * 2) && COLLISION_AXIS_OVERLAP(((*slot)->y >> 8) + (*slot)->sprite.unk20[0].unk5, (*slot)->sprite.unk20[0].unk7 - (*slot)->sprite.unk20[0].unk5, by, other->unk3B * 2))) {
@@ -717,10 +717,10 @@ static void ProcessObjectCollisionLists(void)
                         break;
                     if (other->flags & 0x200)
                         continue;
-                    if (other->flags & 1)
-                        bx = (other->x >> 8) + (-other->unk38 - other->unk3A * 2);
+                    if ((*otherSlot)->flags & 1)
+                        bx = ((*otherSlot)->x >> 8) + (-(*otherSlot)->unk38 - (*otherSlot)->unk3A * 2);
                     else
-                        bx = (other->x >> 8) + other->unk38;
+                        bx = ((*otherSlot)->x >> 8) + (*otherSlot)->unk38;
                     by = (other->y >> 8) + other->unk39;
                     if (COLLISION_AXIS_OVERLAP(ax, (*slot)->unk3A * 2, bx, other->unk3A * 2)
                         && COLLISION_AXIS_OVERLAP(ay, (*slot)->unk3B * 2, by, other->unk3B * 2)) {
@@ -779,10 +779,10 @@ static void ProcessObjectCollisionLists(void)
                         break;
                     if (other->flags & 0x200)
                         continue;
-                    if (other->flags & 1)
-                        bx = (other->x >> 8) + (-other->unk38 - other->unk3A * 2);
+                    if ((*otherSlot)->flags & 1)
+                        bx = ((*otherSlot)->x >> 8) + (-(*otherSlot)->unk38 - (*otherSlot)->unk3A * 2);
                     else
-                        bx = (other->x >> 8) + other->unk38;
+                        bx = ((*otherSlot)->x >> 8) + (*otherSlot)->unk38;
                     by = (other->y >> 8) + other->unk39;
                     if (COLLISION_AXIS_OVERLAP(ax, (*slot)->unk3A * 2, bx, other->unk3A * 2)
                         && COLLISION_AXIS_OVERLAP(ay, (*slot)->unk3B * 2, by, other->unk3B * 2)) {
