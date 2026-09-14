@@ -947,13 +947,6 @@ void BlendSpriteAnimationPalettes(u8 paletteId, u16 sourceAnim, u8 sourceVariant
 }
 #endif
 
-// TODO(match): The original masks the red byte into a fresh copy of the mask and copies the sign-extended red offset before multiplying; this masks in place.
-#ifndef NONMATCHING
-NAKED void OffsetSpriteAnimationPalette(u8 paletteId, u16 anim, u8 variant, s8 red, s8 green, s8 blue, u16 amount)
-{
-    asm(".include \"asm/nonmatching/OffsetSpriteAnimationPalette.inc\"");
-}
-#else
 void OffsetSpriteAnimationPalette(u8 paletteId, u16 anim, u8 variant, s8 red, s8 green, s8 blue, u16 amount)
 {
     u16 colors[16];
@@ -979,10 +972,12 @@ void OffsetSpriteAnimationPalette(u8 paletteId, u16 anim, u8 variant, s8 red, s8
         u8 low;
         u16 color;
         s32 mask = 31;
-        low = colors[i];
+        do low = colors[i]; while (0);
         {
             s32 delta = (red * amount) >> 8;
-            color = ClampPaletteChannel((low & mask) + delta);
+            s32 value = low & mask;
+            value += delta;
+            color = ClampPaletteChannel(value);
         }
         {
             u32 channel = colors[i] >> 5;
@@ -1005,7 +1000,6 @@ void OffsetSpriteAnimationPalette(u8 paletteId, u16 anim, u8 variant, s8 red, s8
     gMainFlags |= MAIN_FLAG_OBJ_PALETTE_SYNC_ENABLE;
     SaveObjPaletteColors(paletteId * 16, 16);
 }
-#endif
 
 const u16 gBrightenRedTable[64] = {
     0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0008,
