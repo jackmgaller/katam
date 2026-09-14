@@ -267,18 +267,15 @@ static inline void AdvancePaletteEffect(struct PaletteEffect *effect, u32 flags)
                 e->unkC = e->unk2 * 0x100;
                 e->unk1 = target;
             } else {
-                u16 newFlags = flags | 1;
-                // TODO(match): Materialize the halfword before masking to preserve the r0 flag-update result.
-                asm("" : : "r"(newFlags));
+                u16 newFlags;
+                do newFlags = flags | 1; while (0);
                 e->unk8 = newFlags & 0xFF59;
             }
         } else {
             e->unk1 = target;
             {
                 u16 newFlags = flags | 0x20;
-                // TODO(match): Keep the OR result separate from the previous flags until the shared store.
-                asm("" : : "r"(newFlags));
-                e->unk8 = newFlags;
+                do e->unk8 = newFlags; while (0);
             }
         }
     }
@@ -460,15 +457,14 @@ void ApplyPaletteWhiteFill(struct PaletteEffect *effect)
 {
     u16 *palette;
     u32 fill;
-    u16 bgBank;
-    u16 objBank;
+    u16 bank;
     u32 finished;
     u32 flags;
     u32 savedFlags;
     if (effect->unk8 & 2) {
         palette = gBgPalette;
-        for (bgBank = 0; bgBank < 16; bgBank++) {
-            if ((effect->unk6 >> bgBank) & 1) {
+        for (bank = 0; bank < 16; bank++) {
+            if ((effect->unk6 >> bank) & 1) {
                 fill = 0xFFFFFFFF;
                 CpuSet(&fill, palette, CPU_SET_SRC_FIXED | CPU_SET_32BIT | 8);
                 palette += 16;
@@ -477,8 +473,8 @@ void ApplyPaletteWhiteFill(struct PaletteEffect *effect)
             }
         }
         palette = gObjPalette;
-        for (objBank = 0; objBank < 16; objBank++) {
-            if ((effect->unk4 >> objBank) & 1) {
+        for (bank = 0; bank < 16; bank++) {
+            if ((effect->unk4 >> bank) & 1) {
                 fill = 0xFFFFFFFF;
                 CpuSet(&fill, palette, CPU_SET_SRC_FIXED | CPU_SET_32BIT | 8);
                 palette += 16;
