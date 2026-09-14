@@ -458,7 +458,7 @@ void ProcessAttackTileCollisions(struct ObjectBase *attack)
                 if (row & 1)
                     tileY += row + 1;
                 else
-                    tileY = (u16)(tileY - 1) - row;
+                    tileY -= row + 1;
             }
         }
     } else {
@@ -506,40 +506,41 @@ void ProcessAttackTileCollisions(struct ObjectBase *attack)
             --row;
             for (column = width + 1; column != 0;) {
                 u32 attributes;
+                struct EffectObject *effect;
                 --column;
                 attributes = gCollisionAttributes[GetCollisionTile(attack->unk56, tileX + column, row + tileY)];
-                // TODO(match): Three input references prioritize attack over column in agbcc; two swap r6/r7.
-                asm("" : : "r"(attack), "r"(attack), "r"(attack));
-                if (attributes & 0x1000) {
-                    switch (attributes & 0xF00000) {
-                    case 0x200000:
-                        if (!(attack->unk68 & 0x1000)) continue;
-                        break;
-                    case 0x300000:
-                        if (!(attack->unk68 & 0x4000)) continue;
-                        break;
-                    case 0x400000:
-                        if (!(attack->unk68 & 0x800)) continue;
-                        break;
-                    }
-                    if (attributes & 0x20) {
-                        sub_08001408(attack->unk56, sub_080025AC(attack->unk56, column + tileX, row + tileY), NULL, NULL);
-                        sub_0800E0E4((struct Object *)attack, column + tileX, row + tileY);
-                        PlaySfx(attack, SE_BLOCK_BREAK);
-                    } else {
-                        struct EffectObject *effect;
-                        sub_08001408(attack->unk56, sub_080025AC(attack->unk56, column + tileX, row + tileY), NULL, NULL);
-                        effect = CreateEffectObject(attack, 0, 0x28D, 0);
-                        effect->x = ((column + tileX) * 0x1000) + 0x800;
-                        effect->y = ((row + tileY) * 0x1000) + 0x800;
-                        PlaySfx(attack, SE_BLOCK_BREAK);
-                        if (attack->unk68 & 0x10000000) {
-                            sub_08085328(attack->parent);
-                            RequestScreenShake(2, attack);
-                        }
-                    }
-                    attack->flags |= 0x80000;
+                if (!(attributes & 0x1000))
+                    continue;
+                switch (attributes & 0xF00000) {
+                case 0x200000:
+                    if (!(attack->unk68 & 0x1000)) continue;
+                    break;
+                case 0x300000:
+                    if (!(attack->unk68 & 0x4000)) continue;
+                    break;
+                case 0x400000:
+                    if (!(attack->unk68 & 0x800)) continue;
+                    break;
                 }
+                if (attributes & 0x20) {
+                    sub_08001408(attack->unk56, sub_080025AC(attack->unk56, column + tileX, row + tileY), NULL, NULL);
+                    sub_0800E0E4((struct Object *)attack, column + tileX, row + tileY);
+                    PlaySfx(attack, SE_BLOCK_BREAK);
+                    attack->flags |= 0x80000;
+                    continue;
+                }
+                sub_08001408(attack->unk56, sub_080025AC(attack->unk56, column + tileX, row + tileY), NULL, NULL);
+                effect = CreateEffectObject(attack, 0, 0x28D, 0);
+                effect->x = ((column + tileX) * 0x1000) + 0x800;
+                effect->y = ((row + tileY) * 0x1000) + 0x800;
+                PlaySfx(attack, SE_BLOCK_BREAK);
+                if (attack->unk68 & 0x10000000) {
+                    sub_08085328(attack->parent);
+                    RequestScreenShake(2, attack);
+                    attack->flags |= 0x80000;
+                    continue;
+                }
+                attack->flags |= 0x80000;
             }
         }
     }
