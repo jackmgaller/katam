@@ -584,8 +584,8 @@ static inline void CommitAttackContact(struct ObjectBase *attack)
         attack->flags = (attack->flags | 0x40000) & ~0x4000000;
 }
 
-// TODO(match): The frame is 48 rather than 24 bytes: ax, ay and the attack cursor spill
-// instead of living in r8, r9 and r7, and the Kirby hit body is emitted once, not twice.
+// TODO(match): In the three object loops the original shares the 0x200 mask register
+// between the attack and object flag tests; here the object test reloads the constant.
 #ifndef NONMATCHING
 static NAKED void ProcessObjectCollisionLists(void)
 {
@@ -643,8 +643,14 @@ static void ProcessObjectCollisionLists(void)
                     else
                         bx = ((*otherSlot)->x >> 8) + (*otherSlot)->unk38;
                     by = (other->y >> 8) + other->unk39;
-                    if (((*slot)->unk3A != 0 && (*slot)->unk3B != 0 && COLLISION_AXIS_OVERLAP(ax, (*slot)->unk3A * 2, bx, other->unk3A * 2) && COLLISION_AXIS_OVERLAP(ay, (*slot)->unk3B * 2, by, other->unk3B * 2))
-                        || ((*slot)->sprite.unk20[0].unk0 == 0 && COLLISION_AXIS_OVERLAP(((*slot)->x >> 8) + (*slot)->sprite.unk20[0].unk4, (*slot)->sprite.unk20[0].unk6 - (*slot)->sprite.unk20[0].unk4, bx, other->unk3A * 2) && COLLISION_AXIS_OVERLAP(((*slot)->y >> 8) + (*slot)->sprite.unk20[0].unk5, (*slot)->sprite.unk20[0].unk7 - (*slot)->sprite.unk20[0].unk5, by, other->unk3B * 2))) {
+                    if (((*slot)->unk3A != 0 && (*slot)->unk3B != 0
+                            && COLLISION_AXIS_OVERLAP(ax, (*slot)->unk3A * 2, bx, other->unk3A * 2)
+                            && COLLISION_AXIS_OVERLAP(ay, (*slot)->unk3B * 2, by, other->unk3B * 2))
+                        || ((*slot)->sprite.unk20[0].unk0 == 0
+                            && COLLISION_AXIS_OVERLAP(((*slot)->x >> 8) + (*slot)->sprite.unk20[0].unk4,
+                                (*slot)->sprite.unk20[0].unk6 - (*slot)->sprite.unk20[0].unk4, bx, other->unk3A * 2)
+                            && COLLISION_AXIS_OVERLAP(((*slot)->y >> 8) + (*slot)->sprite.unk20[0].unk5,
+                                (*slot)->sprite.unk20[0].unk7 - (*slot)->sprite.unk20[0].unk5, by, other->unk3B * 2))) {
                         u8 consumed = gObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
                         if ((u16)gObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot))
                             *otherSlot = NULL;
