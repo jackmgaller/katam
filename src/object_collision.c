@@ -1047,14 +1047,17 @@ static void ProcessKirbyContacts(void)
             || (firstBase->flags & 0x3800F00) || first->stateFn == sub_080566E0
             || (u16)(first->animationIndex - 0x4A) <= 15 || firstBase->sprite.animId == 0x220)
             continue;
-        for (secondId = firstId + 1; secondId < gNumKirbys; ++secondId) {
+        secondId = firstId + 1;
+        while (secondId < gNumKirbys) {
             struct Kirby *second = &gKirbys[secondId];
             bool8 overlap;
             // The original repeats the first Kirby's animation check here.
             if ((second->base.flags & 0x3800F00) || gKirbys[secondId].stateFn == sub_080566E0
                 || (u16)(first->animationIndex - 0x4A) <= 15 || second->base.sprite.animId == 0x220
-                || second->base.roomId != firstBase->roomId)
+                || second->base.roomId != firstBase->roomId) {
+                ++secondId;
                 continue;
+            }
             overlap = KirbyCanContactOther((struct Kirby *)firstBase, second);
             if (overlap && first->ability != KIRBY_ABILITY_MINI) {
                 if (gKirbys[secondId].ability != KIRBY_ABILITY_MINI
@@ -1067,6 +1070,7 @@ static void ProcessKirbyContacts(void)
                             sub_08053DAC(first, secondId);
                             sub_08054414(&gKirbys[secondId], firstId);
                             first->unkE1 |= 1 << secondId;
+                            ++secondId;
                             continue;
                         }
                     }
@@ -1083,6 +1087,7 @@ static void ProcessKirbyContacts(void)
                                 sub_08053DAC((struct Kirby *)(offset + (u32)kirbys), firstId);
                                 sub_08054414(first, secondId);
                                 kirbys[secondId].unkE1 |= 1 << firstId;
+                                ++secondId;
                                 continue;
                             }
                         }
@@ -1110,6 +1115,7 @@ static void ProcessKirbyContacts(void)
                 } else {
                     first->unk104 |= 7 << (secondId * 4);
                 }
+                ++secondId;
             } else {
                 u32 shift, testShift, contactBits;
                 contactBits = first->unk104;
@@ -1170,9 +1176,8 @@ static void ProcessKirbyContacts(void)
                     }
                     *contactField = contacts;
                 }
+                ++secondId;
             }
-            // TODO(match): Six input references keep secondId in r5; five allocate r6 and change 116 instruction entries.
-            asm("" : : "r"(secondId), "r"(secondId), "r"(secondId), "r"(secondId), "r"(secondId), "r"(secondId));
         }
     }
 }
