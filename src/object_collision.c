@@ -265,12 +265,13 @@ contactEffects:
 s32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *attack)
 {
     struct ObjectBase *parent;
-    // TODO(match): Shift each returned byte before the shared test; a bool8 temporary adds an LSR after the shared LSL.
+    // Each returned byte is shifted before the shared test; a bool8 local adds an LSR.
     u32 handled;
     s32 attackFlags, initialFlags;
     u32 grab;
     u32 flags, defense, vulnerableTypes;
     u32 initialOtherFlags, intangible;
+    s32 typeFlags;
     if (other->header.kind == 1 && ((struct Object *)other)->type == 0x46 && attack->xspeed < 0)
         return 0;
     parent = attack->parent;
@@ -382,36 +383,29 @@ s32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *att
                 }
             }
         }
-        {
-            s32 interactionFlags = attackFlags;
-            // TODO(match): Keep the interaction test in a separate register from the attack flags used afterward.
-            asm("" : "+r"(interactionFlags));
-            if (interactionFlags & 0x10000000) {
-                u32 attackTypeMask = 0x400000;
-                if (!(flags & attackTypeMask) && !(flags & 0x10000)) {
-                    if (flags & 0x100000) {
-                        defense = other->unk5C;
-                        vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
-                        if (!(vulnerableTypes & interactionFlags))
-                            return 0;
-                        if ((u32)(interactionFlags & 7) < (defense & 7))
-                            goto CheckDamage;
-                    }
-                    if (!(attackFlags & attackTypeMask) || !(other->unk5C & attackTypeMask))
-                        sub_080853C8((struct Kirby *)parent, 4);
+        typeFlags = attackFlags;
+        if (typeFlags & 0x10000000) {
+            u32 attackTypeMask = 0x400000;
+            if (!(flags & attackTypeMask) && !(flags & 0x10000)) {
+                if (flags & 0x100000) {
+                    defense = other->unk5C;
+                    vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
+                    if (!(vulnerableTypes & typeFlags))
+                        return 0;
+                    if ((u32)(typeFlags & 7) < (defense & 7))
+                        goto CheckDamage;
                 }
+                if (!(attackFlags & attackTypeMask) || !(other->unk5C & attackTypeMask))
+                    sub_080853C8((struct Kirby *)parent, 4);
             }
         }
 CheckDamage:
-        {
-            s32 damageFlags;
-            defense = other->unk5C;
-            vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
-            damageFlags = attack->unk68;
-            if ((vulnerableTypes & damageFlags) && (u32)(damageFlags & 7) >= (defense & 7)
-                && !(other->flags & 0x8000) && !(damageFlags & 0x20000000))
-                return 1;
-        }
+        defense = other->unk5C;
+        vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
+        typeFlags = attack->unk68;
+        if ((vulnerableTypes & typeFlags) && (u32)(typeFlags & 7) >= (defense & 7)
+            && !(other->flags & 0x8000) && !(typeFlags & 0x20000000))
+            return 1;
     }
     return 0;
 }
@@ -464,7 +458,7 @@ void ProcessAttackTileCollisions(struct ObjectBase *attack)
                 if (row & 1)
                     tileY += row + 1;
                 else
-                    tileY = (u16)(tileY - 1) - row;
+                    tileY -= row + 1;
             }
         }
     } else {
@@ -512,40 +506,41 @@ void ProcessAttackTileCollisions(struct ObjectBase *attack)
             --row;
             for (column = width + 1; column != 0;) {
                 u32 attributes;
+                struct EffectObject *effect;
                 --column;
                 attributes = gCollisionAttributes[GetCollisionTile(attack->unk56, tileX + column, row + tileY)];
-                // TODO(match): Three input references prioritize attack over column in agbcc; two swap r6/r7.
-                asm("" : : "r"(attack), "r"(attack), "r"(attack));
-                if (attributes & 0x1000) {
-                    switch (attributes & 0xF00000) {
-                    case 0x200000:
-                        if (!(attack->unk68 & 0x1000)) continue;
-                        break;
-                    case 0x300000:
-                        if (!(attack->unk68 & 0x4000)) continue;
-                        break;
-                    case 0x400000:
-                        if (!(attack->unk68 & 0x800)) continue;
-                        break;
-                    }
-                    if (attributes & 0x20) {
-                        sub_08001408(attack->unk56, sub_080025AC(attack->unk56, column + tileX, row + tileY), NULL, NULL);
-                        sub_0800E0E4((struct Object *)attack, column + tileX, row + tileY);
-                        PlaySfx(attack, SE_BLOCK_BREAK);
-                    } else {
-                        struct EffectObject *effect;
-                        sub_08001408(attack->unk56, sub_080025AC(attack->unk56, column + tileX, row + tileY), NULL, NULL);
-                        effect = CreateEffectObject(attack, 0, 0x28D, 0);
-                        effect->x = ((column + tileX) * 0x1000) + 0x800;
-                        effect->y = ((row + tileY) * 0x1000) + 0x800;
-                        PlaySfx(attack, SE_BLOCK_BREAK);
-                        if (attack->unk68 & 0x10000000) {
-                            sub_08085328(attack->parent);
-                            RequestScreenShake(2, attack);
-                        }
-                    }
-                    attack->flags |= 0x80000;
+                if (!(attributes & 0x1000))
+                    continue;
+                switch (attributes & 0xF00000) {
+                case 0x200000:
+                    if (!(attack->unk68 & 0x1000)) continue;
+                    break;
+                case 0x300000:
+                    if (!(attack->unk68 & 0x4000)) continue;
+                    break;
+                case 0x400000:
+                    if (!(attack->unk68 & 0x800)) continue;
+                    break;
                 }
+                if (attributes & 0x20) {
+                    sub_08001408(attack->unk56, sub_080025AC(attack->unk56, column + tileX, row + tileY), NULL, NULL);
+                    sub_0800E0E4((struct Object *)attack, column + tileX, row + tileY);
+                    PlaySfx(attack, SE_BLOCK_BREAK);
+                    attack->flags |= 0x80000;
+                    continue;
+                }
+                sub_08001408(attack->unk56, sub_080025AC(attack->unk56, column + tileX, row + tileY), NULL, NULL);
+                effect = CreateEffectObject(attack, 0, 0x28D, 0);
+                effect->x = ((column + tileX) * 0x1000) + 0x800;
+                effect->y = ((row + tileY) * 0x1000) + 0x800;
+                PlaySfx(attack, SE_BLOCK_BREAK);
+                if (attack->unk68 & 0x10000000) {
+                    sub_08085328(attack->parent);
+                    RequestScreenShake(2, attack);
+                    attack->flags |= 0x80000;
+                    continue;
+                }
+                attack->flags |= 0x80000;
             }
         }
     }
@@ -1053,14 +1048,18 @@ static void ProcessKirbyContacts(void)
             || (firstBase->flags & 0x3800F00) || first->stateFn == sub_080566E0
             || (u16)(first->animationIndex - 0x4A) <= 15 || firstBase->sprite.animId == 0x220)
             continue;
-        for (secondId = firstId + 1; secondId < gNumKirbys; ++secondId) {
+        secondId = firstId + 1;
+        while (secondId < gNumKirbys) {
             struct Kirby *second = &gKirbys[secondId];
             bool8 overlap;
+            u32 shift, testShift, contactBits;
             // The original repeats the first Kirby's animation check here.
             if ((second->base.flags & 0x3800F00) || gKirbys[secondId].stateFn == sub_080566E0
                 || (u16)(first->animationIndex - 0x4A) <= 15 || second->base.sprite.animId == 0x220
-                || second->base.roomId != firstBase->roomId)
+                || second->base.roomId != firstBase->roomId) {
+                ++secondId;
                 continue;
+            }
             overlap = KirbyCanContactOther((struct Kirby *)firstBase, second);
             if (overlap && first->ability != KIRBY_ABILITY_MINI) {
                 if (gKirbys[secondId].ability != KIRBY_ABILITY_MINI
@@ -1073,6 +1072,7 @@ static void ProcessKirbyContacts(void)
                             sub_08053DAC(first, secondId);
                             sub_08054414(&gKirbys[secondId], firstId);
                             first->unkE1 |= 1 << secondId;
+                            ++secondId;
                             continue;
                         }
                     }
@@ -1089,6 +1089,7 @@ static void ProcessKirbyContacts(void)
                                 sub_08053DAC((struct Kirby *)(offset + (u32)kirbys), firstId);
                                 sub_08054414(first, secondId);
                                 kirbys[secondId].unkE1 |= 1 << firstId;
+                                ++secondId;
                                 continue;
                             }
                         }
@@ -1116,69 +1117,68 @@ static void ProcessKirbyContacts(void)
                 } else {
                     first->unk104 |= 7 << (secondId * 4);
                 }
-            } else {
-                u32 shift, testShift, contactBits;
-                contactBits = first->unk104;
-                testShift = secondId * 4;
-                contactBits &= 7 << testShift;
-                shift = testShift;
-                if (contactBits && overlap) {
-                    if (firstBase->y < second->base.y) {
-                        firstBase->unkC |= 0x100;
-                        firstBase->unk62 |= 4;
-                        firstBase->yspeed = 0;
-                        first->unk104 -= 1 << shift;
-                    } else {
-                        firstBase->objBase55++;
-                    }
-                }
-                if (!overlap) {
-                    u16 *contactField = &first->unk104;
-                    u32 contacts = *contactField;
-                    u32 mask = 7 << shift;
-                    if ((contacts & mask) != mask) {
-                        if (firstBase->y > second->base.y - 0x1000)
-                            contacts &= ~mask;
-                        else
-                            contacts |= mask;
-                    } else {
-                        contacts |= contacts & mask;
-                    }
-                    *contactField = contacts;
-                }
-                overlap = KirbyCanContactOther(second, (struct Kirby *)firstBase);
-                contactBits = gKirbys[secondId].unk104;
-                testShift = firstId * 4;
-                contactBits &= 7 << testShift;
-                shift = testShift;
-                if (contactBits && overlap) {
-                    if (firstBase->y > second->base.y) {
-                        second->base.unkC |= 0x100;
-                        second->base.unk62 |= 4;
-                        second->base.yspeed = 0;
-                        gKirbys[secondId].unk104 -= 1 << shift;
-                    } else {
-                        second->base.objBase55++;
-                    }
-                }
-                if (!overlap) {
-                    struct Kirby *contactKirby = &gKirbys[secondId];
-                    u16 *contactField = &contactKirby->unk104;
-                    u32 contacts = *contactField;
-                    u32 mask = 7 << shift;
-                    if ((contacts & mask) != mask) {
-                        if (second->base.y > firstBase->y - 0x1000)
-                            contacts &= ~mask;
-                        else
-                            contacts |= mask;
-                    } else {
-                        contacts |= contacts & mask;
-                    }
-                    *contactField = contacts;
+                ++secondId;
+                continue;
+            }
+            contactBits = first->unk104;
+            testShift = secondId * 4;
+            contactBits &= 7 << testShift;
+            shift = testShift;
+            if (contactBits && overlap) {
+                if (firstBase->y < second->base.y) {
+                    firstBase->unkC |= 0x100;
+                    firstBase->unk62 |= 4;
+                    firstBase->yspeed = 0;
+                    first->unk104 -= 1 << shift;
+                } else {
+                    firstBase->objBase55++;
                 }
             }
-            // TODO(match): Six input references keep secondId in r5; five allocate r6 and change 116 instruction entries.
-            asm("" : : "r"(secondId), "r"(secondId), "r"(secondId), "r"(secondId), "r"(secondId), "r"(secondId));
+            if (!overlap) {
+                u16 *contactField = &first->unk104;
+                u32 contacts = *contactField;
+                u32 mask = 7 << shift;
+                if ((contacts & mask) != mask) {
+                    if (firstBase->y > second->base.y - 0x1000)
+                        contacts &= ~mask;
+                    else
+                        contacts |= mask;
+                } else {
+                    contacts |= contacts & mask;
+                }
+                *contactField = contacts;
+            }
+            overlap = KirbyCanContactOther(second, (struct Kirby *)firstBase);
+            contactBits = gKirbys[secondId].unk104;
+            testShift = firstId * 4;
+            contactBits &= 7 << testShift;
+            shift = testShift;
+            if (contactBits && overlap) {
+                if (firstBase->y > second->base.y) {
+                    second->base.unkC |= 0x100;
+                    second->base.unk62 |= 4;
+                    second->base.yspeed = 0;
+                    gKirbys[secondId].unk104 -= 1 << shift;
+                } else {
+                    second->base.objBase55++;
+                }
+            }
+            if (!overlap) {
+                struct Kirby *contactKirby = &gKirbys[secondId];
+                u16 *contactField = &contactKirby->unk104;
+                u32 contacts = *contactField;
+                u32 mask = 7 << shift;
+                if ((contacts & mask) != mask) {
+                    if (second->base.y > firstBase->y - 0x1000)
+                        contacts &= ~mask;
+                    else
+                        contacts |= mask;
+                } else {
+                    contacts |= contacts & mask;
+                }
+                *contactField = contacts;
+            }
+            ++secondId;
         }
     }
 }
