@@ -335,9 +335,8 @@ void ApplyPaletteDarkening(struct PaletteEffect *effect)
                 effect->unk1 = effect->unk2;
             else {
                 u16 newFlags = flags | 1;
-                // TODO(match): Materialize the halfword result so OR and AND use r0 rather than r2.
-                asm("" : : "r"(newFlags));
-                effect->unk8 = newFlags & 0xFF79;
+                flags = newFlags & 0xFF79;
+                effect->unk8 = flags;
             }
         } else {
             effect->unkC += effect->unkA;
