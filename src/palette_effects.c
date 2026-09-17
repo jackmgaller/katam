@@ -215,16 +215,14 @@ static inline void DarkenColor(u16 *palette, struct PaletteEffect *effect)
     *palette = result;
 }
 
-static inline void BrightenColor(u16 *palette, struct PaletteEffect *effect)
-{
-    s8 amount = effect->unk1;
-    u32 result = gBrightenRedTable[(*palette & 31) + amount];
-    result |= gBrightenGreenTable[((*palette >> 5) & 31) + amount];
-    {
-        u32 color = gBrightenBlueTable[((*palette >> 10) & 31) + amount] | result;
-        *palette = color;
-    }
-}
+// The colour accumulates in a function-scope variable: as an inline-function local it
+// takes r2 ahead of the adjustment and each colour's final OR lands in r0.
+#define BRIGHTEN_COLOR(palette, effect)                                            \
+    (amount = (effect)->unk1,                                                       \
+     color = gBrightenRedTable[(*(palette) & 31) + amount],                         \
+     color |= gBrightenGreenTable[((*(palette) >> 5) & 31) + amount],               \
+     color |= gBrightenBlueTable[((*(palette) >> 10) & 31) + amount],               \
+     *(palette) = color)
 
 static inline void DarkenColorWithTable(u16 *palette, struct PaletteEffect *effect)
 {
@@ -343,13 +341,6 @@ void ApplyPaletteDarkening(struct PaletteEffect *effect)
     }
 }
 
-// TODO(match): Each color's final OR and store land in r0, where the original keeps the accumulated color in r3.
-#ifndef NONMATCHING
-NAKED void ApplyPaletteBrightening(struct PaletteEffect *effect)
-{
-    asm(".include \"asm/nonmatching/ApplyPaletteBrightening.inc\"");
-}
-#else
 void ApplyPaletteBrightening(struct PaletteEffect *effect)
 {
     u16 *palette;
@@ -357,13 +348,15 @@ void ApplyPaletteBrightening(struct PaletteEffect *effect)
     u32 finished;
     u32 flags;
     u32 savedFlags;
+    u32 color;
+    s8 amount;
     if (effect->unk8 & 2) {
         palette = gBgPalette;
         for (bank = 0; bank < 16; bank++) {
             if ((effect->unk6 >> bank) & 1) {
                 if (bank == 0)
-                    BrightenColor(palette, effect);
-                TRANSFORM_VISIBLE_COLORS(BrightenColor);
+                    BRIGHTEN_COLOR(palette, effect);
+                TRANSFORM_VISIBLE_COLORS(BRIGHTEN_COLOR);
                 ++palette;
             } else {
                 palette += 16;
@@ -372,7 +365,7 @@ void ApplyPaletteBrightening(struct PaletteEffect *effect)
         palette = gObjPalette;
         for (bank = 0; bank < 16; bank++) {
             if ((effect->unk4 >> bank) & 1) {
-                TRANSFORM_VISIBLE_COLORS(BrightenColor);
+                TRANSFORM_VISIBLE_COLORS(BRIGHTEN_COLOR);
                 ++palette;
             } else {
                 palette += 16;
@@ -386,7 +379,6 @@ void ApplyPaletteBrightening(struct PaletteEffect *effect)
     if (!finished && (!(gMainFlags & 0x800) || (savedFlags & 0x80)))
         AdvancePaletteEffect(effect, savedFlags);
 }
-#endif
 
 void ApplyPaletteTableDarkening(struct PaletteEffect *effect)
 {
@@ -501,6 +493,7 @@ void ApplyPaletteWhiteFill(struct PaletteEffect *effect)
 }
 
 #undef TRANSFORM_VISIBLE_COLORS
+#undef BRIGHTEN_COLOR
 
 struct PaletteEffect *CreateRoomPaletteEffect(u8 slot, u16 room)
 {
