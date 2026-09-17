@@ -554,9 +554,10 @@ static inline void CommitAttackContact(struct ObjectBase *attack)
         attack->flags = (attack->flags | 0x40000) & ~0x4000000;
 }
 
-// TODO(match): In each object loop the original loads the list entry into the temporary
-// its later (*otherSlot) reads share and copies that into other; here the copy runs the
-// other way round, and the second pass tests the temporary instead of other.
+// TODO(match): Only the r3/r4 naming differs. At each object loop's entry the original loads
+// the list entry into the temporary its later (*otherSlot) reads share and copies that into
+// other (the bottom copy of the test loads other first, as here), and the second pass tests
+// the temporary instead of other.
 #ifndef NONMATCHING
 static NAKED void ProcessObjectCollisionLists(void)
 {
@@ -574,6 +575,7 @@ static void ProcessObjectCollisionLists(void)
     s32 ax, ay;
     s32 bx, by;
     u32 mask; // the attack and object 0x200 tests share one mask, as the original does
+    u32 attackFlags;
     for (group = 0; group < gNumKirbys; ++group) {
         slot = (struct ObjectBase **)gUnk_02022EC0[group];
         for (count = gUnk_02022F40[group]; count != 0; --count, ++slot) {
@@ -606,8 +608,9 @@ static void ProcessObjectCollisionLists(void)
                     other = *otherSlot;
                     if (other == NULL)
                         continue;
+                    attackFlags = (*slot)->flags;
                     mask = 0x200;
-                    if ((*slot)->flags & mask)
+                    if (attackFlags & mask)
                         break;
                     if ((*otherSlot)->flags & mask)
                         continue;
@@ -692,8 +695,9 @@ static void ProcessObjectCollisionLists(void)
                         continue;
                     if (other == *slot)
                         continue;
+                    attackFlags = (*slot)->flags;
                     mask = 0x200;
-                    if ((*slot)->flags & mask)
+                    if (attackFlags & mask)
                         break;
                     if ((*otherSlot)->flags & mask)
                         continue;
@@ -755,8 +759,9 @@ static void ProcessObjectCollisionLists(void)
                         continue;
                     if (other == *slot)
                         continue;
+                    attackFlags = (*slot)->flags;
                     mask = 0x200;
-                    if ((*slot)->flags & mask)
+                    if (attackFlags & mask)
                         break;
                     if ((*otherSlot)->flags & mask)
                         continue;
