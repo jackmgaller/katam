@@ -267,6 +267,8 @@ static inline void AdvancePaletteEffect(struct PaletteEffect *effect, u32 flags)
                 e->unk1 = target;
             } else {
                 u16 newFlags;
+                // TODO(match): The do-while(0) keeps regmove from folding the ORed value back
+                // into the flags register, so newFlags gets a register of its own.
                 do newFlags = flags | 1; while (0);
                 e->unk8 = newFlags & 0xFF59;
             }
@@ -274,6 +276,8 @@ static inline void AdvancePaletteEffect(struct PaletteEffect *effect, u32 flags)
             e->unk1 = target;
             {
                 u16 newFlags = flags | 0x20;
+                // TODO(match): The do-while(0) around the store keeps regmove from folding
+                // newFlags into the flags register, so the store reads a register of its own.
                 do e->unk8 = newFlags; while (0);
             }
         }
@@ -650,6 +654,7 @@ struct PaletteEffect *CreateHiddenPaletteFadeToWhite(u8 slot)
         }
     }
     effect->unk8 = 0x14;
+    // TODO: Slots 4-7 still read beyond the four Kirbys, as in the original.
     effect->unkE = gKirbys[slotId].base.roomId;
     effect->unkA = 0x200;
     effect->unkC = 0;
@@ -704,6 +709,7 @@ struct PaletteEffect *CreatePaletteDim(u8 slot)
     } else if (gKirbys[gLocalPlayerId].base.roomId == gKirbys[slotId].base.roomId) {
         effect->unk8 = 0x4E;
     }
+    // TODO: Slots 4-7 still read beyond the four Kirbys, as in the original.
     effect->unkE = gKirbys[slotId].base.roomId;
     effect->unkA = 0x100;
     effect->unkC = 0;
@@ -739,6 +745,7 @@ struct PaletteEffect *CreatePaletteUndim(u8 slot)
     } else if (gKirbys[gLocalPlayerId].base.roomId == gKirbys[slotId].base.roomId) {
         effect->unk8 = 6;
     }
+    // TODO: Slots 4-7 still read beyond the four Kirbys, as in the original.
     effect->unkE = gKirbys[slotId].base.roomId;
     effect->unkA = -0x200;
     effect->unkC = 0xA00;
@@ -922,6 +929,9 @@ void BlendSpriteAnimationPalettes(u8 paletteId, u16 sourceAnim, u8 sourceVariant
         dstLow = target[i];
         {
             s32 sourceRed, targetRed;
+            // TODO(match): The do-while(0), with the compound red arithmetic below, is what
+            // masks the target red byte into a fresh copy of the mask register as the original
+            // does; written as a plain expression the red channel masks in place instead.
             do targetRed = dstLow & mask; while (0);
             sourceRed = srcLow & mask;
             targetRed -= sourceRed;
@@ -972,6 +982,9 @@ void OffsetSpriteAnimationPalette(u8 paletteId, u16 anim, u8 variant, s8 red, s8
         u8 low;
         u16 color;
         s32 mask = 31;
+        // TODO(match): The do-while(0) around the red byte load, with the red sum taken through
+        // a local below, is what masks the red byte into a fresh copy of the mask register as
+        // the original does; a plain load and expression mask it in place instead.
         do low = colors[i]; while (0);
         {
             s32 delta = (red * amount) >> 8;

@@ -1178,7 +1178,10 @@ static void ProcessKirbyContacts(void)
             struct Kirby *second = &gKirbys[secondId];
             bool8 overlap;
             u32 shift, testShift, contactBits;
-            // The original repeats the first Kirby's animation check here.
+            // TODO: Original bug: the animation term repeats the first Kirby's animationIndex
+            // instead of the second's. The outer loop has already skipped firstId when
+            // first->animationIndex is in 0x4A-0x59, so the term is always false here and the
+            // second Kirby is never excluded from contact by its own animation.
             if ((second->base.flags & 0x3800F00) || gKirbys[secondId].stateFn == sub_080566E0
                 || (u16)(first->animationIndex - 0x4A) <= 15 || second->base.sprite.animId == 0x220
                 || second->base.roomId != firstBase->roomId) {
