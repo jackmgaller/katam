@@ -1016,9 +1016,9 @@ SECTIONS {
         *libc.a:s_rint.o(.rodata);
         data/data_3.o(.rodata); /* very likely to be unused .rodata section in some library */
         *libc.a:impure.o(.rodata);
-        /* TODO: extract the multiboot programs from ROM. */
-        data/data_2_before_hud.o(.rodata);
+        data/data_08D60980.o(.rodata);
         src/hud.o(.data);
+        /* TODO: extract the multiboot programs from ROM. */
         data/data_2.o(.rodata);
         data/multi_boot_images.o(.rodata);
         src/build_info.o(.rodata);
