@@ -86,7 +86,7 @@
             u32 _temp2 = _temp * 64 + ((objBase)->header.kind - 1) * 32; \
  \
             asm("":::"memory"); \
-            _idx = gUnk_02022EB0[_temp][(objBase)->header.kind - 1]++ + _temp2; \
+            _idx = gUnk_02022EB0.byGroup[_temp][(objBase)->header.kind - 1]++ + _temp2; \
             gUnk_02022F50[_idx] = (objBase); \
             gUnk_02022F50[_idx + 1] = NULL; \
         } \
@@ -104,7 +104,7 @@
             u8 _idx; \
             u32 _temp2 = _temp * 64 + ((objBase)->header.kind - 1) * 32; \
  \
-            _idx = gUnk_02022EB0[_temp][(objBase)->header.kind - 1]++ + _temp2; \
+            _idx = gUnk_02022EB0.byGroup[_temp][(objBase)->header.kind - 1]++ + _temp2; \
             gUnk_02022F50[_idx] = (objBase); \
             gUnk_02022F50[_idx + 1] = NULL; \
         } \

@@ -34,14 +34,14 @@ static void ObjectCollisionTaskDestructor(struct Task *);
 
 static inline void ClearCollisionCounts(void)
 {
-    gUnk_02022EB0[0][0] = 0;
-    gUnk_02022EB0[0][1] = 0;
-    gUnk_02022EB0[1][0] = 0;
-    gUnk_02022EB0[1][1] = 0;
-    gUnk_02022EB0[2][0] = 0;
-    gUnk_02022EB0[2][1] = 0;
-    gUnk_02022EB0[3][0] = 0;
-    gUnk_02022EB0[3][1] = 0;
+    gUnk_02022EB0.byGroup[0][0] = 0;
+    gUnk_02022EB0.byGroup[0][1] = 0;
+    gUnk_02022EB0.byGroup[1][0] = 0;
+    gUnk_02022EB0.byGroup[1][1] = 0;
+    gUnk_02022EB0.byGroup[2][0] = 0;
+    gUnk_02022EB0.byGroup[2][1] = 0;
+    gUnk_02022EB0.byGroup[3][0] = 0;
+    gUnk_02022EB0.byGroup[3][1] = 0;
     gUnk_02022F40[0] = 0;
     gUnk_02022F40[1] = 0;
     gUnk_02022F40[2] = 0;
@@ -579,7 +579,7 @@ static void ProcessObjectCollisionLists(void)
                         ResolveSolidObjectCollision(other, (struct Object *)*slot);
                 }
                 otherSlot = &gUnk_02022F50[group << 6];
-                for (otherCount = gUnk_02022EB0[0][group * 2]; otherCount != 0; --otherCount, ++otherSlot) {
+                for (otherCount = gUnk_02022EB0.flat[group * 2]; otherCount != 0; --otherCount, ++otherSlot) {
                     struct ObjectBase *object = *otherSlot;
                     if ((object->unkC & 0x1000) && (*slot)->roomId == object->roomId && !(object->flags & 0x100))
                         ResolveSolidObjectCollision(object, (struct Object *)*slot);
@@ -587,7 +587,7 @@ static void ProcessObjectCollisionLists(void)
             }
         }
         slot = &gUnk_02022F50[(group * 64) | 32];
-        for (count = gUnk_02022EB0[0][group * 2 + 1]; count != 0; --count, ++slot) {
+        for (count = gUnk_02022EB0.flat[group * 2 + 1]; count != 0; --count, ++slot) {
             if (*slot == NULL)
                 continue;
             if ((*slot)->flags & 1)
@@ -597,7 +597,7 @@ static void ProcessObjectCollisionLists(void)
             ay = ((*slot)->y >> 8) + (*slot)->unk39;
             if ((*slot)->flags & 0x20000000) {
                 otherSlot = &gUnk_02022F50[group * 64];
-                otherCount = gUnk_02022EB0[0][group * 2];
+                otherCount = gUnk_02022EB0.flat[group * 2];
                 if (otherCount != 0) {
                     listedObject = *otherSlot;
                     other = listedObject;
@@ -705,7 +705,7 @@ static void ProcessObjectCollisionLists(void)
             }
             if ((*slot)->flags & 0x40000000) {
                 otherSlot = &gUnk_02022F50[(group * 64) | 32];
-                otherCount = gUnk_02022EB0[0][group * 2 + 1];
+                otherCount = gUnk_02022EB0.flat[group * 2 + 1];
                 if (otherCount != 0) {
                     listedObject = *otherSlot;
                     other = listedObject;
@@ -784,7 +784,7 @@ static void ProcessObjectCollisionLists(void)
                 ProcessAttackTileCollisions(*slot);
         }
         slot = &gUnk_02022F50[group * 64];
-        for (count = gUnk_02022EB0[0][group * 2]; count != 0; --count, ++slot) {
+        for (count = gUnk_02022EB0.flat[group * 2]; count != 0; --count, ++slot) {
             if (*slot == NULL)
                 continue;
             if ((*slot)->flags & 1)
@@ -794,7 +794,7 @@ static void ProcessObjectCollisionLists(void)
             ay = ((*slot)->y >> 8) + (*slot)->unk39;
             if ((*slot)->flags & 0x20000000) {
                 otherSlot = &gUnk_02022F50[group * 64];
-                for (otherCount = gUnk_02022EB0[0][group * 2]; otherCount != 0; --otherCount, ++otherSlot) {
+                for (otherCount = gUnk_02022EB0.flat[group * 2]; otherCount != 0; --otherCount, ++otherSlot) {
                     other2 = *otherSlot;
                     entry = other2;
                     if (other2 == NULL)
@@ -1213,10 +1213,15 @@ static void ProcessKirbyContacts(void)
                             if (CanKirbyShareIndex(kirbys, secondId)
                                 && (first->base.unk56 < gNumHumanPlayers || kirbys[secondId].base.unk56 < gNumHumanPlayers)) {
                                 u32 offset = secondId * sizeof(struct Kirby);
-                                // TODO(match): Typed pointer arithmetic reverses the ADD operands (r3, r4 instead of r4, r3).
-                                sub_08053DAC((struct Kirby *)(offset + (u32)kirbys), firstId);
+                                struct Kirby *sharingKirby;
+                                // TODO(match): Compute &kirbys[secondId] with adds r4, r4, r3.
+                                // Typed indexing, pointer increments, and an inline helper instead
+                                // emit adds r4, r3, r4. Keep the pointer typed; this instruction
+                                // defines the result and clobbers flags, with no fixed registers.
+                                asm("add %0, %1, %2" : "=l"(sharingKirby) : "l"(offset), "l"(kirbys) : "cc");
+                                sub_08053DAC(sharingKirby, firstId);
                                 sub_08054414(first, secondId);
-                                kirbys[secondId].unkE1 |= 1 << firstId;
+                                sharingKirby->unkE1 |= 1 << firstId;
                                 ++secondId;
                                 continue;
                             }
