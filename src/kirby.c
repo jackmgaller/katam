@@ -1,5 +1,5 @@
 #include "hud.h"
-#include "pause_transition.h"
+#include "screen_transition.h"
 #include "palette_effects.h"
 #include "code_080332BC.h"
 #include "global.h"
@@ -6338,14 +6338,14 @@ void sub_0803EE18(void)
             }
         }
         if (kirby->unk11A & 8
-            && CanStartPauseScreenTransition()
+            && CanStartScreenTransition()
             && !(gUnk_0203AD10 & 0xE0)
             && !(kirby->base.unkC & 0x10000000)
             && !(kirby->base.flags & 0x2000000))
         {
             kirby->unk11A &= ~8;
             gUnk_0203AD50 = kirby->base.unk56;
-            StartPauseScreenTransition(0);
+            StartScreenTransition(0);
         }
         if (!Macro_0810B1F4(&kirby->base)
             && kirby->unkE8)

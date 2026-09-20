@@ -1,7 +1,7 @@
 	.include "asm/macros.inc"
 	.include "constants/constants.inc"
 
-	.section .rodata
+	.section .data
 	.align 2
 
 gUnk_08D60980:: @ 08D60980

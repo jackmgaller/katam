@@ -1,4 +1,4 @@
-#include "pause_transition.h"
+#include "screen_transition.h"
 #include "palette_effects.h"
 #include "pause_world_map.h"
 #include "code_0801DA58.h"
@@ -1377,7 +1377,7 @@ static void WorldMapUnlockMain(void) {
         }
         else {
             TaskDestroy(gCurTask);
-            FinishPauseScreen();
+            FinishTransitionScreen();
         }
     }
     else {
@@ -1555,7 +1555,7 @@ static void WorldMapToGame(void) {
     if (worldmap->closeCounter++ > 18) {
         TaskDestroy(gPauseMenus[gLocalPlayerId].mainTask);
         TaskDestroy(gCurTask);
-        FinishPauseScreen();
+        FinishTransitionScreen();
     }
     WorldMapDrawKirbys(worldmap);
 }

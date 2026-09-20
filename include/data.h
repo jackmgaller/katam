@@ -606,8 +606,8 @@ extern u16 gUnk_02022E70[];
 extern u32 gUnk_02022E80[];
 // The collision lists use both group/kind pairs and flat byte indices.
 union ObjectCollisionCounts {
-    /*0x00*/ u8 byGroup[4][2];
-    /*0x00*/ u8 flat[8];
+    /* 0x00 */ u8 byGroup[4][2];
+    /* 0x00 */ u8 flat[8];
 }; /* size = 0x8 */
 
 extern union ObjectCollisionCounts gUnk_02022EB0;

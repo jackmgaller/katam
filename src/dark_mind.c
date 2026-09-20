@@ -11298,7 +11298,7 @@ static void sub_081169E4(struct DarkMindTrigger *ip)
 static void sub_08116BC0(struct DarkMindTrigger *r5)
 {
     struct Kirby *kirby;
-    struct GameplayHud *r1;
+    struct GameplayHud *hud;
     u8 i;
 
     ObjectSetFunc(r5, 0, sub_08118964);
@@ -11306,9 +11306,9 @@ static void sub_08116BC0(struct DarkMindTrigger *r5)
     r5->unk0.base.yspeed = 0;
     r5->unk0.base.counter = 0x40;
     r5->unk0.base.flags |= 0x40;
-    r1 = TryTrackHudEnemy(&r5->unk0);
-    if (r1)
-        r1->unk9 = 0;
+    hud = TryTrackHudEnemy(&r5->unk0);
+    if (hud)
+        hud->unk9 = 0;
     for (i = 0; i < gNumKirbys; ++i)
     {
         kirby = &gKirbys[i];

@@ -1,4 +1,4 @@
-#include "pause_transition.h"
+#include "screen_transition.h"
 #include "hud.h"
 #include "palette_effects.h"
 #include "global.h"
@@ -16,30 +16,30 @@
 #include "constants/songs.h"
 #include "task.h"
 
-struct PauseTransition {
-    /* 0x00 */ void (*callback)(struct PauseTransition *);
+struct ScreenTransition {
+    /* 0x00 */ void (*callback)(struct ScreenTransition *);
     /* 0x04 */ bool32 finished;
     /* 0x08 */ u16 screen;
     /* 0x0A */ u16 timer;
 }; /* size = 0xC */
 
 extern struct Task *gUnk_0203AD4C;
-extern void (*const gPauseTransitionScreens[])(void);
+static void (*const sTransitionScreens[27])(void);
 
-static void UnpauseGameplay(struct PauseTransition *);
-static void UpdatePauseScreenTransition(void);
-static void PauseScreenTransitionDestructor(struct Task *);
-static void BeginPauseScreenTransition(struct PauseTransition *);
-static void StartPauseScreenFadeOut(struct PauseTransition *);
-static void WaitForPauseScreenFadeOut(struct PauseTransition *);
-static void OpenPauseTransitionScreen(struct PauseTransition *);
-static void WaitForPauseScreenFinish(struct PauseTransition *);
-static void RestoreGameplayAfterPauseScreen(struct PauseTransition *);
-static void DelayPauseScreenFadeIn(struct PauseTransition *);
-static void StartPauseScreenFadeIn(struct PauseTransition *);
-static void DestroyPauseScreenTransition(struct PauseTransition *);
+static void UnpauseGameplay(struct ScreenTransition *);
+static void UpdateScreenTransition(void);
+static void ScreenTransitionDestructor(struct Task *);
+static void BeginScreenTransition(struct ScreenTransition *);
+static void StartScreenTransitionFadeOut(struct ScreenTransition *);
+static void WaitForScreenTransitionFadeOut(struct ScreenTransition *);
+static void OpenTransitionScreen(struct ScreenTransition *);
+static void WaitForTransitionScreenFinish(struct ScreenTransition *);
+static void RestoreGameplayAfterTransitionScreen(struct ScreenTransition *);
+static void DelayScreenTransitionFadeIn(struct ScreenTransition *);
+static void StartScreenTransitionFadeIn(struct ScreenTransition *);
+static void DestroyScreenTransition(struct ScreenTransition *);
 
-static void UnpauseGameplay(struct PauseTransition *transition)
+static void UnpauseGameplay(struct ScreenTransition *transition)
 {
     u16 i;
 
@@ -55,51 +55,51 @@ static void UnpauseGameplay(struct PauseTransition *transition)
     } else {
         gKirbys[0].movementState |= gHeldKeys & B_BUTTON;
     }
-    transition->callback = DelayPauseScreenFadeIn;
+    transition->callback = DelayScreenTransitionFadeIn;
 }
 
-void ResetPauseScreenTransition(void)
+void ResetScreenTransition(void)
 {
     gUnk_0203AD4C = NULL;
     PauseMenuInitRetained();
 }
 
-bool32 CanStartPauseScreenTransition(void)
+bool32 CanStartScreenTransition(void)
 {
     if ((gMainFlags & 0x400) || gUnk_0203AD4C != NULL)
         return FALSE;
     return TRUE;
 }
 
-static inline void StartPauseTransitionInternal(u16 screen)
+static inline void StartScreenTransitionInternal(u16 screen)
 {
-    struct Task *task = TaskCreate(UpdatePauseScreenTransition, sizeof(struct PauseTransition), 1, TASK_x0004, PauseScreenTransitionDestructor);
-    struct PauseTransition *transition;
+    struct Task *task = TaskCreate(UpdateScreenTransition, sizeof(struct ScreenTransition), 1, TASK_x0004 | TASK_USE_IWRAM, ScreenTransitionDestructor);
+    struct ScreenTransition *transition;
 
     gUnk_0203AD4C = task;
     transition = TaskGetStructPtr(task);
-    transition->callback = BeginPauseScreenTransition;
+    transition->callback = BeginScreenTransition;
     transition->screen = screen;
     transition->finished = FALSE;
     gMainFlags |= 0x400;
 }
 
-void StartPauseScreenTransition(u16 screen)
+void StartScreenTransition(u16 screen)
 {
-    struct Task *task = TaskCreate(UpdatePauseScreenTransition, sizeof(struct PauseTransition), 1, TASK_x0004, PauseScreenTransitionDestructor);
-    struct PauseTransition *transition;
+    struct Task *task = TaskCreate(UpdateScreenTransition, sizeof(struct ScreenTransition), 1, TASK_x0004 | TASK_USE_IWRAM, ScreenTransitionDestructor);
+    struct ScreenTransition *transition;
 
     gUnk_0203AD4C = task;
     transition = TaskGetStructPtr(task);
-    transition->callback = BeginPauseScreenTransition;
+    transition->callback = BeginScreenTransition;
     transition->screen = screen;
     transition->finished = FALSE;
     gMainFlags |= 0x400;
 }
 
-void FinishPauseScreen(void)
+void FinishTransitionScreen(void)
 {
-    struct PauseTransition *transition = TaskGetStructPtr(gUnk_0203AD4C);
+    struct ScreenTransition *transition = TaskGetStructPtr(gUnk_0203AD4C);
 
     transition->finished = TRUE;
     CpuFill32(0, (void *)BG_VRAM, BG_VRAM_SIZE);
@@ -107,92 +107,92 @@ void FinishPauseScreen(void)
 
 void sub_080396BC(void)
 {
-    StartPauseTransitionInternal(9);
+    StartScreenTransitionInternal(9);
 }
 
 void StartWorldMapUnlockMoonlightMansion(void)
 {
-    StartPauseTransitionInternal(10);
+    StartScreenTransitionInternal(10);
 }
 
 void StartWorldMapUnlockRainbowRouteEast(void)
 {
-    StartPauseTransitionInternal(11);
+    StartScreenTransitionInternal(11);
 }
 
 void StartWorldMapUnlockRainbowRouteSouth(void)
 {
-    StartPauseTransitionInternal(12);
+    StartScreenTransitionInternal(12);
 }
 
 void StartWorldMapUnlockCabbageCavernCenter(void)
 {
-    StartPauseTransitionInternal(13);
+    StartScreenTransitionInternal(13);
 }
 
 void StartWorldMapUnlockRainbowRouteWest(void)
 {
-    StartPauseTransitionInternal(14);
+    StartScreenTransitionInternal(14);
 }
 
 void StartWorldMapUnlockCarrotCastle(void)
 {
-    StartPauseTransitionInternal(15);
+    StartScreenTransitionInternal(15);
 }
 
 void StartWorldMapUnlockRainbowRouteNorth(void)
 {
-    StartPauseTransitionInternal(16);
+    StartScreenTransitionInternal(16);
 }
 
 void StartWorldMapUnlockMustardMountain(void)
 {
-    StartPauseTransitionInternal(17);
+    StartScreenTransitionInternal(17);
 }
 
 void StartWorldMapUnlockCabbageCavernWest(void)
 {
-    StartPauseTransitionInternal(18);
+    StartScreenTransitionInternal(18);
 }
 
 void StartWorldMapUnlockRadishRuins(void)
 {
-    StartPauseTransitionInternal(19);
+    StartScreenTransitionInternal(19);
 }
 
 void StartWorldMapUnlockPeppermintPalaceEast(void)
 {
-    StartPauseTransitionInternal(20);
+    StartScreenTransitionInternal(20);
 }
 
 void StartWorldMapUnlockPeppermintPalaceWest(void)
 {
-    StartPauseTransitionInternal(21);
+    StartScreenTransitionInternal(21);
 }
 
 void StartWorldMapUnlockCabbageCavernEast(void)
 {
-    StartPauseTransitionInternal(22);
+    StartScreenTransitionInternal(22);
 }
 
 void StartWorldMapUnlockOliveOcean(void)
 {
-    StartPauseTransitionInternal(23);
+    StartScreenTransitionInternal(23);
 }
 
 void StartWorldMapUnlockCandyConstellation(void)
 {
-    StartPauseTransitionInternal(24);
+    StartScreenTransitionInternal(24);
 }
 
-static void UpdatePauseScreenTransition(void)
+static void UpdateScreenTransition(void)
 {
-    struct PauseTransition *transition = TaskGetStructPtr(gCurTask);
+    struct ScreenTransition *transition = TaskGetStructPtr(gCurTask);
 
     transition->callback(transition);
 }
 
-static void PauseScreenTransitionDestructor(struct Task *task UNUSED)
+static void ScreenTransitionDestructor(struct Task *task UNUSED)
 {
     m4aSongNumContinue(MUS_VICTORY_LONG);
     m4aSongNumContinue(MUS_VICTORY_SHORT);
@@ -202,14 +202,14 @@ static void PauseScreenTransitionDestructor(struct Task *task UNUSED)
     gUnk_0203AD4C = NULL;
 }
 
-static void BeginPauseScreenTransition(struct PauseTransition *transition)
+static void BeginScreenTransition(struct ScreenTransition *transition)
 {
     if (transition->screen == 0)
         m4aSongNumStart(SE_PAUSE_MENU_OPEN);
-    transition->callback = StartPauseScreenFadeOut;
+    transition->callback = StartScreenTransitionFadeOut;
 }
 
-static void StartPauseScreenFadeOut(struct PauseTransition *transition)
+static void StartScreenTransitionFadeOut(struct ScreenTransition *transition)
 {
     struct PaletteEffect *effect;
 
@@ -218,10 +218,10 @@ static void StartPauseScreenFadeOut(struct PauseTransition *transition)
     effect->unk8 |= 0x80;
     effect->unk4 = 0xFFFF;
     effect->unk6 = 0xFFFF;
-    transition->callback = WaitForPauseScreenFadeOut;
+    transition->callback = WaitForScreenTransitionFadeOut;
 }
 
-static void WaitForPauseScreenFadeOut(struct PauseTransition *transition)
+static void WaitForScreenTransitionFadeOut(struct ScreenTransition *transition)
 {
     if (++transition->timer > 30) {
         u16 color = RGB_WHITE;
@@ -229,7 +229,7 @@ static void WaitForPauseScreenFadeOut(struct PauseTransition *transition)
         LoadBgPaletteAndBase(&color, 0, 1);
         if (gUnk_0203AD10 & 2)
             sub_08031CE4(8);
-        transition->callback = OpenPauseTransitionScreen;
+        transition->callback = OpenTransitionScreen;
         m4aSongNumStop(MUS_VICTORY_LONG);
         m4aSongNumStop(MUS_VICTORY_SHORT);
         m4aMPlayVolumeControl(&gMPlayInfo_1, 0xFFFF, 0);
@@ -237,26 +237,26 @@ static void WaitForPauseScreenFadeOut(struct PauseTransition *transition)
     }
 }
 
-static void OpenPauseTransitionScreen(struct PauseTransition *transition)
+static void OpenTransitionScreen(struct ScreenTransition *transition)
 {
     sub_08020220();
     BackupBasePalettes();
     SaveDisplayState();
-    gPauseTransitionScreens[transition->screen]();
-    transition->callback = WaitForPauseScreenFinish;
+    sTransitionScreens[transition->screen]();
+    transition->callback = WaitForTransitionScreenFinish;
 }
 
-static void WaitForPauseScreenFinish(struct PauseTransition *transition)
+static void WaitForTransitionScreenFinish(struct ScreenTransition *transition)
 {
     sub_080203C8();
     if (transition->finished) {
         if (gUnk_0203AD10 & 2)
             sub_08031CE4(8);
-        transition->callback = RestoreGameplayAfterPauseScreen;
+        transition->callback = RestoreGameplayAfterTransitionScreen;
     }
 }
 
-static void RestoreGameplayAfterPauseScreen(struct PauseTransition *transition)
+static void RestoreGameplayAfterTransitionScreen(struct ScreenTransition *transition)
 {
     sub_08020370();
     RestoreBasePalettes();
@@ -266,13 +266,13 @@ static void RestoreGameplayAfterPauseScreen(struct PauseTransition *transition)
     transition->callback = UnpauseGameplay;
 }
 
-static void DelayPauseScreenFadeIn(struct PauseTransition *transition)
+static void DelayScreenTransitionFadeIn(struct ScreenTransition *transition)
 {
     if (transition->timer++ > 2)
-        transition->callback = StartPauseScreenFadeIn;
+        transition->callback = StartScreenTransitionFadeIn;
 }
 
-static void StartPauseScreenFadeIn(struct PauseTransition *transition)
+static void StartScreenTransitionFadeIn(struct ScreenTransition *transition)
 {
     struct PaletteEffect *effect;
     u16 color;
@@ -284,16 +284,16 @@ static void StartPauseScreenFadeIn(struct PauseTransition *transition)
     effect->unk6 = 0xFFFF;
     color = RGB_WHITE;
     LoadBgPaletteAndBase(&color, 0, 1);
-    transition->callback = DestroyPauseScreenTransition;
+    transition->callback = DestroyScreenTransition;
     transition->callback(transition);
 }
 
-static void DestroyPauseScreenTransition(struct PauseTransition *transition UNUSED)
+static void DestroyScreenTransition(struct ScreenTransition *transition UNUSED)
 {
     TaskDestroy(gCurTask);
 }
 
-void (*const gPauseTransitionScreens[27])(void) = {
+static void (*const sTransitionScreens[27])(void) = {
     CreatePauseMenu,
     sub_0801D618,
     sub_0801D624,
@@ -321,4 +321,11 @@ void (*const gPauseTransitionScreens[27])(void) = {
     WorldMapUnlockCandyConstellation,
     sub_0802E16C,
     sub_0814A828,
+};
+
+static const u16 sUnk_0834BE00[16] UNUSED = {
+    RGB(0, 0, 1), RGB(0, 1, 1), RGB(1, 1, 1), RGB(1, 1, 3),
+    RGB(1, 3, 3), RGB(3, 3, 3), RGB(3, 3, 7), RGB(3, 7, 7),
+    RGB(7, 7, 7), RGB(7, 7, 15), RGB(23, 14, 15), RGB(31, 14, 15),
+    RGB(31, 14, 31), RGB(31, 30, 31), RGB_WHITE, RGB_WHITE | 0x8000,
 };

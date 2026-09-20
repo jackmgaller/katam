@@ -19,7 +19,7 @@ inline void DrawHudLivesCount(struct Kirby *kirby);
 inline void DrawDemoHud(void);
 inline void DrawHudPhoneIcon(void);
 inline void ClearHudPhoneIcon(void);
-inline void DrawHudEnemyNameTiles(void);
+inline void DrawHudNameTiles(void);
 inline void ShowGameOverHud(void);
 inline void ShowBorrowLifeHud(void);
 inline void RestoreHudAfterLifeBorrow(void);
@@ -34,6 +34,7 @@ inline void DrawGameOverMessage(void);
 #include "level.h"
 #include "task.h"
 #include "constants/object_types.h"
+#include "constants/kirby.h"
 #include "constants/songs.h"
 
 #include "hud.h"
@@ -41,26 +42,27 @@ inline void DrawGameOverMessage(void);
 #include "functions.h"
 
 extern struct Task *gGameplayHudTask;
-extern const u16 gHudPalettes[][16];
-extern const u32 gHudDecimalDivisors[8];
-extern const u8 gUnk_082EC7A0[];
-extern const u8 *gHudEnemyAndAreaNameGraphics[6];
-extern const u8 *gHudGameOverAndDemoGraphics[6];
+static const u16 sHudPalettes[18][16];
+static const u32 sHudDecimalDivisors[8];
+static const u8 sOffscreenKirbyIconOffsets[4];
+static const u8 sOtherRoomKirbyIconX[4];
+static const u16 *sAbilityIconPalettes[32];
+static const u8 *sAbilityIconGraphics[6][32];
+static const u8 *sHudEnemyAndAreaNameGraphics[6];
+static const u8 *sHudGameOverAndDemoGraphics[6];
+static const u8 *sHudBorrowMessageGraphics[6];
+static const u8 *sHudGiveMessageGraphics[6];
+static const u8 *sHudConnectingMessageGraphics[6];
+static const u8 *sHudAnswerMessageGraphics[6];
+static const u8 *sHudBorrowLifePromptGraphics[6];
+static const u8 *sHudBorrowLifeChoiceGraphics[6];
+// Includes the health-bar graphics at gUnk_082ECBA0, an interior alias at +0x400.
+extern const u16 gUnk_082EC7A0[0x400];
 
-extern const u8 gUnk_082ECBA0[];
-extern const u8 *gHudBorrowMessageGraphics[6];
-extern const u8 *gHudGiveMessageGraphics[6];
-extern const u8 *gHudConnectingMessageGraphics[6];
-extern const u8 *gHudAnswerMessageGraphics[6];
-extern const u8 *gHudBorrowLifePromptGraphics[6];
-extern const u8 *gHudBorrowLifeChoiceGraphics[6];
+extern const u16 gUnk_082ECBA0[0x200];
 extern const u16 gUnk_083513E8[56];
 extern const u16 gUnk_08351458[27][4];
 extern const u16 gUnk_08351628[4][4];
-extern const u16 *gAbilityIconPalettes[32];
-extern const u8 *gAbilityIconGraphics[6][32];
-extern const u8 gOffscreenKirbyIconOffsets[4];
-extern const u8 gOtherRoomKirbyIconX[4];
 static void DrawBorrowLifeNoCursor(void);
 static void DrawBorrowLifeYesCursor(void);
 
@@ -99,12 +101,12 @@ void CreateGameplayHud(void)
     struct GameplayHud *tmp, *hud;
     struct Kirby *kirby;
     u8 i;
-    gBgCntRegs[1] = 0x1C04;
+    gBgCntRegs[1] = BGCNT_PRIORITY(0) | BGCNT_CHARBASE(1) | BGCNT_16COLOR | BGCNT_SCREENBASE(28) | BGCNT_TXT256x256;
     CpuFill16(0x184, BG_SCREEN_ADDR(28), 0x800);
     CpuFill16(0, (void *)(BG_VRAM + 0x7080), 0x600);
     gBgScrollRegs[1][0] = 0;
     gBgScrollRegs[1][1] = 0;
-    task = TaskCreate(UpdateGameplayHud, sizeof(struct GameplayHud), 0xF500, 0, GameplayHudDestructor);
+    task = TaskCreate(UpdateGameplayHud, sizeof(struct GameplayHud), 0xF500, TASK_USE_IWRAM, GameplayHudDestructor);
     gGameplayHudTask = task;
     tmp = TaskGetStructPtr(task);
     hud = tmp;
@@ -123,7 +125,7 @@ void CreateGameplayHud(void)
     DrawHudAbilityIconRows(2);
     DrawHudPhoneIcon();
     DrawPhoneBattery(kirby);
-    DrawHudEnemyNameTiles();
+    DrawHudNameTiles();
     DrawEnemyHealthOrAreaName(NULL);
     CpuFill16(0, (void *)(BG_VRAM + 0x77A0), 0x100);
     hud->unk0 = kirby->score;
@@ -212,7 +214,7 @@ void UpdateGameplayHud(void)
                     DrawCallHudMessage(2);
                 break;
             }
-            if (hud->unkE <= 0x5F || (u8)(hud->unkE + 0x80) <= 0x5F)
+            if (hud->unkE <= 0x5F || (hud->unkE >= 0x80 && hud->unkE <= 0xDF))
                 DisplayCallingKirby(hud);
         } else {
             DrawLifeSharingHudMessage(0);
@@ -317,23 +319,23 @@ void UpdateBorrowLifeHud(void)
     DrawOtherKirbyIndicators(hud);
     hud->unkC = kirby->battery;
     hud->unkB = gRoomProps[kirby->base.roomId].priorityFlags & 8;
-    if (gUnk_02021580 >= gNumKirbys)
-        goto noCall;
-    if (!(gKirbys[gUnk_02021580].base.unkC & 0x10000) && gKirbys[gUnk_02021580].base.roomId == kirby->base.roomId)
-        goto noCall;
-    if (!(gRoomProps[kirby->base.roomId].priorityFlags & 0x10))
-        goto noCall;
-    showCall = TRUE;
-    for (i = 1; i <= 8; i++) {
-        if (gUnk_0835105C[i] == kirby->base.roomId && *GetStateSlot(STATE_SLOT_SESSION, i, 0)) {
-            showCall = FALSE;
-            break;
+    if ((gUnk_02021580 >= gNumKirbys)
+        || (!(gKirbys[gUnk_02021580].base.unkC & 0x10000) && gKirbys[gUnk_02021580].base.roomId == kirby->base.roomId)
+        || (!(gRoomProps[kirby->base.roomId].priorityFlags & 0x10))) {
+        showCall = FALSE;
+    } else {
+        showCall = TRUE;
+        for (i = 1; i <= 8; i++) {
+            if (gUnk_0835105C[i] == kirby->base.roomId && *GetStateSlot(STATE_SLOT_SESSION, i, 0)) {
+                showCall = FALSE;
+                break;
+            }
         }
-    }
-    for (i = 9; i <= 13; i++) {
-        if (gUnk_0835105C[i] == kirby->base.roomId && *GetStateSlot(STATE_SLOT_SESSION, i + 3, 0)) {
-            showCall = FALSE;
-            break;
+        for (i = 9; i <= 13; i++) {
+            if (gUnk_0835105C[i] == kirby->base.roomId && *GetStateSlot(STATE_SLOT_SESSION, i + 3, 0)) {
+                showCall = FALSE;
+                break;
+            }
         }
     }
 
@@ -342,7 +344,6 @@ void UpdateBorrowLifeHud(void)
         hud->unkE++;
         hud->unk10 |= 1;
     } else {
-    noCall:
         if (hud->unk10 & 1) {
             if (kirby->base.unk56 == gLocalPlayerId)
                 m4aSongNumStop(SE_08D5AF5C);
@@ -386,36 +387,36 @@ static void DrawOtherKirbyIndicators(struct GameplayHud *hud)
                 if (body->x <= 21) {
                     if (body->y <= 25) {
                         body->variant = 3;
-                        if (body->y < gOffscreenKirbyIconOffsets[indicator] + 10)
-                            body->y = gOffscreenKirbyIconOffsets[indicator] + 10;
+                        if (body->y < sOffscreenKirbyIconOffsets[indicator] + 10)
+                            body->y = sOffscreenKirbyIconOffsets[indicator] + 10;
                     } else if (body->y > 124) {
                         body->variant = 7;
-                        if (body->y > 140 - gOffscreenKirbyIconOffsets[indicator])
-                            body->y = 140 - gOffscreenKirbyIconOffsets[indicator];
+                        if (body->y > 140 - sOffscreenKirbyIconOffsets[indicator])
+                            body->y = 140 - sOffscreenKirbyIconOffsets[indicator];
                     } else {
                         body->variant = 1;
                     }
-                    body->x += gOffscreenKirbyIconOffsets[indicator];
+                    body->x += sOffscreenKirbyIconOffsets[indicator];
                 } else if (body->x > 216) {
                     if (body->y <= 25) {
                         body->variant = 2;
-                        if (body->y < gOffscreenKirbyIconOffsets[indicator] + 10)
-                            body->y = gOffscreenKirbyIconOffsets[indicator] + 10;
+                        if (body->y < sOffscreenKirbyIconOffsets[indicator] + 10)
+                            body->y = sOffscreenKirbyIconOffsets[indicator] + 10;
                     } else if (body->y > 124) {
                         body->variant = 6;
-                        if (body->y > 140 - gOffscreenKirbyIconOffsets[indicator])
-                            body->y = 140 - gOffscreenKirbyIconOffsets[indicator];
+                        if (body->y > 140 - sOffscreenKirbyIconOffsets[indicator])
+                            body->y = 140 - sOffscreenKirbyIconOffsets[indicator];
                     } else {
                         body->variant = 0;
                     }
-                    body->x -= gOffscreenKirbyIconOffsets[indicator];
+                    body->x -= sOffscreenKirbyIconOffsets[indicator];
                 } else {
                     if (body->y <= 25) {
                         body->variant = 4;
-                        body->y += gOffscreenKirbyIconOffsets[indicator];
+                        body->y += sOffscreenKirbyIconOffsets[indicator];
                     } else {
                         body->variant = 5;
-                        body->y -= gOffscreenKirbyIconOffsets[indicator];
+                        body->y -= sOffscreenKirbyIconOffsets[indicator];
                     }
                 }
                 if (hud->unk15[i] != 1) {
@@ -452,7 +453,7 @@ static void DrawOtherKirbyIndicators(struct GameplayHud *hud)
             kirby->sprites[1].unk8 &= ~0x80000;
             kirby->sprites[0].unk8 &= ~0x80000;
             if (gUnk_0203AD20 & 8) {
-                body->x = gOtherRoomKirbyIconX[indicator];
+                body->x = sOtherRoomKirbyIconX[indicator];
                 body->y = 0x91;
                 ability->x = body->x;
                 ability->y = body->y;
@@ -462,7 +463,7 @@ static void DrawOtherKirbyIndicators(struct GameplayHud *hud)
                 ability->unk8 |= 0x800;
                 effect->unk8 |= 0x800;
             } else {
-                body->x = gOtherRoomKirbyIconX[indicator];
+                body->x = sOtherRoomKirbyIconX[indicator];
                 body->y = 15;
                 ability->x = body->x;
                 ability->y = body->y;
@@ -535,7 +536,7 @@ void DrawCallHudMessage(u8 message)
         }
         break;
     case 1:
-        CpuCopy16(gHudConnectingMessageGraphics[gLanguage], (void *)(BG_VRAM + 0x7C60), 0x3A0);
+        CpuCopy16(sHudConnectingMessageGraphics[gLanguage], (void *)(BG_VRAM + 0x7C60), 0x3A0);
         for (y = 0; y < 2; y++) {
             for (x = 0; x < 14; x++)
                 *tiles++ = (y * 15 + (x + 0x1E3)) | 0xF000;
@@ -543,7 +544,7 @@ void DrawCallHudMessage(u8 message)
         }
         break;
     case 2:
-        CpuCopy16(gHudAnswerMessageGraphics[gLanguage], (void *)(BG_VRAM + 0x7C60), 0x3A0);
+        CpuCopy16(sHudAnswerMessageGraphics[gLanguage], (void *)(BG_VRAM + 0x7C60), 0x3A0);
         for (y = 0; y < 2; y++) {
             for (x = 0; x < 14; x++)
                 *tiles++ = (y * 15 + (x + 0x1E3)) | 0xF000;
@@ -567,7 +568,7 @@ void DrawLifeSharingHudMessage(u8 message)
         }
         break;
     case 1:
-        CpuCopy16(gHudBorrowMessageGraphics[gLanguage], (void *)(BG_VRAM + 0x7C60), 0x3A0);
+        CpuCopy16(sHudBorrowMessageGraphics[gLanguage], (void *)(BG_VRAM + 0x7C60), 0x3A0);
         for (y = 0; y < 2; y++) {
             for (x = 0; x < 14; x++)
                 *tiles++ = (y * 15 + (x + 0x1E3)) | 0xF000;
@@ -575,7 +576,7 @@ void DrawLifeSharingHudMessage(u8 message)
         }
         break;
     case 2:
-        CpuCopy16(gHudGiveMessageGraphics[gLanguage], (void *)(BG_VRAM + 0x7C60), 0x3A0);
+        CpuCopy16(sHudGiveMessageGraphics[gLanguage], (void *)(BG_VRAM + 0x7C60), 0x3A0);
         for (y = 0; y < 2; y++) {
             for (x = 0; x < 14; x++)
                 *tiles++ = (y * 15 + (x + 0x1E3)) | 0xF000;
@@ -590,8 +591,8 @@ void DrawBorrowLifePrompt(void)
     struct Kirby *kirby = &gKirbys[gLocalPlayerId];
     u16 *tiles = (u16 *)(BG_VRAM + 0xE190);
     u8 y, x;
-    CpuCopy16(gHudBorrowLifePromptGraphics[gLanguage], (void *)(BG_VRAM + 0x70A0), 0x400);
-    CpuCopy16(gHudBorrowLifeChoiceGraphics[gLanguage], (void *)(BG_VRAM + 0x7C60), 0x3A0);
+    CpuCopy16(sHudBorrowLifePromptGraphics[gLanguage], (void *)(BG_VRAM + 0x70A0), 0x400);
+    CpuCopy16(sHudBorrowLifeChoiceGraphics[gLanguage], (void *)(BG_VRAM + 0x7C60), 0x3A0);
     if (gKirbys[gLocalPlayerId].base.roomId != 0x397) {
         for (y = 0; y < 2; y++) {
             for (x = 0; x < 16; x++)
@@ -734,7 +735,7 @@ struct GameplayHud *TryTrackHudEnemy(struct Object *object)
     if (gCurTask->main == UpdateBorrowLifeHud)
         return NULL;
     // TODO: The original dereferences object before its null check; preserve that ordering.
-    if (object->type > 0x5D)
+    if (object->type > OBJ_EMPTY_5D)
         return NULL;
     if (gKirbys[gLocalPlayerId].base.roomId != object->base.roomId)
         return NULL;
@@ -750,14 +751,14 @@ struct GameplayHud *TryTrackHudEnemy(struct Object *object)
     if (object->base.flags & 0x1000)
         return NULL;
     hud->unk1C = object;
-    CpuCopy16(gHudEnemyAndAreaNameGraphics[gLanguage] + object->type * 0x100, (void *)(BG_VRAM + 0x77A0), 0x100);
+    CpuCopy16(sHudEnemyAndAreaNameGraphics[gLanguage] + object->type * 0x100, (void *)(BG_VRAM + 0x77A0), 0x100);
     hud->unkF = 0;
     tracked = hud->unk1C;
-    if (tracked->type >= 0x38 && tracked->type <= 0x52) {
+    if (ObjType38To52(tracked)) {
         if (tracked->type == OBJ_DARK_MIND_FORM_1)
             scaledHp = tracked->unk80 * gUnk_08351628[tracked->subtype][gNumHumanPlayers - 1];
         else
-            scaledHp = tracked->unk80 * gUnk_08351458[tracked->type - 0x38][gNumHumanPlayers - 1];
+            scaledHp = tracked->unk80 * gUnk_08351458[ObjTypeAltIdx(tracked)][gNumHumanPlayers - 1];
         hud->unkA = scaledHp >> 8;
         if (scaledHp & 0xFF)
             hud->unkA++;
@@ -783,9 +784,9 @@ void DrawEnemyHealthOrAreaName(struct GameplayHud *hud)
     tiles = (u16 *)(BG_VRAM + 0xE4E8);
     if (hud == NULL) {
         u16 index = 0x20;
-        CpuCopy16(gHudEnemyAndAreaNameGraphics[gLanguage] + (gUnk_08D6CD0C[gKirbys[gLocalPlayerId].base.roomId]->unk46 * 0x200 + 0x5300),
+        CpuCopy16(sHudEnemyAndAreaNameGraphics[gLanguage] + (gUnk_08D6CD0C[gKirbys[gLocalPlayerId].base.roomId]->unk46 * 0x200 + 0x5300),
             (void *)(BG_VRAM + 0x77A0), 0x100);
-        CpuCopy16(gHudEnemyAndAreaNameGraphics[gLanguage] + (gUnk_08D6CD0C[gKirbys[gLocalPlayerId].base.roomId]->unk46 * 0x200 + 0x5400),
+        CpuCopy16(sHudEnemyAndAreaNameGraphics[gLanguage] + (gUnk_08D6CD0C[gKirbys[gLocalPlayerId].base.roomId]->unk46 * 0x200 + 0x5400),
             (void *)(BG_VRAM + 0x74A0), 0x100);
         *tiles++ = 0xF184;
         *tiles++ = 0xF184;
@@ -802,7 +803,7 @@ void DrawEnemyHealthOrAreaName(struct GameplayHud *hud)
         u16 cells;
         CpuCopy16(gUnk_082ECBA0, (void *)(BG_VRAM + 0x74A0), 0x100);
         *tiles++ = 0xF1A5;
-        hp = (s8)hud->unk9;
+        hp = hud->unk9;
         cells = 8;
         do {
             if (hp & 0xF8) {
@@ -889,11 +890,11 @@ static void UpdateTrackedHudEnemy(struct GameplayHud *hud)
         hud->unkA = 0;
     } else {
         s16 scaledHp;
-        if ((u8)(object->type - 0x38) <= 0x1A) {
+        if (ObjType38To52(object)) {
             if (object->type == OBJ_DARK_MIND_FORM_1)
                 scaledHp = object->unk80 * gUnk_08351628[object->subtype][gNumHumanPlayers - 1];
             else
-                scaledHp = object->unk80 * gUnk_08351458[object->type - 0x38][gNumHumanPlayers - 1];
+                scaledHp = object->unk80 * gUnk_08351458[ObjTypeAltIdx(object)][gNumHumanPlayers - 1];
             hud->unkA = scaledHp >> 8;
             if (scaledHp & 0xFF)
                 hud->unkA++;
@@ -928,7 +929,7 @@ static void UpdateTrackedHudEnemy(struct GameplayHud *hud)
         return;
     }
     // The clearing block is written out in both arms, as in the original (the copies are cross-jumped).
-    if ((u8)(tracked->type - 0x38) <= 0x1A) {
+    if (ObjType38To52(tracked)) {
         if (abs(gCurLevelInfo[gLocalPlayerId].viewportPosition.x + 0x7800 - tracked->base.x) > 0xF000
             || abs(gCurLevelInfo[gLocalPlayerId].viewportPosition.y + 0x5000 - tracked->base.y) > 0xC800) {
             CpuFill16(0, (void *)(BG_VRAM + 0x77A0), 0x100);
@@ -962,18 +963,18 @@ static void AnimateHudEnemyHealth(struct GameplayHud *hud)
             }
         }
     }
-    if ((s8)hud->unk9 != (s8)hud->unkA) {
-        if ((s8)hud->unk9 > (s8)hud->unkA) {
-            s32 step = ((s8)hud->unk9 - (s8)hud->unkA) >> 3;
+    if (hud->unk9 != hud->unkA) {
+        if (hud->unk9 > hud->unkA) {
+            s32 step = (hud->unk9 - hud->unkA) >> 3;
             if (step)
                 hud->unk9 -= step;
             else
                 hud->unk9--;
-            if ((s8)hud->unk9 <= 0) {
+            if (hud->unk9 <= 0) {
                 hud->unk9 = 0;
                 hud->unkF = 1;
             }
-        } else if ((s8)hud->unk9 < (s8)hud->unkA && (gUnk_0203AD40 & 7)) {
+        } else if (hud->unk9 < hud->unkA && (gUnk_0203AD40 & 7)) {
             struct Kirby *kirby;
             hud->unk9++;
             kirby = gKirbys;
@@ -984,16 +985,16 @@ static void AnimateHudEnemyHealth(struct GameplayHud *hud)
     }
 }
 
-void LoadAbilityIconGraphicsAndPalette(u32 tilesVram, u8 paletteId, u8 ability)
+void LoadAbilityIconGraphicsAndPalette(uintptr_t tilesVram, u8 paletteId, u8 iconId)
 {
-    LoadBgPaletteAndBase(gAbilityIconPalettes[ability], paletteId * 16, 16);
+    LoadBgPaletteAndBase(sAbilityIconPalettes[iconId], paletteId * 16, 16);
     gMainFlags |= MAIN_FLAG_BG_PALETTE_SYNC_ENABLE;
-    if (ability > 27) {
-        gUnk_03002EC0[gUnk_030039A4].unk0 = (u32)gAbilityIconGraphics[gLanguage][ability];
+    if (iconId > KIRBY_ABILITY_COUNT) {
+        gUnk_03002EC0[gUnk_030039A4].unk0 = (uintptr_t)sAbilityIconGraphics[gLanguage][iconId];
         gUnk_03002EC0[gUnk_030039A4].unk4 = tilesVram;
         gUnk_03002EC0[gUnk_030039A4].unk8 = 0x140;
     } else {
-        gUnk_03002EC0[gUnk_030039A4].unk0 = (u32)gAbilityIconGraphics[gLanguage][ability];
+        gUnk_03002EC0[gUnk_030039A4].unk0 = (uintptr_t)sAbilityIconGraphics[gLanguage][iconId];
         gUnk_03002EC0[gUnk_030039A4].unk4 = tilesVram;
         gUnk_03002EC0[gUnk_030039A4].unk8 = 0x3C0;
     }
@@ -1008,9 +1009,8 @@ inline void LoadHudAbilityIcon(u8 ability)
 inline void StartHudAbilityIconExpansion(struct ObjectBase *object)
 {
     struct GameplayHud *hud = TaskGetStructPtr(gGameplayHudTask);
-    u32 mode = gUnk_0203AD10 & 0x10;
-    if (!mode && object->unk56 == gLocalPlayerId) {
-        hud->unk4 = mode;
+    if (!(gUnk_0203AD10 & 0x10) && object->unk56 == gLocalPlayerId) {
+        hud->unk4 = 0;
         DrawHudAbilityIconRows(2);
     }
 }
@@ -1052,10 +1052,10 @@ inline void LoadGameplayHudGraphics(void)
 {
     u8 color = gKirbys[gLocalPlayerId].color;
     u8 *tiles = (u8 *)(BG_VRAM + 0x70A0);
-    LoadBgPaletteAndBase(gHudPalettes[color], 0xF0, 16);
+    LoadBgPaletteAndBase(sHudPalettes[color], 0xF0, 16);
     CpuCopy16(gUnk_082EC7A0, tiles, 0x700);
     tiles += 0x700;
-    CpuCopy16(gHudEnemyAndAreaNameGraphics[gLanguage], tiles, 0x100);
+    CpuCopy16(sHudEnemyAndAreaNameGraphics[gLanguage], tiles, 0x100);
 }
 
 inline void DrawHudLivesLabel(void)
@@ -1082,9 +1082,9 @@ inline void DrawHudLivesCount(struct Kirby *kirby)
         u32 quotient;
         u16 digit;
         tiles += column;
-        quotient = lives / gHudDecimalDivisors[i + 6];
+        quotient = lives / sHudDecimalDivisors[i + 6];
         digit = quotient;
-        lives -= gHudDecimalDivisors[i + 6] * quotient;
+        lives -= sHudDecimalDivisors[i + 6] * quotient;
         *tiles = (digit + 0x185) | 0xF000;
         tiles = (u16 *)(BG_VRAM + 0xE4C0);
         tiles += column;
@@ -1097,8 +1097,8 @@ inline void DrawDemoHud(void)
     u8 color = gKirbys[gLocalPlayerId].color;
     u16 *tiles = (u16 *)(BG_VRAM + 0xE198);
     u8 i;
-    LoadBgPaletteAndBase(gHudPalettes[color], 0xF0, 16);
-    CpuCopy16(gHudGameOverAndDemoGraphics[gLanguage], (void *)(BG_VRAM + 0x70A0), 0x800);
+    LoadBgPaletteAndBase(sHudPalettes[color], 0xF0, 16);
+    CpuCopy16(sHudGameOverAndDemoGraphics[gLanguage], (void *)(BG_VRAM + 0x70A0), 0x800);
     for (i = 0; i < 6; i++)
         *tiles++ = (i + 0x1B5) | 0xF000;
 }
@@ -1118,7 +1118,7 @@ inline void ClearHudPhoneIcon(void)
     *tiles = 0xF184;
 }
 
-inline void DrawHudEnemyNameTiles(void)
+inline void DrawHudNameTiles(void)
 {
     if (!(gUnk_0203AD10 & 0x10)) {
         u16 *tiles = (u16 *)(BG_VRAM + 0xE4AA);
@@ -1174,7 +1174,7 @@ inline void DrawGameOverMessage(void)
 {
     u16 *tiles = (u16 *)(BG_VRAM + 0xE18E);
     u8 y, x;
-    CpuCopy16(gHudGameOverAndDemoGraphics[gLanguage], (void *)(BG_VRAM + 0x70A0), 0x800);
+    CpuCopy16(sHudGameOverAndDemoGraphics[gLanguage], (void *)(BG_VRAM + 0x70A0), 0x800);
     for (y = 0; y < 3; y++) {
         for (x = 0; x < 16; x++)
             *tiles++ = (y * 16 + (x + 0x185)) | 0xF000;
@@ -1193,7 +1193,7 @@ void RefreshGameplayHud(struct Kirby *kirby)
         DrawDemoHud();
         return;
     }
-    LoadBgPaletteAndBase(gHudPalettes[color], 0xF0, 16);
+    LoadBgPaletteAndBase(sHudPalettes[color], 0xF0, 16);
     if (gGameplayHudTask->main == UpdateGameOverHudIndicators) {
         DrawGameOverMessage();
         return;
@@ -1216,9 +1216,9 @@ void RefreshGameplayHud(struct Kirby *kirby)
     else
         ClearHudPhoneIcon();
     DrawPhoneBattery(&gKirbys[gLocalPlayerId]);
-    DrawHudEnemyNameTiles();
+    DrawHudNameTiles();
     if (hud->unk1C != NULL) {
-        CpuCopy16(gHudEnemyAndAreaNameGraphics[gLanguage] + hud->unk1C->type * 0x100, (void *)(BG_VRAM + 0x77A0), 0x100);
+        CpuCopy16(sHudEnemyAndAreaNameGraphics[gLanguage] + hud->unk1C->type * 0x100, (void *)(BG_VRAM + 0x77A0), 0x100);
         DrawEnemyHealthOrAreaName(hud);
     } else {
         CpuFill16(0, (void *)(BG_VRAM + 0x77A0), 0x100);
@@ -1252,7 +1252,7 @@ void RefreshGameplayHud(struct Kirby *kirby)
                 DrawLifeSharingHudMessage(1);
             else
                 DrawCallHudMessage(1);
-        } else if ((u8)(hud->unkE + 0x80) <= 0x5F) {
+        } else if ((hud->unkE >= 0x80 && hud->unkE <= 0xDF)) {
             if (gKirbys[gUnk_02021580].base.unkC & 0x10000)
                 DrawLifeSharingHudMessage(2);
             else
@@ -1266,7 +1266,7 @@ void RefreshGameplayHud(struct Kirby *kirby)
             DrawPhoneBattery(kirby);
             hud->unkD = 0;
         }
-        if (hud->unkE <= 0x5F || (u8)(hud->unkE + 0x80) <= 0x5F) {
+        if (hud->unkE <= 0x5F || (hud->unkE >= 0x80 && hud->unkE <= 0xDF)) {
             DisplayCallingKirby(hud);
         } else {
             if (gKirbys[gUnk_02021580].base.unkC & 0x10000)
@@ -1281,33 +1281,123 @@ void RefreshGameplayHud(struct Kirby *kirby)
     hud->unk10 |= 1;
 }
 
-const u16 gHudPalettes[18][16] = {
-    { 0xA1C0, 0x729F, 0xE5BF, 0xCD3F, 0x001F, 0x1011, 0x90AE, 0x0000, 0xFFFF, 0x035F, 0xFF4D, 0x825F, 0x01DF, 0x5000, 0x035F, 0xCA52 },
-    { 0xA1C0, 0x1BFF, 0x8EFF, 0x021F, 0x815F, 0x8111, 0x808C, 0x0000, 0xFFFF, 0x035F, 0xFF4D, 0x825F, 0x01DF, 0x5000, 0x035F, 0xCA52 },
-    { 0xA1C0, 0x011F, 0x00BA, 0x0094, 0x601B, 0x000C, 0x0007, 0x0000, 0xFFFF, 0x035F, 0xFF4D, 0x825F, 0x01DF, 0x5000, 0x035F, 0xCA52 },
-    { 0xA1C0, 0x832E, 0x02AB, 0x8208, 0x015F, 0x0166, 0x0100, 0x0000, 0xFFFF, 0x035F, 0xFF4D, 0x825F, 0x01DF, 0x5000, 0x035F, 0xCA52 },
-    { 0xA1C0, 0xFFFF, 0x5EF7, 0xCA52, 0x313F, 0x39CE, 0x294A, 0x0000, 0xFFFF, 0x035F, 0xFF4D, 0x825F, 0x01DF, 0x5000, 0x035F, 0xCA52 },
-    { 0xA1C0, 0xC631, 0xB5AD, 0xAD6B, 0x01FF, 0xA108, 0x1CE7, 0x0000, 0xFFFF, 0x035F, 0xFF4D, 0x825F, 0x01DF, 0x5000, 0x035F, 0xCA52 },
-    { 0xA1C0, 0xFF71, 0x7EED, 0x7E6A, 0x6D09, 0x7DE5, 0x6182, 0x0000, 0xFFFF, 0x035F, 0xFFF4, 0x825F, 0x01DF, 0x5000, 0x035F, 0xCA52 },
-    { 0xA1C0, 0xF66F, 0xEE0C, 0x65CA, 0x4808, 0x5940, 0xCCE0, 0x0000, 0xFFFF, 0x035F, 0xFFF4, 0x825F, 0x01DF, 0x5000, 0x035F, 0xCA52 },
-    { 0xA1C0, 0x7E76, 0xFDD4, 0x7D51, 0x3492, 0x682E, 0xCCAC, 0x0000, 0xFFFF, 0x035F, 0xFF4D, 0x825F, 0x01DF, 0x5000, 0x035F, 0xCA52 },
-    { 0xA1C0, 0xDFEE, 0x4B47, 0x3680, 0x91FB, 0x3200, 0x29A0, 0x0000, 0xFFFF, 0x035F, 0xFF4D, 0x825F, 0x01DF, 0x5000, 0x035F, 0xCA52 },
-    { 0xA1C0, 0x8EDF, 0x0E7F, 0x11FF, 0x00D8, 0x015F, 0x005A, 0x0000, 0xFFFF, 0x035F, 0xFF4D, 0x825F, 0x01DF, 0x5000, 0x035F, 0xCA52 },
-    { 0xA1C0, 0x321A, 0x29B7, 0xA153, 0x0450, 0x98F0, 0x10AD, 0x0000, 0xFFFF, 0x035F, 0xFF4D, 0x825F, 0x01DF, 0x5000, 0x035F, 0xCA52 },
-    { 0xA1C0, 0x6E5F, 0x61FF, 0x519E, 0x2A06, 0xB8DB, 0x1C53, 0x0000, 0xFFFF, 0x035F, 0xFF4D, 0x825F, 0x01DF, 0x5000, 0x035F, 0xCA52 },
-    { 0xA1C0, 0xEF7B, 0x5EF7, 0x4E73, 0xAD6B, 0xB9CE, 0xA94A, 0x0000, 0xFFFF, 0x035F, 0x7BDE, 0x825F, 0x01DF, 0x5000, 0x035F, 0xCA52 },
-    { 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000 },
-    { 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000 },
-    { 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000 },
-    { 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000 },
+static const u16 sHudPalettes[18][16] = {
+    {
+        RGB( 0, 14,  8) | 0x8000, RGB(31, 20, 28), RGB(31, 13, 25) | 0x8000, RGB(31,  9, 19) | 0x8000,
+        RGB(31,  0,  0), RGB(17,  0,  4), RGB(14,  5,  4) | 0x8000, RGB_BLACK,
+        RGB_WHITE | 0x8000, RGB(31, 26,  0), RGB(13, 26, 31) | 0x8000, RGB(31, 18,  0) | 0x8000,
+        RGB(31, 14,  0), RGB( 0,  0, 20), RGB(31, 26,  0), RGB(18, 18, 18) | 0x8000,
+    },
+    {
+        RGB( 0, 14,  8) | 0x8000, RGB(31, 31,  6), RGB(31, 23,  3) | 0x8000, RGB(31, 16,  0),
+        RGB(31, 10,  0) | 0x8000, RGB(17,  8,  0) | 0x8000, RGB(12,  4,  0) | 0x8000, RGB_BLACK,
+        RGB_WHITE | 0x8000, RGB(31, 26,  0), RGB(13, 26, 31) | 0x8000, RGB(31, 18,  0) | 0x8000,
+        RGB(31, 14,  0), RGB( 0,  0, 20), RGB(31, 26,  0), RGB(18, 18, 18) | 0x8000,
+    },
+    {
+        RGB( 0, 14,  8) | 0x8000, RGB(31,  8,  0), RGB(26,  5,  0), RGB(20,  4,  0),
+        RGB(27,  0, 24), RGB(12,  0,  0), RGB( 7,  0,  0), RGB_BLACK,
+        RGB_WHITE | 0x8000, RGB(31, 26,  0), RGB(13, 26, 31) | 0x8000, RGB(31, 18,  0) | 0x8000,
+        RGB(31, 14,  0), RGB( 0,  0, 20), RGB(31, 26,  0), RGB(18, 18, 18) | 0x8000,
+    },
+    {
+        RGB( 0, 14,  8) | 0x8000, RGB(14, 25,  0) | 0x8000, RGB(11, 21,  0), RGB( 8, 16,  0) | 0x8000,
+        RGB(31, 10,  0), RGB( 6, 11,  0), RGB( 0,  8,  0), RGB_BLACK,
+        RGB_WHITE | 0x8000, RGB(31, 26,  0), RGB(13, 26, 31) | 0x8000, RGB(31, 18,  0) | 0x8000,
+        RGB(31, 14,  0), RGB( 0,  0, 20), RGB(31, 26,  0), RGB(18, 18, 18) | 0x8000,
+    },
+    {
+        RGB( 0, 14,  8) | 0x8000, RGB_WHITE | 0x8000, RGB(23, 23, 23), RGB(18, 18, 18) | 0x8000,
+        RGB(31,  9, 12), RGB(14, 14, 14), RGB(10, 10, 10), RGB_BLACK,
+        RGB_WHITE | 0x8000, RGB(31, 26,  0), RGB(13, 26, 31) | 0x8000, RGB(31, 18,  0) | 0x8000,
+        RGB(31, 14,  0), RGB( 0,  0, 20), RGB(31, 26,  0), RGB(18, 18, 18) | 0x8000,
+    },
+    {
+        RGB( 0, 14,  8) | 0x8000, RGB(17, 17, 17) | 0x8000, RGB(13, 13, 13) | 0x8000, RGB(11, 11, 11) | 0x8000,
+        RGB(31, 15,  0), RGB( 8,  8,  8) | 0x8000, RGB( 7,  7,  7), RGB_BLACK,
+        RGB_WHITE | 0x8000, RGB(31, 26,  0), RGB(13, 26, 31) | 0x8000, RGB(31, 18,  0) | 0x8000,
+        RGB(31, 14,  0), RGB( 0,  0, 20), RGB(31, 26,  0), RGB(18, 18, 18) | 0x8000,
+    },
+    {
+        RGB( 0, 14,  8) | 0x8000, RGB(17, 27, 31) | 0x8000, RGB(13, 23, 31), RGB(10, 19, 31),
+        RGB( 9,  8, 27), RGB( 5, 15, 31), RGB( 2, 12, 24), RGB_BLACK,
+        RGB_WHITE | 0x8000, RGB(31, 26,  0), RGB(20, 31, 31) | 0x8000, RGB(31, 18,  0) | 0x8000,
+        RGB(31, 14,  0), RGB( 0,  0, 20), RGB(31, 26,  0), RGB(18, 18, 18) | 0x8000,
+    },
+    {
+        RGB( 0, 14,  8) | 0x8000, RGB(15, 19, 29) | 0x8000, RGB(12, 16, 27) | 0x8000, RGB(10, 14, 25),
+        RGB( 8,  0, 18), RGB( 0, 10, 22), RGB( 0,  7, 19) | 0x8000, RGB_BLACK,
+        RGB_WHITE | 0x8000, RGB(31, 26,  0), RGB(20, 31, 31) | 0x8000, RGB(31, 18,  0) | 0x8000,
+        RGB(31, 14,  0), RGB( 0,  0, 20), RGB(31, 26,  0), RGB(18, 18, 18) | 0x8000,
+    },
+    {
+        RGB( 0, 14,  8) | 0x8000, RGB(22, 19, 31), RGB(20, 14, 31) | 0x8000, RGB(17, 10, 31),
+        RGB(18,  4, 13), RGB(14,  1, 26), RGB(12,  5, 19) | 0x8000, RGB_BLACK,
+        RGB_WHITE | 0x8000, RGB(31, 26,  0), RGB(13, 26, 31) | 0x8000, RGB(31, 18,  0) | 0x8000,
+        RGB(31, 14,  0), RGB( 0,  0, 20), RGB(31, 26,  0), RGB(18, 18, 18) | 0x8000,
+    },
+    {
+        RGB( 0, 14,  8) | 0x8000, RGB(14, 31, 23) | 0x8000, RGB( 7, 26, 18), RGB( 0, 20, 13),
+        RGB(27, 15,  4) | 0x8000, RGB( 0, 16, 12), RGB( 0, 13, 10), RGB_BLACK,
+        RGB_WHITE | 0x8000, RGB(31, 26,  0), RGB(13, 26, 31) | 0x8000, RGB(31, 18,  0) | 0x8000,
+        RGB(31, 14,  0), RGB( 0,  0, 20), RGB(31, 26,  0), RGB(18, 18, 18) | 0x8000,
+    },
+    {
+        RGB( 0, 14,  8) | 0x8000, RGB(31, 22,  3) | 0x8000, RGB(31, 19,  3), RGB(31, 15,  4),
+        RGB(24,  6,  0), RGB(31, 10,  0), RGB(26,  2,  0), RGB_BLACK,
+        RGB_WHITE | 0x8000, RGB(31, 26,  0), RGB(13, 26, 31) | 0x8000, RGB(31, 18,  0) | 0x8000,
+        RGB(31, 14,  0), RGB( 0,  0, 20), RGB(31, 26,  0), RGB(18, 18, 18) | 0x8000,
+    },
+    {
+        RGB( 0, 14,  8) | 0x8000, RGB(26, 16, 12), RGB(23, 13, 10), RGB(19, 10,  8) | 0x8000,
+        RGB(16,  2,  1), RGB(16,  7,  6) | 0x8000, RGB(13,  5,  4), RGB_BLACK,
+        RGB_WHITE | 0x8000, RGB(31, 26,  0), RGB(13, 26, 31) | 0x8000, RGB(31, 18,  0) | 0x8000,
+        RGB(31, 14,  0), RGB( 0,  0, 20), RGB(31, 26,  0), RGB(18, 18, 18) | 0x8000,
+    },
+    {
+        RGB( 0, 14,  8) | 0x8000, RGB(31, 18, 27), RGB(31, 15, 24), RGB(30, 12, 20),
+        RGB( 6, 16, 10), RGB(27,  6, 14) | 0x8000, RGB(19,  2,  7), RGB_BLACK,
+        RGB_WHITE | 0x8000, RGB(31, 26,  0), RGB(13, 26, 31) | 0x8000, RGB(31, 18,  0) | 0x8000,
+        RGB(31, 14,  0), RGB( 0,  0, 20), RGB(31, 26,  0), RGB(18, 18, 18) | 0x8000,
+    },
+    {
+        RGB( 0, 14,  8) | 0x8000, RGB(27, 27, 27) | 0x8000, RGB(23, 23, 23), RGB(19, 19, 19),
+        RGB(11, 11, 11) | 0x8000, RGB(14, 14, 14) | 0x8000, RGB(10, 10, 10) | 0x8000, RGB_BLACK,
+        RGB_WHITE | 0x8000, RGB(31, 26,  0), RGB(30, 30, 30), RGB(31, 18,  0) | 0x8000,
+        RGB(31, 14,  0), RGB( 0,  0, 20), RGB(31, 26,  0), RGB(18, 18, 18) | 0x8000,
+    },
+    {
+        RGB_BLACK, RGB_BLACK, RGB_BLACK, RGB_BLACK,
+        RGB_BLACK, RGB_BLACK, RGB_BLACK, RGB_BLACK,
+        RGB_BLACK, RGB_BLACK, RGB_BLACK, RGB_BLACK,
+        RGB_BLACK, RGB_BLACK, RGB_BLACK, RGB_BLACK,
+    },
+    {
+        RGB_BLACK, RGB_BLACK, RGB_BLACK, RGB_BLACK,
+        RGB_BLACK, RGB_BLACK, RGB_BLACK, RGB_BLACK,
+        RGB_BLACK, RGB_BLACK, RGB_BLACK, RGB_BLACK,
+        RGB_BLACK, RGB_BLACK, RGB_BLACK, RGB_BLACK,
+    },
+    {
+        RGB_BLACK, RGB_BLACK, RGB_BLACK, RGB_BLACK,
+        RGB_BLACK, RGB_BLACK, RGB_BLACK, RGB_BLACK,
+        RGB_BLACK, RGB_BLACK, RGB_BLACK, RGB_BLACK,
+        RGB_BLACK, RGB_BLACK, RGB_BLACK, RGB_BLACK,
+    },
+    {
+        RGB_BLACK, RGB_BLACK, RGB_BLACK, RGB_BLACK,
+        RGB_BLACK, RGB_BLACK, RGB_BLACK, RGB_BLACK,
+        RGB_BLACK, RGB_BLACK, RGB_BLACK, RGB_BLACK,
+        RGB_BLACK, RGB_BLACK, RGB_BLACK, RGB_BLACK,
+    },
 };
-const u32 gHudDecimalDivisors[8] = {
+static const u32 sHudDecimalDivisors[8] = {
     10000000, 1000000, 100000, 10000, 1000, 100, 10, 1,
 };
-const u8 gOffscreenKirbyIconOffsets[4] = {
+static const u8 sOffscreenKirbyIconOffsets[4] = {
     0, 4, 8, 12,
 };
-const u8 gOtherRoomKirbyIconX[4] = {
+static const u8 sOtherRoomKirbyIconX[4] = {
     24, 40, 56, 72,
 };
 
@@ -1568,7 +1658,7 @@ extern const u8 gUnk_0834A320[];
 extern const u8 gUnk_0834AB20[];
 extern const u8 gUnk_0834B320[];
 
-const u16 *gAbilityIconPalettes[32] = {
+static const u16 *sAbilityIconPalettes[32] = {
     gUnk_083145A0, gUnk_08314980, gUnk_08314D60, gUnk_08315140,
     gUnk_08315520, gUnk_08315900, gUnk_08315CE0, gUnk_083160C0,
     gUnk_083164A0, gUnk_08316880, gUnk_08316C60, gUnk_08317040,
@@ -1578,7 +1668,7 @@ const u16 *gAbilityIconPalettes[32] = {
     gUnk_0831A2A0, gUnk_0831A680, gUnk_0831AA60, gUnk_0831AE40,
     gUnk_0831B220, gUnk_0831B600, gUnk_0831B9E0, gUnk_0831BDC0,
 };
-const u8 *gAbilityIconGraphics[6][32] = {
+static const u8 *sAbilityIconGraphics[6][32] = {
     {
         gUnk_083145C0, gUnk_083149A0, gUnk_08314D80, gUnk_08315160,
         gUnk_08315540, gUnk_08315920, gUnk_08315D00, gUnk_083160E0,
@@ -1640,27 +1730,27 @@ const u8 *gAbilityIconGraphics[6][32] = {
         gUnk_0833FBA0, gUnk_0833FBA0, gUnk_0833FBA0, gUnk_0833FBA0,
     },
 };
-const u8 *gHudEnemyAndAreaNameGraphics[6] = {
+static const u8 *sHudEnemyAndAreaNameGraphics[6] = {
     gUnk_082ECFA0, gUnk_082F38A0, gUnk_08300AA0, gUnk_083073A0, gUnk_082FA1A0, gUnk_0830DCA0,
 };
-const u8 *gHudBorrowMessageGraphics[6] = {
+static const u8 *sHudBorrowMessageGraphics[6] = {
     gUnk_08340E60, gUnk_08342520, gUnk_08343BE0, gUnk_083483E0, gUnk_083452A0, gUnk_08346D20,
 };
-const u8 *gHudGiveMessageGraphics[6] = {
+static const u8 *sHudGiveMessageGraphics[6] = {
     gUnk_08341220, gUnk_083428E0, gUnk_08343FA0, gUnk_083487A0, gUnk_08345660, gUnk_083470E0,
 };
-const u8 *gHudConnectingMessageGraphics[6] = {
+static const u8 *sHudConnectingMessageGraphics[6] = {
     gUnk_083406E0, gUnk_08341DA0, gUnk_08343460, gUnk_08347C60, gUnk_08344B20, gUnk_083461E0,
 };
-const u8 *gHudAnswerMessageGraphics[6] = {
+static const u8 *sHudAnswerMessageGraphics[6] = {
     gUnk_08340AA0, gUnk_08342160, gUnk_08343820, gUnk_08348020, gUnk_08344EE0, gUnk_083465A0,
 };
-const u8 *gHudBorrowLifePromptGraphics[6] = {
+static const u8 *sHudBorrowLifePromptGraphics[6] = {
     gUnk_083415E0, gUnk_08342CA0, gUnk_08344360, gUnk_08348B60, gUnk_08345A20, gUnk_083474A0,
 };
-const u8 *gHudBorrowLifeChoiceGraphics[6] = {
+static const u8 *sHudBorrowLifeChoiceGraphics[6] = {
     gUnk_083419E0, gUnk_083430A0, gUnk_08344760, gUnk_08348F60, gUnk_08345E20, gUnk_083478A0,
 };
-const u8 *gHudGameOverAndDemoGraphics[6] = {
+static const u8 *sHudGameOverAndDemoGraphics[6] = {
     gUnk_08349320, gUnk_08349320, gUnk_08349B20, gUnk_0834AB20, gUnk_0834A320, gUnk_0834B320,
 };

@@ -19,10 +19,11 @@
 #include "gba/m4a.h"
 #include "constants/songs.h"
 #include "constants/kirby.h"
+#include "constants/object_types.h"
 #include "prank.h"
 #include "soarar.h"
 
-u8 KirbyCanContactOther(struct Kirby *, struct Kirby *);
+bool8 KirbyCanContactOther(struct Kirby *, struct Kirby *);
 static void UpdateObjectCollisions(void);
 static void ProcessObjectCollisionLists(void);
 static void ProcessKirbyContacts(void);
@@ -72,21 +73,21 @@ static void UpdateObjectCollisions(void)
     gUnk_0203AD40++;
 }
 
-s32 HandleKirbyCollision(struct ObjectBase *attack, struct ObjectBase *other)
+bool32 HandleKirbyCollision(struct ObjectBase *attack, struct ObjectBase *other)
 {
     u32 flags = other->flags;
     if (!(flags & 0x200)) {
         struct ObjectBase *parent = attack->parent;
         if (parent != other) {
-            s32 attackFlags = attack->unk68;
+            u32 attackFlags = attack->unk68;
             if (attackFlags & 0x20) {
-                // TODO: The original dereferences parent before its null check; preserve that ordering.
+                // TODO: Original UB: parent is dereferenced before its null check; preserve that ordering.
                 if (!(parent->flags & 0x200)) {
                     u32 defense = other->unk5C;
                     u32 vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
                     if ((vulnerableTypes & attackFlags)
-                        && (u32)(attackFlags & 7) >= (defense & 7) && !(flags & 0x8000)
-                        && (parent == NULL || parent->header.kind != 1 || ((struct Object *)parent)->type != 0x32 || ((struct Kirby *)other)->ability != 0)) {
+                        && (attackFlags & 7) >= (defense & 7) && !(flags & 0x8000)
+                        && (parent == NULL || parent->header.kind != 1 || ((struct Object *)parent)->type != OBJ_DROPPY || ((struct Kirby *)other)->ability != 0)) {
                         other->unk6C = parent;
                         if (parent == NULL)
                             other->unk6C = attack;
@@ -102,32 +103,32 @@ s32 HandleKirbyCollision(struct ObjectBase *attack, struct ObjectBase *other)
                 defense = other->unk5C;
                 vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
                 if ((vulnerableTypes & attackFlags)
-                    && (u32)(attackFlags & 7) >= (defense & 7) && !(other->flags & 0x8000)
+                    && (attackFlags & 7) >= (defense & 7) && !(other->flags & 0x8000)
                     && !(attackFlags & 0x800000))
                     sub_0804A728((struct Kirby *)other);
             }
         }
     }
-    return 0;
+    return FALSE;
 }
 
-s32 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
+bool32 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
 {
     struct ObjectBase *parent;
-    s32 attackFlags, loadedAttackFlags;
+    u32 attackFlags, loadedAttackFlags;
     u32 grab;
     u32 flags, defense;
     if (attack->header.kind == 2) {
-        if (((struct Object *)other)->type == 0x46 && attack->xspeed < 0)
-            return 0;
+        if (((struct Object *)other)->type == OBJ_KING_GOLEM && attack->xspeed < 0)
+            return FALSE;
         if (attack->header.kind == 2 && attack->parent == other)
-            return 0;
+            return FALSE;
     }
     if (other->flags & 0x1000000) {
         if (attack->flags & 0x40000)
-            return 0;
+            return FALSE;
         if (attack->unk68 & 0x80)
-            return 0;
+            return FALSE;
     }
     parent = attack->parent;
     if (parent != NULL && parent->header.kind == 0 && attack->unk56 == gLocalPlayerId)
@@ -138,37 +139,37 @@ s32 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
     if (grab) {
         struct Object *object = (struct Object *)other;
         struct ObjectBase *parent;
-        u32 flags, loadedFlags, noContact;
+        u32 flags, loadedFlags, flag10000;
         u32 loadedDefense, resistant;
         parent = attack->parent;
         if (parent == NULL)
-            return 0;
+            return FALSE;
         if (parent->header.kind == 1) {
             u8 type = ((struct Object *)parent)->type;
-            if (type != 7 && type != 14)
-                return 0;
-            if ((u8)(((struct Object *)other)->type - 0x5E) > 14)
-                return 0;
+            if (type != OBJ_SNOOTER_1 && type != OBJ_SNOOTER_2)
+                return FALSE;
+            if (((struct Object *)other)->type < OBJ_SMALL_FOOD || ((struct Object *)other)->type > OBJ_EMPTY_6C)
+                return FALSE;
             if (!(attack->flags & 0x10000)) {
                 other->flags |= 0x40000;
                 other->unk6C = parent;
             }
             sub_0809CFC4((struct Object *)other);
-            return 1;
+            return TRUE;
         }
         if (attack->unk56 >= gNumHumanPlayers) {
-            if ((u8)(((struct Object *)other)->type - 0x5E) <= 14 || ((struct Object *)other)->type == 0xA4
-                || (((struct Object *)other)->type == 0xA3 && other->unk56 < gNumHumanPlayers))
-                return 0;
+            if ((((struct Object *)other)->type >= OBJ_SMALL_FOOD && ((struct Object *)other)->type <= OBJ_EMPTY_6C) || ((struct Object *)other)->type == OBJ_ABILITY_STAR_2
+                || (((struct Object *)other)->type == OBJ_ABILITY_STAR_1 && other->unk56 < gNumHumanPlayers))
+                return FALSE;
         }
         loadedFlags = attack->flags;
-        noContact = loadedFlags & 0x10000;
+        flag10000 = loadedFlags & 0x10000;
         flags = loadedFlags;
-        if (!noContact && !(other->flags & 0x20000)) {
+        if (!flag10000 && !(other->flags & 0x20000)) {
             if ((flags & 0x100000) || (other->flags & 0x200000)) {
                 u32 defense = other->unk5C;
                 u32 vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
-                if ((vulnerableTypes & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)) {
+                if ((vulnerableTypes & attackFlags) && (attackFlags & 7) >= (defense & 7)) {
                     object->base.flags |= 0x40000;
                     object->base.unk6C = parent;
                 }
@@ -188,14 +189,14 @@ s32 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
         resistant = loadedDefense & 0x20;
         defense = loadedDefense;
         if (resistant) {
-            if (object->type <= 0xD4 || !(attackFlags & 0x200000))
-                return 0;
+            if (object->type <= OBJ_UNKNOWN_D4 || !(attackFlags & 0x200000))
+                return FALSE;
         }
-        if ((attackFlags & 0x200000) && (u8)(object->type - 0x5E) <= 14) {
+        if ((attackFlags & 0x200000) && (object->type >= OBJ_SMALL_FOOD && object->type <= OBJ_EMPTY_6C)) {
             attack->flags = flags & ~0x40000;
         } else {
             u32 vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
-            if ((vulnerableTypes & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)) {
+            if ((vulnerableTypes & attackFlags) && (attackFlags & 7) >= (defense & 7)) {
                 attack->flags = flags | 0x40000;
                 object->base.unk6C = parent;
                 sub_0809C380(object);
@@ -203,23 +204,23 @@ s32 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
                 other->objBase54 += (gUnk_0203AD40 & 2) * 2;
             }
         }
-        return 0;
+        return FALSE;
     }
     {
         u32 attackStateFlags = attack->flags;
-        u32 noContact = attackStateFlags & 0x10000;
+        u32 flag10000 = attackStateFlags & 0x10000;
         u32 vulnerableTypes, damageTypes;
         defense = other->unk5C;
-        if (!noContact) {
+        if (!flag10000) {
             u32 initialOtherFlags = other->flags;
-            u32 intangible = initialOtherFlags & 0x20000;
+            u32 flag20000 = initialOtherFlags & 0x20000;
             flags = initialOtherFlags;
-            if (!intangible) {
+            if (!flag20000) {
                 if ((attackStateFlags & 0x100000) || (flags & 0x200000)) {
                     u32 vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
                     if (!(vulnerableTypes & attackFlags))
                         goto contactEffects;
-                    if ((u32)(attackFlags & 7) >= (defense & 7)) {
+                    if ((attackFlags & 7) >= (defense & 7)) {
                         other->flags = flags | 0x40000;
                         other->unk6C = attack;
                     }
@@ -232,22 +233,22 @@ s32 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
         vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
         damageTypes = vulnerableTypes & attackFlags;
         flags = other->flags;
-        if (damageTypes && (u32)(attackFlags & 7) >= (defense & 7) && !(flags & 0x8000)) {
+        if (damageTypes && (attackFlags & 7) >= (defense & 7) && !(flags & 0x8000)) {
             if (attackFlags & 0x8000)
                 sub_0809C6D0((struct Object *)other);
             else
                 sub_0809B1E4((struct Object *)other);
             if (!(other->unk68 & 0x20000000))
-                return 1;
-            return 0;
+                return TRUE;
+            return FALSE;
         }
     }
 contactEffects:
     if (flags & 0x40000) {
         struct Object *object = (struct Object *)other;
-        if (attackFlags & 0x800000) return 0;
-        if ((u8)(object->type - 0x38) > 0x1A) {
-            if (object->type != 0x6D || !(attackFlags & 0x80))
+        if (attackFlags & 0x800000) return FALSE;
+        if (object->type < OBJ_MR_FROSTY || object->type > OBJ_DARK_META_KNIGHT_W8) {
+            if (object->type != OBJ_SMALL_BUTTON || !(attackFlags & 0x80))
                 sub_0808845C(object, 10);
             if (!(other->flags & 0x8000))
                 sub_0808520C(object, 16);
@@ -259,26 +260,27 @@ contactEffects:
         if (attack->unk68 & 0x10000)
             sub_080884C4(object);
     }
-    return 0;
+    return FALSE;
 }
 
-s32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *attack)
+bool32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *attack)
 {
     struct ObjectBase *parent;
-    // Each returned byte is shifted before the shared test; a bool8 local adds an LSR.
+    // TODO(match): A bool8 result adds an LSR after the shared byte test.
+    // Keep the shift until the switch control flow can reproduce the original test.
     u32 handled;
-    s32 attackFlags, initialFlags;
+    u32 attackFlags, initialFlags;
     u32 grab;
     u32 flags, defense, vulnerableTypes;
-    u32 initialOtherFlags, intangible;
-    s32 typeFlags;
-    if (other->header.kind == 1 && ((struct Object *)other)->type == 0x46 && attack->xspeed < 0)
-        return 0;
+    u32 initialOtherFlags, flag10000;
+    u32 typeFlags;
+    if (other->header.kind == 1 && ((struct Object *)other)->type == OBJ_KING_GOLEM && attack->xspeed < 0)
+        return FALSE;
     parent = attack->parent;
     if (parent == other)
-        return 0;
+        return FALSE;
     if (other->header.kind == 1 && (other->flags & 0x1000000) && (attack->flags & 0x40000))
-        return 0;
+        return FALSE;
     initialFlags = attack->unk68;
     grab = initialFlags & 0x20;
     attackFlags = initialFlags;
@@ -286,88 +288,88 @@ s32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *att
         attack->unk6C = other;
         defense = other->unk5C;
         vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
-        if ((vulnerableTypes & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)
+        if ((vulnerableTypes & attackFlags) && (attackFlags & 7) >= (defense & 7)
             && !(other->flags & 0x8000)) {
             struct Object *object = (struct Object *)parent;
             if (parent != NULL) {
                 parent->unkC &= ~0x40;
                 if (parent->header.kind == 1) {
                     switch (((struct Object *)parent)->type) {
-                    case 0x32:
+                    case OBJ_DROPPY:
                         if (other->flags & 0x8000)
-                            return 0;
+                            return FALSE;
                         handled = (u32)sub_080A049C((struct Object *)parent, (struct Kirby *)other) << 24;
                         break;
-                    case 0x33:
+                    case OBJ_PRANK:
                         if (other->flags & 0x8000)
-                            return 0;
+                            return FALSE;
                         handled = (u32)sub_080A1804((struct Object *)parent, (struct Kirby *)other) << 24;
                         break;
-                    case 0x38:
+                    case OBJ_MR_FROSTY:
                         if (other->flags & 0x8000)
-                            return 0;
+                            return FALSE;
                         handled = (u32)sub_080CC6F0((struct Object *)parent, (struct Kirby *)other) << 24;
                         break;
-                    case 0x9E:
-                    case 0xAE:
+                    case OBJ_COOKIN_PAN:
+                    case OBJ_PRANK_PAN:
                         if (other->flags & 0x8000)
-                            return 0;
+                            return FALSE;
                         handled = (u32)sub_080B6368(object, (struct Kirby *)other) << 24;
                         break;
-                    case 0x3A:
+                    case OBJ_PHAN_PHAN:
                         if (other->flags & 0x8000)
-                            return 0;
+                            return FALSE;
                         handled = (u32)sub_080CE94C((struct Object *)parent, (struct Kirby *)other) << 24;
                         break;
-                    case 15:
+                    case OBJ_LEAP:
                         if (other->flags & 0x8000)
-                            return 0;
+                            return FALSE;
                         handled = (u32)sub_080B0758((struct Object *)parent, (struct Kirby *)other) << 24;
                         break;
-                    case 0x48:
+                    case OBJ_GOBBLER:
                         if (other->flags & 0x8000)
-                            return 0;
+                            return FALSE;
                         handled = (u32)sub_080E588C((struct Gobbler *)parent, (struct Kirby *)other) << 24;
                         break;
-                    case 0x9F:
+                    case OBJ_GOBBLER_BABY:
                         if (other->flags & 0x8000)
-                            return 0;
+                            return FALSE;
                         handled = (u32)sub_080E74E4((struct Object *)parent, (struct Kirby *)other) << 24;
                         break;
-                    case 0x3E:
+                    case OBJ_MASTER_HAND:
                         if (other->flags & 0x8000)
-                            return 0;
+                            return FALSE;
                         handled = (u32)sub_080D4004((struct Object *)parent, (struct Kirby *)other) << 24;
                         break;
-                    case 0x47:
-                    case 0x4D:
+                    case OBJ_CRAZY_HAND_1:
+                    case OBJ_CRAZY_HAND_2:
                         if (other->flags & 0x8000)
-                            return 0;
+                            return FALSE;
                         handled = (u32)sub_080E1B8C((struct CrazyHand *)object, (struct Kirby *)other) << 24;
                         break;
-                    case 0x3C:
+                    case OBJ_BOX_BOXER:
                         if (other->flags & 0x8000)
-                            return 0;
+                            return FALSE;
                         handled = (u32)sub_080C8548((struct Object *)parent, (struct Kirby *)other) << 24;
                         break;
-                    case 7:
-                    case 14:
+                    case OBJ_SNOOTER_1:
+                    case OBJ_SNOOTER_2:
                         handled = (u32)sub_080AC5E0(object, &other->header) << 24;
                         break;
                     default:
-                        return 0;
+                        return FALSE;
                     }
                     if (handled)
-                        return 1;
-                    return 0;
+                        return TRUE;
+                    return FALSE;
                 }
             }
         }
     } else {
         initialOtherFlags = other->flags;
-        intangible = initialOtherFlags & 0x10000;
+        flag10000 = initialOtherFlags & 0x10000;
         flags = initialOtherFlags;
-        if (!intangible) {
+        if (!flag10000) {
             u32 attackObjectFlags = attack->flags;
             if (!(attackObjectFlags & 0x20000)) {
                 if (!(flags & 0x100000) && !(attackObjectFlags & 0x200000)) {
@@ -376,7 +378,7 @@ s32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *att
                 } else {
                     u32 defense = other->unk5C;
                     vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
-                    if ((vulnerableTypes & attackFlags) && (u32)(attackFlags & 7) >= (defense & 7)) {
+                    if ((vulnerableTypes & attackFlags) && (attackFlags & 7) >= (defense & 7)) {
                         attack->flags = attackObjectFlags | 0x4000000;
                         attack->unk6C = other;
                     }
@@ -391,8 +393,8 @@ s32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *att
                     defense = other->unk5C;
                     vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
                     if (!(vulnerableTypes & typeFlags))
-                        return 0;
-                    if ((u32)(typeFlags & 7) < (defense & 7))
+                        return FALSE;
+                    if ((typeFlags & 7) < (defense & 7))
                         goto CheckDamage;
                 }
                 if (!(attackFlags & attackTypeMask) || !(other->unk5C & attackTypeMask))
@@ -403,11 +405,11 @@ CheckDamage:
         defense = other->unk5C;
         vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
         typeFlags = attack->unk68;
-        if ((vulnerableTypes & typeFlags) && (u32)(typeFlags & 7) >= (defense & 7)
+        if ((vulnerableTypes & typeFlags) && (typeFlags & 7) >= (defense & 7)
             && !(other->flags & 0x8000) && !(typeFlags & 0x20000000))
-            return 1;
+            return TRUE;
     }
-    return 0;
+    return FALSE;
 }
 
 void ProcessAttackTileCollisions(struct ObjectBase *attack)
@@ -463,6 +465,7 @@ void ProcessAttackTileCollisions(struct ObjectBase *attack)
         }
     } else {
         s16 clip;
+        // TODO(match): clip < 0 drops the original sign-mask operations and changes register allocation.
         if (attack->flags & 1) {
             bounds[2] = -attack->unk3C;
             bounds[0] = -attack->unk3E;
@@ -546,7 +549,7 @@ void ProcessAttackTileCollisions(struct ObjectBase *attack)
     }
 }
 
-extern s32 (*const gObjectCollisionCallbacks[3])(struct ObjectBase *, struct ObjectBase *);
+static bool32 (*const sObjectCollisionCallbacks[3])(struct ObjectBase *, struct ObjectBase *);
 
 static inline void CommitAttackContact(struct ObjectBase *attack)
 {
@@ -568,7 +571,7 @@ static void ProcessObjectCollisionLists(void)
     s32 ax, ay;
     s32 bx, by;
     u32 mask; // the attack and object 0x200 tests share one mask, as the original does
-    u32 attackFlags;
+    u32 objectFlags;
     for (group = 0; group < gNumKirbys; ++group) {
         slot = (struct ObjectBase **)gUnk_02022EC0[group];
         for (count = gUnk_02022F40[group]; count != 0; --count, ++slot) {
@@ -604,9 +607,9 @@ static void ProcessObjectCollisionLists(void)
                     other = listedObject;
                     if (other == NULL)
                         goto nextObject;
-                    attackFlags = entry->flags;
+                    objectFlags = entry->flags;
                     mask = 0x200;
-                    if (attackFlags & mask)
+                    if (objectFlags & mask)
                         goto endObjectLoop;
 
                     while (1) {
@@ -625,8 +628,8 @@ static void ProcessObjectCollisionLists(void)
                                     (*slot)->sprite.unk20[0].unk6 - (*slot)->sprite.unk20[0].unk4, bx, other->unk3A * 2)
                                 && COLLISION_AXIS_OVERLAP(((*slot)->y >> 8) + (*slot)->sprite.unk20[0].unk5,
                                     (*slot)->sprite.unk20[0].unk7 - (*slot)->sprite.unk20[0].unk5, by, other->unk3B * 2))) {
-                            u8 consumed = gObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
-                            if ((u16)gObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot))
+                            bool8 consumed = sObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
+                            if ((u16)sObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot))
                                 *otherSlot = NULL;
                             if (consumed) {
                                 CommitAttackContact(*slot);
@@ -644,9 +647,9 @@ static void ProcessObjectCollisionLists(void)
                         listedObject = other;
                         if (other == NULL)
                             goto nextObject;
-                        attackFlags = (*slot)->flags;
+                        objectFlags = (*slot)->flags;
                         mask = 0x200;
-                        if (attackFlags & mask)
+                        if (objectFlags & mask)
                             break;
                     }
                 }
@@ -672,8 +675,8 @@ static void ProcessObjectCollisionLists(void)
                     if ((*slot)->unk3A != 0 && (*slot)->unk3B != 0
                         && COLLISION_AXIS_OVERLAP(ax, (*slot)->unk3A * 2, bx, other->unk3A * 2)
                         && COLLISION_AXIS_OVERLAP(ay, (*slot)->unk3B * 2, by, other->unk3B * 2)) {
-                        u8 consumed = gObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
-                        if ((u16)gObjectCollisionCallbacks[other->header.kind](*slot, other))
+                        bool8 consumed = sObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
+                        if ((u16)sObjectCollisionCallbacks[other->header.kind](*slot, other))
                             other = NULL;
                         if (consumed) {
                             CommitAttackContact(*slot);
@@ -685,8 +688,8 @@ static void ProcessObjectCollisionLists(void)
                         if (COLLISION_AXIS_OVERLAP(left, (*slot)->sprite.unk20[0].unk6 - (*slot)->sprite.unk20[0].unk4, bx, other->unk3A * 2)) {
                             s32 top = ((*slot)->y >> 8) + (*slot)->sprite.unk20[0].unk5;
                             if (COLLISION_AXIS_OVERLAP(top, (*slot)->sprite.unk20[0].unk7 - (*slot)->sprite.unk20[0].unk5, by, other->unk3B * 2)) {
-                                u8 consumed = gObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
-                                if ((u16)gObjectCollisionCallbacks[other->header.kind](*slot, other))
+                                bool8 consumed = sObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
+                                if ((u16)sObjectCollisionCallbacks[other->header.kind](*slot, other))
                                     other = NULL;
                                 if (consumed) {
                                     CommitAttackContact(*slot);
@@ -712,9 +715,9 @@ static void ProcessObjectCollisionLists(void)
                         goto nextAttack;
                     if (other == *slot)
                         goto nextAttack;
-                    attackFlags = entry->flags;
+                    objectFlags = entry->flags;
                     mask = 0x200;
-                    if (attackFlags & mask)
+                    if (objectFlags & mask)
                         goto endAttackLoop;
 
                     while (1) {
@@ -727,8 +730,8 @@ static void ProcessObjectCollisionLists(void)
                         by = (other->y >> 8) + other->unk39;
                         if (COLLISION_AXIS_OVERLAP(ax, (*slot)->unk3A * 2, bx, other->unk3A * 2)
                             && COLLISION_AXIS_OVERLAP(ay, (*slot)->unk3B * 2, by, other->unk3B * 2)) {
-                            u8 consumed = gObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
-                            if ((u16)gObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot)) {
+                            bool8 consumed = sObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
+                            if ((u16)sObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot)) {
                                 *otherSlot = NULL;
                                 break;
                             }
@@ -741,8 +744,8 @@ static void ProcessObjectCollisionLists(void)
                             if (COLLISION_AXIS_OVERLAP(left, (*slot)->sprite.unk20[0].unk6 - (*slot)->sprite.unk20[0].unk4, bx, other->unk3A * 2)) {
                                 s32 top = ((*slot)->y >> 8) + (*slot)->sprite.unk20[0].unk5;
                                 if (COLLISION_AXIS_OVERLAP(top, (*slot)->sprite.unk20[0].unk7 - (*slot)->sprite.unk20[0].unk5, by, other->unk3B * 2)) {
-                                    u8 consumed = gObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
-                                    if ((u16)gObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot)) {
+                                    bool8 consumed = sObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
+                                    if ((u16)sObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot)) {
                                         *otherSlot = NULL;
                                         break;
                                     }
@@ -765,9 +768,9 @@ static void ProcessObjectCollisionLists(void)
                             goto nextAttack;
                         if (other == *slot)
                             goto nextAttack;
-                        attackFlags = (*slot)->flags;
+                        objectFlags = (*slot)->flags;
                         mask = 0x200;
-                        if (attackFlags & mask)
+                        if (objectFlags & mask)
                             break;
                     }
                 }
@@ -776,7 +779,7 @@ static void ProcessObjectCollisionLists(void)
                     continue;
                 CommitAttackContact(*slot);
             }
-            if ((s32)(*slot)->flags < 0)
+            if ((*slot)->flags >> 31)
                 ProcessAttackTileCollisions(*slot);
         }
         slot = &gUnk_02022F50[group * 64];
@@ -797,9 +800,9 @@ static void ProcessObjectCollisionLists(void)
                         continue;
                     if (other2 == *slot)
                         continue;
-                    attackFlags = (*slot)->flags;
+                    objectFlags = (*slot)->flags;
                     mask = 0x200;
-                    if (attackFlags & mask)
+                    if (objectFlags & mask)
                         break;
                     if (other2->flags & mask)
                         continue;
@@ -810,8 +813,8 @@ static void ProcessObjectCollisionLists(void)
                     by = (entry->y >> 8) + entry->unk39;
                     if (COLLISION_AXIS_OVERLAP(ax, (*slot)->unk3A * 2, bx, entry->unk3A * 2)
                         && COLLISION_AXIS_OVERLAP(ay, (*slot)->unk3B * 2, by, entry->unk3B * 2)) {
-                        u8 consumed = gObjectCollisionCallbacks[(*slot)->header.kind](entry, *slot);
-                        if ((u16)gObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot)) {
+                        bool8 consumed = sObjectCollisionCallbacks[(*slot)->header.kind](entry, *slot);
+                        if ((u16)sObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot)) {
                             *otherSlot = NULL;
                             break;
                         }
@@ -824,8 +827,8 @@ static void ProcessObjectCollisionLists(void)
                         if (COLLISION_AXIS_OVERLAP(left, (*slot)->sprite.unk20[0].unk6 - (*slot)->sprite.unk20[0].unk4, bx, entry->unk3A * 2)) {
                             s32 top = ((*slot)->y >> 8) + (*slot)->sprite.unk20[0].unk5;
                             if (COLLISION_AXIS_OVERLAP(top, (*slot)->sprite.unk20[0].unk7 - (*slot)->sprite.unk20[0].unk5, by, entry->unk3B * 2)) {
-                                u8 consumed = gObjectCollisionCallbacks[(*slot)->header.kind](entry, *slot);
-                                if ((u16)gObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot)) {
+                                bool8 consumed = sObjectCollisionCallbacks[(*slot)->header.kind](entry, *slot);
+                                if ((u16)sObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot)) {
                                     *otherSlot = NULL;
                                     break;
                                 }
@@ -854,8 +857,8 @@ static void ProcessObjectCollisionLists(void)
                             by = (other->y >> 8) + other->unk39;
                             if (COLLISION_AXIS_OVERLAP(ax, (*slot)->unk3A * 2, bx, other->unk3A * 2)
                                 && COLLISION_AXIS_OVERLAP(ay, (*slot)->unk3B * 2, by, other->unk3B * 2)) {
-                                u8 consumed = gObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
-                                if ((u16)gObjectCollisionCallbacks[other->header.kind](*slot, other))
+                                bool8 consumed = sObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
+                                if ((u16)sObjectCollisionCallbacks[other->header.kind](*slot, other))
                                     break;
                                 if (consumed) {
                                     *slot = NULL;
@@ -866,8 +869,8 @@ static void ProcessObjectCollisionLists(void)
                                 if (COLLISION_AXIS_OVERLAP(left, (*slot)->sprite.unk20[0].unk6 - (*slot)->sprite.unk20[0].unk4, bx, other->unk3A * 2)) {
                                     s32 top = ((*slot)->y >> 8) + (*slot)->sprite.unk20[0].unk5;
                                     if (COLLISION_AXIS_OVERLAP(top, (*slot)->sprite.unk20[0].unk7 - (*slot)->sprite.unk20[0].unk5, by, other->unk3B * 2)) {
-                                        u8 consumed = gObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
-                                        if ((u16)gObjectCollisionCallbacks[other->header.kind](*slot, other))
+                                        bool8 consumed = sObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
+                                        if ((u16)sObjectCollisionCallbacks[other->header.kind](*slot, other))
                                             break;
                                         if (consumed) {
                                             *slot = NULL;
@@ -882,7 +885,7 @@ static void ProcessObjectCollisionLists(void)
                 if (*slot == NULL)
                     continue;
             }
-            if ((s32)(*slot)->flags < 0 && !((*slot)->flags & 0x40000))
+            if ((*slot)->flags >> 31 && !((*slot)->flags & 0x40000))
                 ProcessAttackTileCollisions(*slot);
         }
     }
@@ -921,10 +924,10 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
     widthB = b[2] - b[0];
     heightA = a[3] - a[1];
     heightB = b[3] - b[1];
-    previousOverlap[0] = COLLISION_AXIS_OVERLAP(object->unk48 + a[0] * 256, widthA * 256, solid->base.unk48 + b[0] * 256, widthB * 256);
-    previousOverlap[1] = COLLISION_AXIS_OVERLAP(object->unk4C + a[1] * 256, heightA * 256, solid->base.unk4C + b[1] * 256, heightB * 256);
-    overlapX = COLLISION_AXIS_OVERLAP(object->x + a[0] * 256, widthA * 256, solid->base.x + b[0] * 256, widthB * 256);
-    overlapY = COLLISION_AXIS_OVERLAP(object->y + a[1] * 256, heightA * 256, solid->base.y + b[1] * 256, heightB * 256);
+    previousOverlap[0] = COLLISION_AXIS_OVERLAP(object->unk48 + a[0] * 0x100, widthA * 0x100, solid->base.unk48 + b[0] * 0x100, widthB * 0x100);
+    previousOverlap[1] = COLLISION_AXIS_OVERLAP(object->unk4C + a[1] * 0x100, heightA * 0x100, solid->base.unk4C + b[1] * 0x100, heightB * 0x100);
+    overlapX = COLLISION_AXIS_OVERLAP(object->x + a[0] * 0x100, widthA * 0x100, solid->base.x + b[0] * 0x100, widthB * 0x100);
+    overlapY = COLLISION_AXIS_OVERLAP(object->y + a[1] * 0x100, heightA * 0x100, solid->base.y + b[1] * 0x100, heightB * 0x100);
     if (overlapX && overlapY) {
         if (savedFlags & 0x80) {
             object->unk62 |= 0x10;
@@ -932,23 +935,23 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
             return;
         }
         if (previousOverlap[0] && !previousOverlap[1]
-            && object->x != solid->base.x + (b[2] - a[0]) * 256
-            && object->x != solid->base.x + (b[0] - a[2]) * 256) {
+            && object->x != solid->base.x + (b[2] - a[0]) * 0x100
+            && object->x != solid->base.x + (b[0] - a[2]) * 0x100) {
             if (object->yspeed > 0) {
                 s32 tolerance = object->yspeed + 0x300;
-                if (abs((object->y + a[1] * 256) - (solid->base.y + b[3] * 256)) < tolerance) {
+                if (abs((object->y + a[1] * 0x100) - (solid->base.y + b[3] * 0x100)) < tolerance) {
                     object->unk62 |= 8;
                     solid->base.unk62 |= 4;
-                    object->y = solid->base.y + (b[3] - a[1]) * 256 + (solid->base.yspeed + 0x100);
+                    object->y = solid->base.y + (b[3] - a[1]) * 0x100 + (solid->base.yspeed + 0x100);
                     object->yspeed = 0;
                 }
             }
             if (object->yspeed <= 0 || solid->base.yspeed != 0) {
                 s32 tolerance = 0x300 - object->yspeed;
-                if (abs((object->y + a[3] * 256) - (solid->base.y + b[1] * 256)) < tolerance) {
+                if (abs((object->y + a[3] * 0x100) - (solid->base.y + b[1] * 0x100)) < tolerance) {
                     object->unk62 |= 4;
                     solid->base.unk62 |= 8;
-                    object->y = solid->base.y + (b[1] - a[3] + 1) * 256;
+                    object->y = solid->base.y + (b[1] - a[3] + 1) * 0x100;
                     if ((object->flags & 0x40) && object->yspeed > 0)
                         object->yspeed &= 0xFF;
                     else
@@ -959,10 +962,10 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
         }
         if (!previousOverlap[0] && previousOverlap[1]) {
             s32 tolerance = 0x200 - object->yspeed;
-            if (abs((object->y + a[3] * 256) - (solid->base.y + b[1] * 256)) > tolerance) {
+            if (abs((object->y + a[3] * 0x100) - (solid->base.y + b[1] * 0x100)) > tolerance) {
                 if (object->x > solid->base.x) {
                     s32 distance = solid->base.xspeed - (object->xspeed - 0x400);
-                    if (abs((object->x + a[0] * 256) - (solid->base.x + b[2] * 256)) < distance) {
+                    if (abs((object->x + a[0] * 0x100) - (solid->base.x + b[2] * 0x100)) < distance) {
                         if (object->flags & 1)
                             object->unk62 |= 1;
                         else
@@ -971,13 +974,13 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
                             solid->base.unk62 |= 2;
                         else
                             solid->base.unk62 |= 1;
-                        object->x = solid->base.x + (b[2] - a[0]) * 256;
+                        object->x = solid->base.x + (b[2] - a[0]) * 0x100;
                     } else if (object->yspeed == 0) {
                         object->x += 0x100;
                     }
                 } else {
                     s32 distance = (object->xspeed + 0x400) - solid->base.xspeed;
-                    if (abs((object->x + a[2] * 256) - (solid->base.x + b[0] * 256)) < distance) {
+                    if (abs((object->x + a[2] * 0x100) - (solid->base.x + b[0] * 0x100)) < distance) {
                         if (object->flags & 1)
                             object->unk62 |= 2;
                         else
@@ -986,7 +989,7 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
                             solid->base.unk62 |= 1;
                         else
                             solid->base.unk62 |= 2;
-                        object->x = solid->base.x + (b[0] - a[2]) * 256;
+                        object->x = solid->base.x + (b[0] - a[2]) * 0x100;
                     } else if (object->yspeed == 0) {
                         object->x -= 0x100;
                     }
@@ -999,19 +1002,19 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
             if (object->y > solid->base.y) {
                 if (object->yspeed > 0) {
                     s32 tolerance = object->yspeed + 0x300;
-                    if (abs((object->y + a[1] * 256) - (solid->base.y + b[3] * 256)) < tolerance) {
+                    if (abs((object->y + a[1] * 0x100) - (solid->base.y + b[3] * 0x100)) < tolerance) {
                         object->unk62 |= 8;
                         solid->base.unk62 |= 4;
-                        object->y = solid->base.y + (b[3] - a[1]) * 256 + (solid->base.yspeed + 0x100);
+                        object->y = solid->base.y + (b[3] - a[1]) * 0x100 + (solid->base.yspeed + 0x100);
                         object->yspeed = 0;
                     }
                 }
             } else if (object->yspeed <= 0) {
                 s32 tolerance = 0x300 - object->yspeed;
-                if (abs((object->y + a[3] * 256) - (solid->base.y + b[1] * 256)) < tolerance) {
+                if (abs((object->y + a[3] * 0x100) - (solid->base.y + b[1] * 0x100)) < tolerance) {
                     object->unk62 |= 4;
                     solid->base.unk62 |= 8;
-                    object->y = solid->base.y + (b[1] - a[3] + 1) * 256;
+                    object->y = solid->base.y + (b[1] - a[3] + 1) * 0x100;
                     if ((object->flags & 0x40) && object->yspeed > 0)
                         object->yspeed &= 0xFF;
                     else
@@ -1020,10 +1023,10 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
                 }
             }
             tolerance = 0x200 - object->yspeed;
-            if (abs((object->y + a[3] * 256) - (solid->base.y + b[1] * 256)) > tolerance) {
+            if (abs((object->y + a[3] * 0x100) - (solid->base.y + b[1] * 0x100)) > tolerance) {
                 if (object->x > solid->base.x) {
                     s32 distance = solid->base.xspeed - (object->xspeed - 0x400);
-                    if (abs((object->x + a[0] * 256) - (solid->base.x + b[2] * 256)) < distance) {
+                    if (abs((object->x + a[0] * 0x100) - (solid->base.x + b[2] * 0x100)) < distance) {
                         if (object->flags & 1)
                             object->unk62 |= 1;
                         else
@@ -1032,13 +1035,13 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
                             solid->base.unk62 |= 2;
                         else
                             solid->base.unk62 |= 1;
-                        object->x = solid->base.x + (b[2] - a[0]) * 256;
+                        object->x = solid->base.x + (b[2] - a[0]) * 0x100;
                     } else if (object->yspeed == 0) {
                         object->x += 0x100;
                     }
                 } else {
                     s32 distance = (object->xspeed + 0x400) - solid->base.xspeed;
-                    if (abs((object->x + a[2] * 256) - (solid->base.x + b[0] * 256)) < distance) {
+                    if (abs((object->x + a[2] * 0x100) - (solid->base.x + b[0] * 0x100)) < distance) {
                         if (object->flags & 1)
                             object->unk62 |= 2;
                         else
@@ -1047,7 +1050,7 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
                             solid->base.unk62 |= 1;
                         else
                             solid->base.unk62 |= 2;
-                        object->x = solid->base.x + (b[0] - a[2]) * 256;
+                        object->x = solid->base.x + (b[0] - a[2]) * 0x100;
                     } else if (object->yspeed == 0) {
                         object->x -= 0x100;
                     }
@@ -1057,13 +1060,13 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
         if (previousOverlap[0] && previousOverlap[1]) {
             s32 tolerance;
 
-            if (object->x != solid->base.x + (b[2] - a[0]) * 256
-                && object->x != solid->base.x + (b[0] - a[2]) * 256) {
+            if (object->x != solid->base.x + (b[2] - a[0]) * 0x100
+                && object->x != solid->base.x + (b[0] - a[2]) * 0x100) {
                 s32 tolerance = 0x300 - object->yspeed;
-                if (abs((object->y + a[3] * 256) - (solid->base.y + b[1] * 256)) < tolerance) {
+                if (abs((object->y + a[3] * 0x100) - (solid->base.y + b[1] * 0x100)) < tolerance) {
                     object->unk62 |= 4;
                     solid->base.unk62 |= 8;
-                    object->y = solid->base.y + (b[1] - a[3] + 1) * 256;
+                    object->y = solid->base.y + (b[1] - a[3] + 1) * 0x100;
                     if ((object->flags & 0x40) && object->yspeed > 0)
                         object->yspeed &= 0xFF;
                     else
@@ -1071,19 +1074,19 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
                     object->kirby2 = (struct Kirby *)solid;
                 } else if (object->yspeed > 0) {
                     s32 tolerance = object->yspeed + 0x300;
-                    if (abs((object->y + a[1] * 256) - (solid->base.y + b[3] * 256)) < tolerance) {
+                    if (abs((object->y + a[1] * 0x100) - (solid->base.y + b[3] * 0x100)) < tolerance) {
                         object->unk62 |= 8;
                         solid->base.unk62 |= 4;
-                        object->y = solid->base.y + (b[3] - a[1]) * 256 + (solid->base.yspeed + 0x100);
+                        object->y = solid->base.y + (b[3] - a[1]) * 0x100 + (solid->base.yspeed + 0x100);
                         object->yspeed = 0;
                     }
                 }
             }
             tolerance = 0x200 - object->yspeed;
-            if (abs((object->y + a[3] * 256) - (solid->base.y + b[1] * 256)) > tolerance) {
+            if (abs((object->y + a[3] * 0x100) - (solid->base.y + b[1] * 0x100)) > tolerance) {
                 if (object->x > solid->base.x) {
                     s32 distance = solid->base.xspeed - (object->xspeed - 0x400);
-                    if (abs((object->x + a[0] * 256) - (solid->base.x + b[2] * 256)) < distance) {
+                    if (abs((object->x + a[0] * 0x100) - (solid->base.x + b[2] * 0x100)) < distance) {
                         if (object->flags & 1)
                             object->unk62 |= 1;
                         else
@@ -1092,13 +1095,13 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
                             solid->base.unk62 |= 2;
                         else
                             solid->base.unk62 |= 1;
-                        object->x = solid->base.x + (b[2] - a[0]) * 256;
+                        object->x = solid->base.x + (b[2] - a[0]) * 0x100;
                     } else if (object->yspeed == 0) {
                         object->x += 0x100;
                     }
                 } else {
                     s32 distance = (object->xspeed + 0x400) - solid->base.xspeed;
-                    if (abs((object->x + a[2] * 256) - (solid->base.x + b[0] * 256)) < distance) {
+                    if (abs((object->x + a[2] * 0x100) - (solid->base.x + b[0] * 0x100)) < distance) {
                         if (object->flags & 1)
                             object->unk62 |= 2;
                         else
@@ -1107,7 +1110,7 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
                             solid->base.unk62 |= 1;
                         else
                             solid->base.unk62 |= 2;
-                        object->x = solid->base.x + (b[0] - a[2]) * 256;
+                        object->x = solid->base.x + (b[0] - a[2]) * 0x100;
                     } else if (object->yspeed == 0) {
                         object->x -= 0x100;
                     }
@@ -1121,9 +1124,9 @@ void ResolveSolidObjectCollision(struct ObjectBase *object, struct Object *solid
     (((kirby)->ability != KIRBY_ABILITY_UFO \
         && ((((kirby)->animationIndex <= 0x15 || (kirby)->animationIndex == 0x19 || (kirby)->animationIndex == 0x2F) \
                 && (kirby)->animationIndex != 0xD) \
-            || (u16)((kirby)->animationIndex - 0x38) <= 7)) \
+            || ((kirby)->animationIndex >= 0x38 && (kirby)->animationIndex <= 0x3F))) \
         || ((kirby)->ability == KIRBY_ABILITY_UFO \
-            && ((kirby)->animationIndex <= 0x12 || (u16)((kirby)->animationIndex - 0x21) <= 13)))
+            && ((kirby)->animationIndex <= 0x12 || ((kirby)->animationIndex >= 0x21 && (kirby)->animationIndex <= 0x2E))))
 
 static inline bool32 CanKirbyShareIndex(struct Kirby *kirbys, s32 index)
 {
@@ -1131,11 +1134,11 @@ static inline bool32 CanKirbyShareIndex(struct Kirby *kirbys, s32 index)
         if ((kirbys[index].animationIndex <= 0x15 || kirbys[index].animationIndex == 0x19 || kirbys[index].animationIndex == 0x2F)
             && kirbys[index].animationIndex != 0xD)
             return TRUE;
-        if ((u16)(kirbys[index].animationIndex - 0x38) <= 7)
+        if (kirbys[index].animationIndex >= 0x38 && kirbys[index].animationIndex <= 0x3F)
             return TRUE;
     }
     if (kirbys[index].ability == KIRBY_ABILITY_UFO
-        && (kirbys[index].animationIndex <= 0x12 || (u16)(kirbys[index].animationIndex - 0x21) <= 13))
+        && (kirbys[index].animationIndex <= 0x12 || (kirbys[index].animationIndex >= 0x21 && kirbys[index].animationIndex <= 0x2E)))
         return TRUE;
     return FALSE;
 }
@@ -1148,17 +1151,25 @@ static inline bool32 CanKirbyShareIndexLoaded(struct Kirby *kirbys, s32 index, u
             return TRUE;
         {
             struct Kirby *current = kirbys;
-            if ((u16)(current[index].animationIndex - 0x38) <= 7)
+            if (current[index].animationIndex >= 0x38 && current[index].animationIndex <= 0x3F)
                 return TRUE;
             if (current[index].ability != KIRBY_ABILITY_UFO)
                 return FALSE;
         }
     }
-    if (kirbys[index].animationIndex <= 0x12 || (u16)(kirbys[index].animationIndex - 0x21) <= 13)
+    if (kirbys[index].animationIndex <= 0x12 || (kirbys[index].animationIndex >= 0x21 && kirbys[index].animationIndex <= 0x2E))
         return TRUE;
     return FALSE;
 }
 
+// TODO: Typed indexing reverses the operands of one ADD (adds r4, r3, r4
+// instead of adds r4, r4, r3). Preserve the original instructions in the matching build.
+#ifndef NONMATCHING
+NAKED static void ProcessKirbyContacts(void)
+{
+    asm(".include \"asm/nonmatching/ProcessKirbyContacts.inc\"");
+}
+#else
 static void ProcessKirbyContacts(void)
 {
     u8 firstId, secondId;
@@ -1167,7 +1178,7 @@ static void ProcessKirbyContacts(void)
         struct Kirby *first = (struct Kirby *)firstBase;
         if ((gUnk_03000510.unk4 & (0x10 | (1 << firstId)))
             || (firstBase->flags & 0x3800F00) || first->stateFn == sub_080566E0
-            || (u16)(first->animationIndex - 0x4A) <= 15 || firstBase->sprite.animId == 0x220)
+            || (first->animationIndex >= 0x4A && first->animationIndex <= 0x59) || firstBase->sprite.animId == 0x220)
             continue;
         secondId = firstId + 1;
         while (secondId < gNumKirbys) {
@@ -1179,7 +1190,7 @@ static void ProcessKirbyContacts(void)
             // first->animationIndex is in 0x4A-0x59, so the term is always false here and the
             // second Kirby is never excluded from contact by its own animation.
             if ((second->base.flags & 0x3800F00) || gKirbys[secondId].stateFn == sub_080566E0
-                || (u16)(first->animationIndex - 0x4A) <= 15 || second->base.sprite.animId == 0x220
+                || (first->animationIndex >= 0x4A && first->animationIndex <= 0x59) || second->base.sprite.animId == 0x220
                 || second->base.roomId != firstBase->roomId) {
                 ++secondId;
                 continue;
@@ -1208,13 +1219,7 @@ static void ProcessKirbyContacts(void)
                         if (CanKirbyShare(first)) {
                             if (CanKirbyShareIndex(kirbys, secondId)
                                 && (first->base.unk56 < gNumHumanPlayers || kirbys[secondId].base.unk56 < gNumHumanPlayers)) {
-                                u32 offset = secondId * sizeof(struct Kirby);
-                                struct Kirby *sharingKirby;
-                                // TODO(match): Compute &kirbys[secondId] with adds r4, r4, r3.
-                                // Typed indexing, pointer increments, and an inline helper instead
-                                // emit adds r4, r3, r4. Keep the pointer typed; this instruction
-                                // defines the result and clobbers flags, with no fixed registers.
-                                asm("add %0, %1, %2" : "=l"(sharingKirby) : "l"(offset), "l"(kirbys) : "cc");
+                                struct Kirby *sharingKirby = &kirbys[secondId];
                                 sub_08053DAC(sharingKirby, firstId);
                                 sub_08054414(first, secondId);
                                 sharingKirby->unkE1 |= 1 << firstId;
@@ -1312,7 +1317,9 @@ static void ProcessKirbyContacts(void)
     }
 }
 
-u8 KirbyCanContactOther(struct Kirby *first, struct Kirby *second)
+#endif
+
+bool8 KirbyCanContactOther(struct Kirby *first, struct Kirby *second)
 {
     s8 a[4], b[4];
     s32 ax, ay, bx, by;
@@ -1334,12 +1341,12 @@ u8 KirbyCanContactOther(struct Kirby *first, struct Kirby *second)
     }
     b[1] = second->base.unk3D;
     b[3] = second->base.unk3F;
-    ax = first->base.x + a[0] * 256;
-    bx = second->base.x + b[0] * 256;
-    if (COLLISION_AXIS_OVERLAP(ax, (a[2] - a[0]) * 256, bx, (b[2] - b[0]) * 256)) {
-        ay = first->base.y + a[1] * 256;
-        by = second->base.y + b[1] * 256;
-        if (COLLISION_AXIS_OVERLAP(ay, (a[3] - a[1]) * 256, by, (b[3] - b[1]) * 256)) {
+    ax = first->base.x + a[0] * 0x100;
+    bx = second->base.x + b[0] * 0x100;
+    if (COLLISION_AXIS_OVERLAP(ax, (a[2] - a[0]) * 0x100, bx, (b[2] - b[0]) * 0x100)) {
+        ay = first->base.y + a[1] * 0x100;
+        by = second->base.y + b[1] * 0x100;
+        if (COLLISION_AXIS_OVERLAP(ay, (a[3] - a[1]) * 0x100, by, (b[3] - b[1]) * 0x100)) {
             if (first->base.yspeed <= 0)
                 return TRUE;
         }
@@ -1347,7 +1354,7 @@ u8 KirbyCanContactOther(struct Kirby *first, struct Kirby *second)
     return FALSE;
 }
 
-u8 ObjectHitboxesOverlap(struct ObjectBase *first, struct ObjectBase *second)
+bool8 ObjectHitboxesOverlap(struct ObjectBase *first, struct ObjectBase *second)
 {
     s32 ax, ay, bx, by;
     if (first->flags & 1)
@@ -1367,7 +1374,7 @@ u8 ObjectHitboxesOverlap(struct ObjectBase *first, struct ObjectBase *second)
     return FALSE;
 }
 
-static s32 ObjectHitboxOverlapsRect(struct ObjectBase *object, s32 x, s32 y, s16 xOffset, s16 yOffset, u16 width, u16 height)
+static bool32 ObjectHitboxOverlapsRect(struct ObjectBase *object, s32 x, s32 y, s16 xOffset, s16 yOffset, u16 width, u16 height)
 {
     s32 ax, ay, bx, by;
     if (object->flags & 1)
@@ -1384,7 +1391,7 @@ static s32 ObjectHitboxOverlapsRect(struct ObjectBase *object, s32 x, s32 y, s16
     return FALSE;
 }
 
-u8 ObjectOriginOverlapsRect(struct ObjectBase *object, s32 x, s32 y, s16 xOffset, s16 yOffset, u16 width, u16 height)
+bool8 ObjectOriginOverlapsRect(struct ObjectBase *object, s32 x, s32 y, s16 xOffset, s16 yOffset, u16 width, u16 height)
 {
     s32 rectX, rectY;
     s32 objectX, objectY;
@@ -1405,7 +1412,7 @@ struct ObjectBase **GetRoomObjectCollisionList(struct ObjectBase *object)
     if (object->unk56 != 0xFF)
         group = gCurLevelInfo[object->unk56].unk65E;
     else
-        // TODO: The original returns an out-of-range list for the 0xFF sentinel.
+        // TODO: Original UB: the 0xFF sentinel produces an out-of-bounds array pointer.
         group = 0xFF;
     return &gUnk_02022F50[group * 64];
 }
@@ -1416,7 +1423,7 @@ struct Object **GetRoomSolidCollisionList(struct ObjectBase *object)
     if (object->unk56 != 0xFF)
         group = gCurLevelInfo[object->unk56].unk65E;
     else
-        // TODO: The original returns an out-of-range list for the 0xFF sentinel.
+        // TODO: Original UB: the 0xFF sentinel produces an out-of-bounds array pointer.
         group = 0xFF;
     return gUnk_02022EC0[group];
 }
@@ -1425,6 +1432,6 @@ static void ObjectCollisionTaskDestructor(struct Task *task UNUSED)
 {
 }
 
-s32 (*const gObjectCollisionCallbacks[3])(struct ObjectBase *, struct ObjectBase *) = {
+static bool32 (*const sObjectCollisionCallbacks[3])(struct ObjectBase *, struct ObjectBase *) = {
     HandleKirbyCollision, HandleObjectCollision, HandleAttackObjectCollision,
 };

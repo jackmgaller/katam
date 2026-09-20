@@ -1,4 +1,4 @@
-#include "pause_transition.h"
+#include "screen_transition.h"
 #include "palette_effects.h"
 #include "code_0801C6F8.h"
 #include "task.h"
@@ -718,7 +718,7 @@ static void sub_0801D948(struct Unk_0801C6F8 *var)
             UpdateSaveBufferByOffset(SAVE_BUFFER_TYPE_WORLD_PROPS, gSaveID > 2 ? 0 : gSaveID);
     }
     sub_080027A8();
-    FinishPauseScreen();
+    FinishTransitionScreen();
     TaskDestroy(gCurTask);
 }
 

@@ -27,9 +27,13 @@ inline void InsertPaletteEffectByPriority(struct PaletteEffect *arg0, u8 arg1);
 #include "palette_effects.h"
 #include "functions.h"
 
-extern u16 gUnk_02022120[256];
-extern u16 gUnk_02022320[256];
-extern u16 gUnk_02022520[512];
+struct BasePalettes {
+    /* 0x000 */ u16 bg[256];
+    /* 0x200 */ u16 obj[256];
+}; /* size = 0x400 */
+
+extern struct BasePalettes gBasePalettes ALIGNED(4);
+extern struct BasePalettes gBasePalettesBackup ALIGNED(4);
 
 static void QueuePaletteEffect(struct PaletteEffect *);
 void CompactPaletteEffectQueue(void);
@@ -42,13 +46,13 @@ void ApplyPaletteBrightening(struct PaletteEffect *);
 void ApplyPaletteTableDarkening(struct PaletteEffect *);
 void ApplyPaletteRedTint(struct PaletteEffect *);
 void ApplyPaletteWhiteFill(struct PaletteEffect *);
-extern void (*const gPaletteEffectCallbacks[5])(struct PaletteEffect *);
-extern const u16 gBrightenRedTable[64];
-extern const u16 gBrightenGreenTable[64];
-extern const u16 gBrightenBlueTable[64];
-extern const u16 gDarkenRedTable[64];
-extern const u16 gDarkenGreenTable[64];
-extern const u16 gDarkenBlueTable[64];
+static void (*const sPaletteEffectCallbacks[5])(struct PaletteEffect *);
+static const u16 sBrightenRedTable[64];
+static const u16 sBrightenGreenTable[64];
+static const u16 sBrightenBlueTable[64];
+static const u16 sDarkenRedTable[64];
+static const u16 sDarkenGreenTable[64];
+static const u16 sDarkenBlueTable[64];
 
 static void QueuePaletteEffect(struct PaletteEffect *effect)
 {
@@ -59,7 +63,7 @@ static void QueuePaletteEffect(struct PaletteEffect *effect)
     struct PaletteEffect *existing;
 
     if (task == NULL) {
-        gPaletteEffectsTask = TaskCreate(UpdatePaletteEffects, 0, 0xFFFE, TASK_x0004, PaletteEffectsTaskDestructor);
+        gPaletteEffectsTask = TaskCreate(UpdatePaletteEffects, 0, 0xFFFE, TASK_x0004 | TASK_USE_IWRAM, PaletteEffectsTaskDestructor);
         for (i = 0; i < 8; i++)
             state->unk80[i] = NULL;
     }
@@ -148,11 +152,11 @@ static void UpdatePaletteEffects(void)
                 if ((state->unk0[i].unk8 & 4)
                     && (!(gMainFlags & 0x800) || !(flags & 0x100) || (state->unk0[i].unk8 & 0x80))) {
                     if (state->unk0[i].unk6 && !bgRestored) {
-                        CpuCopy32(gUnk_02022120, gBgPalette, sizeof(gBgPalette));
+                        CpuCopy32(gBasePalettes.bg, gBgPalette, sizeof(gBgPalette));
                         bgRestored = TRUE;
                     }
                     if (state->unk0[i].unk4 && !objRestored) {
-                        CpuCopy32(gUnk_02022320, gObjPalette, sizeof(gObjPalette));
+                        CpuCopy32(gBasePalettes.obj, gObjPalette, sizeof(gObjPalette));
                         objRestored = TRUE;
                     }
                 }
@@ -163,7 +167,7 @@ static void UpdatePaletteEffects(void)
         return;
     for (i = 0; i < 8; i++) {
         if (state->unk80[i] && (!(gMainFlags & 0x800) || !(flags & 0x100) || (state->unk80[i]->unk8 & 0x80))) {
-            gPaletteEffectCallbacks[state->unk80[i]->unk0](state->unk80[i]);
+            sPaletteEffectCallbacks[state->unk80[i]->unk0](state->unk80[i]);
             if (!(state->unk80[i]->unk8 & 2)) {
                 if (state->unk80[i]->unk8 & 1)
                     state->unk80[i] = NULL;
@@ -179,9 +183,9 @@ static void UpdatePaletteEffects(void)
         }
     }
     CompactPaletteEffectQueue();
-    if (gMainFlags & 0x10000) {
+    if (gMainFlags & MAIN_FLAG_BG_PALETTE_TRANSFORMATION_ENABLE) {
         if (objRestored) {
-            if (gMainFlags & 0x20000) {
+            if (gMainFlags & MAIN_FLAG_OBJ_PALETTE_TRANSFORMATION_ENABLE) {
                 LoadObjPaletteWithTransformation(gObjPalette, 0, 0x100);
             } else {
                 DmaCopy16(3, gObjPalette, gObjPalette, sizeof(gObjPalette));
@@ -189,7 +193,7 @@ static void UpdatePaletteEffects(void)
             }
         }
         if (bgRestored) {
-            if (gMainFlags & 0x10000) {
+            if (gMainFlags & MAIN_FLAG_BG_PALETTE_TRANSFORMATION_ENABLE) {
                 LoadBgPaletteWithTransformation(gBgPalette, 0, 0x100);
             } else {
                 DmaCopy16(3, gBgPalette, gBgPalette, sizeof(gBgPalette));
@@ -219,21 +223,21 @@ static inline void DarkenColor(u16 *palette, struct PaletteEffect *effect)
 // takes r2 ahead of the adjustment and each colour's final OR lands in r0.
 #define BRIGHTEN_COLOR(palette, effect)                                            \
     (amount = (effect)->unk1,                                                       \
-     color = gBrightenRedTable[(*(palette) & 31) + amount],                         \
-     color |= gBrightenGreenTable[((*(palette) >> 5) & 31) + amount],               \
-     color |= gBrightenBlueTable[((*(palette) >> 10) & 31) + amount],               \
+     color = sBrightenRedTable[(*(palette) & 31) + amount],                         \
+     color |= sBrightenGreenTable[((*(palette) >> 5) & 31) + amount],               \
+     color |= sBrightenBlueTable[((*(palette) >> 10) & 31) + amount],               \
      *(palette) = color)
 
 static inline void DarkenColorWithTable(u16 *palette, struct PaletteEffect *effect)
 {
-    const u16 *redTable = gDarkenRedTable;
+    const u16 *redTable = sDarkenRedTable;
     s32 offset;
     u32 result;
     u32 red = *palette & 31;
     offset = effect->unk1 - 31;
     result = redTable[red - offset];
-    result |= gDarkenGreenTable[((*palette >> 5) & 31) - offset];
-    result |= gDarkenBlueTable[((*palette >> 10) & 31) - offset];
+    result |= sDarkenGreenTable[((*palette >> 5) & 31) - offset];
+    result |= sDarkenBlueTable[((*palette >> 10) & 31) - offset];
     *palette = result;
 }
 
@@ -242,11 +246,11 @@ static inline void TintColorRed(u16 *palette, struct PaletteEffect *effect)
     s8 amount = effect->unk1;
     s32 offset;
     u32 green;
-    u32 result = gBrightenRedTable[(*palette & 31) + amount];
+    u32 result = sBrightenRedTable[(*palette & 31) + amount];
     green = (*palette >> 5) & 31;
     offset = amount - 31;
-    result |= gDarkenGreenTable[green - offset];
-    result |= gDarkenBlueTable[((*palette >> 10) & 31) - offset];
+    result |= sDarkenGreenTable[green - offset];
+    result |= sDarkenBlueTable[((*palette >> 10) & 31) - offset];
     *palette = result;
 }
 
@@ -286,21 +290,23 @@ static inline void AdvancePaletteEffect(struct PaletteEffect *effect, u32 flags)
 
 // Each bank has fifteen visible colors after its transparent entry.
 #define TRANSFORM_VISIBLE_COLORS(transform) \
-    ++palette; transform(palette, effect); \
-    ++palette; transform(palette, effect); \
-    ++palette; transform(palette, effect); \
-    ++palette; transform(palette, effect); \
-    ++palette; transform(palette, effect); \
-    ++palette; transform(palette, effect); \
-    ++palette; transform(palette, effect); \
-    ++palette; transform(palette, effect); \
-    ++palette; transform(palette, effect); \
-    ++palette; transform(palette, effect); \
-    ++palette; transform(palette, effect); \
-    ++palette; transform(palette, effect); \
-    ++palette; transform(palette, effect); \
-    ++palette; transform(palette, effect); \
-    ++palette; transform(palette, effect);
+    ({ \
+        ++palette; transform(palette, effect); \
+        ++palette; transform(palette, effect); \
+        ++palette; transform(palette, effect); \
+        ++palette; transform(palette, effect); \
+        ++palette; transform(palette, effect); \
+        ++palette; transform(palette, effect); \
+        ++palette; transform(palette, effect); \
+        ++palette; transform(palette, effect); \
+        ++palette; transform(palette, effect); \
+        ++palette; transform(palette, effect); \
+        ++palette; transform(palette, effect); \
+        ++palette; transform(palette, effect); \
+        ++palette; transform(palette, effect); \
+        ++palette; transform(palette, effect); \
+        ++palette; transform(palette, effect); \
+    })
 
 void ApplyPaletteDarkening(struct PaletteEffect *effect)
 {
@@ -330,7 +336,7 @@ void ApplyPaletteDarkening(struct PaletteEffect *effect)
     }
     flags = effect->unk8;
     if (!(flags & 1) && (!(gMainFlags & 0x800) || (flags & 0x80))) {
-        if ((s8)effect->unk1 == (s8)effect->unk2) {
+        if (effect->unk1 == effect->unk2) {
             if (flags & 0x40)
                 effect->unk1 = effect->unk2;
             else {
@@ -461,7 +467,6 @@ void ApplyPaletteRedTint(struct PaletteEffect *effect)
 void ApplyPaletteWhiteFill(struct PaletteEffect *effect)
 {
     u16 *palette;
-    u32 fill;
     u16 bank;
     u32 finished;
     u32 flags;
@@ -470,8 +475,7 @@ void ApplyPaletteWhiteFill(struct PaletteEffect *effect)
         palette = gBgPalette;
         for (bank = 0; bank < 16; bank++) {
             if ((effect->unk6 >> bank) & 1) {
-                fill = 0xFFFFFFFF;
-                CpuSet(&fill, palette, CPU_SET_SRC_FIXED | CPU_SET_32BIT | 8);
+                CpuFill32(0xFFFFFFFF, palette, 16 * sizeof(*palette));
                 palette += 16;
             } else {
                 palette += 16;
@@ -480,8 +484,7 @@ void ApplyPaletteWhiteFill(struct PaletteEffect *effect)
         palette = gObjPalette;
         for (bank = 0; bank < 16; bank++) {
             if ((effect->unk4 >> bank) & 1) {
-                fill = 0xFFFFFFFF;
-                CpuSet(&fill, palette, CPU_SET_SRC_FIXED | CPU_SET_32BIT | 8);
+                CpuFill32(0xFFFFFFFF, palette, 16 * sizeof(*palette));
                 palette += 16;
             } else {
                 palette += 16;
@@ -582,7 +585,7 @@ struct PaletteEffect *CreatePaletteFadeFromWhite(u8 slot)
         }
     }
     effect->unk8 = 4;
-    if ((u32) slotId >= (u32) gNumKirbys) {
+    if (slotId >= gNumKirbys) {
         effect->unk8 = 6;
     } else if (gKirbys[gLocalPlayerId].base.roomId == gKirbys[slotId].base.roomId) {
         effect->unk8 = 6;
@@ -618,7 +621,7 @@ struct PaletteEffect *CreatePaletteFadeToWhite(u8 slot)
         }
     }
     effect->unk8 = 0x4C;
-    if ((u32) slotId >= (u32) gNumKirbys) {
+    if (slotId >= gNumKirbys) {
         effect->unk8 = 0x4E;
     } else if (gKirbys[gLocalPlayerId].base.roomId == gKirbys[slotId].base.roomId) {
         effect->unk8 = 0x4E;
@@ -679,7 +682,7 @@ static struct PaletteEffect *HoldPaletteEffect(u8 slot)
     state = &gPaletteEffectManager;
     effect = &state->unk0[slotId];
     effect->unk8 = 4;
-    if (((u32) slotId >= (u32) gNumKirbys) || (gKirbys[gLocalPlayerId].base.roomId == gKirbys[slotId].base.roomId)) {
+    if ((slotId >= gNumKirbys) || (gKirbys[gLocalPlayerId].base.roomId == gKirbys[slotId].base.roomId)) {
         effect->unk8 = 6;
     }
     effect->unkA = 0;
@@ -704,7 +707,7 @@ struct PaletteEffect *CreatePaletteDim(u8 slot)
         }
     }
     effect->unk8 = 0x4C;
-    if ((u32) slotId >= (u32) gNumKirbys) {
+    if (slotId >= gNumKirbys) {
         effect->unk8 = 0x4E;
     } else if (gKirbys[gLocalPlayerId].base.roomId == gKirbys[slotId].base.roomId) {
         effect->unk8 = 0x4E;
@@ -740,7 +743,7 @@ struct PaletteEffect *CreatePaletteUndim(u8 slot)
         }
     }
     effect->unk8 = 4;
-    if ((u32) slotId >= (u32) gNumKirbys) {
+    if (slotId >= gNumKirbys) {
         effect->unk8 = 6;
     } else if (gKirbys[gLocalPlayerId].base.roomId == gKirbys[slotId].base.roomId) {
         effect->unk8 = 6;
@@ -806,36 +809,35 @@ inline void LoadBgPaletteAndBase(const u16 *palette, u8 offset, u16 num)
     u16 *destination = gBgPalette;
     destination += offset;
     CpuSet(palette, destination, num);
-    destination = gUnk_02022120;
+    destination = gBasePalettes.bg;
     destination += offset;
     CpuSet(palette, destination, num);
 }
 
 inline void LoadLevelBasePalettes(const u16 **arg0, const u16 **arg1)
 {
-    CpuCopy32(*arg0, gUnk_02022120, 0xC0);
-    CpuCopy32(*arg1, &gUnk_02022120[0x60], 0x100);
+    CpuCopy32(*arg0, gBasePalettes.bg, 0xC0);
+    CpuCopy32(*arg1, &gBasePalettes.bg[0x60], 0x100);
 }
 
 inline void SaveObjPaletteColors(u8 offset, u8 num)
 {
-    CpuCopy16(&gObjPalette[offset], &gUnk_02022320[offset], num << 1);
+    CpuCopy16(&gObjPalette[offset], &gBasePalettes.obj[offset], num << 1);
 }
 
 inline void SaveBgPaletteColors(u8 offset, u8 num)
 {
-    CpuCopy16(&gBgPalette[offset], &gUnk_02022120[offset], num << 1);
+    CpuCopy16(&gBgPalette[offset], &gBasePalettes.bg[offset], num << 1);
 }
 
 inline void BackupBasePalettes(void)
 {
-    // The BG and OBJ base palettes occupy one contiguous 0x400-byte range.
-    CpuFastCopy(gUnk_02022120, gUnk_02022520, 0x400);
+    CpuFastCopy(&gBasePalettes, &gBasePalettesBackup, sizeof(gBasePalettes));
 }
 
 inline void RestoreBasePalettes(void)
 {
-    CpuFastCopy(gUnk_02022520, gUnk_02022120, 0x400);
+    CpuFastCopy(&gBasePalettesBackup, &gBasePalettes, sizeof(gBasePalettes));
 }
 
 inline struct PaletteEffect *GetPaletteEffect(u8 slot)
@@ -948,7 +950,7 @@ void BlendSpriteAnimationPalettes(u8 paletteId, u16 sourceAnim, u8 sourceVariant
         color |= ClampPaletteChannel((srcChannel & mask) + ((amount * difference) >> 8)) * 1024;
         source[i] = color;
     }
-    if (gMainFlags & 0x20000)
+    if (gMainFlags & MAIN_FLAG_OBJ_PALETTE_TRANSFORMATION_ENABLE)
         LoadObjPaletteWithTransformation(source, paletteId * 16, 16);
     else {
         DmaCopy16(3, source, &gObjPalette[paletteId * 16], sizeof(source));
@@ -1004,7 +1006,7 @@ void OffsetSpriteAnimationPalette(u8 paletteId, u16 anim, u8 variant, s8 red, s8
         }
         colors[i] = color;
     }
-    if (gMainFlags & 0x20000)
+    if (gMainFlags & MAIN_FLAG_OBJ_PALETTE_TRANSFORMATION_ENABLE)
         LoadObjPaletteWithTransformation(colors, paletteId * 16, 16);
     else {
         DmaCopy16(3, colors, &gObjPalette[paletteId * 16], sizeof(colors));
@@ -1014,7 +1016,7 @@ void OffsetSpriteAnimationPalette(u8 paletteId, u16 anim, u8 variant, s8 red, s8
     SaveObjPaletteColors(paletteId * 16, 16);
 }
 
-const u16 gBrightenRedTable[64] = {
+static const u16 sBrightenRedTable[64] = {
     0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0008,
     0x0009, 0x000A, 0x000B, 0x000C, 0x000D, 0x000E, 0x000F, 0x0010,
     0x0011, 0x0012, 0x0013, 0x0014, 0x0015, 0x0016, 0x0017, 0x0018,
@@ -1025,7 +1027,7 @@ const u16 gBrightenRedTable[64] = {
     0x001F, 0x001F, 0x001F, 0x001F, 0x001F, 0x001F, 0x001F, 0x001F,
 };
 
-const u16 gBrightenGreenTable[64] = {
+static const u16 sBrightenGreenTable[64] = {
     0x0020, 0x0040, 0x0060, 0x0080, 0x00A0, 0x00C0, 0x00E0, 0x0100,
     0x0120, 0x0140, 0x0160, 0x0180, 0x01A0, 0x01C0, 0x01E0, 0x0200,
     0x0220, 0x0240, 0x0260, 0x0280, 0x02A0, 0x02C0, 0x02E0, 0x0300,
@@ -1036,7 +1038,7 @@ const u16 gBrightenGreenTable[64] = {
     0x03E0, 0x03E0, 0x03E0, 0x03E0, 0x03E0, 0x03E0, 0x03E0, 0x03E0,
 };
 
-const u16 gBrightenBlueTable[64] = {
+static const u16 sBrightenBlueTable[64] = {
     0x0400, 0x0800, 0x0C00, 0x1000, 0x1400, 0x1800, 0x1C00, 0x2000,
     0x2400, 0x2800, 0x2C00, 0x3000, 0x3400, 0x3800, 0x3C00, 0x4000,
     0x4400, 0x4800, 0x4C00, 0x5000, 0x5400, 0x5800, 0x5C00, 0x6000,
@@ -1047,7 +1049,7 @@ const u16 gBrightenBlueTable[64] = {
     0x7C00, 0x7C00, 0x7C00, 0x7C00, 0x7C00, 0x7C00, 0x7C00, 0x7C00,
 };
 
-const u16 gDarkenRedTable[64] = {
+static const u16 sDarkenRedTable[64] = {
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
@@ -1058,7 +1060,7 @@ const u16 gDarkenRedTable[64] = {
     0x0018, 0x0019, 0x001A, 0x001B, 0x001C, 0x001D, 0x001E, 0x001F,
 };
 
-const u16 gDarkenGreenTable[64] = {
+static const u16 sDarkenGreenTable[64] = {
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
@@ -1069,7 +1071,7 @@ const u16 gDarkenGreenTable[64] = {
     0x0300, 0x0320, 0x0340, 0x0360, 0x0380, 0x03A0, 0x03C0, 0x03E0,
 };
 
-const u16 gDarkenBlueTable[64] = {
+static const u16 sDarkenBlueTable[64] = {
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
@@ -1080,6 +1082,6 @@ const u16 gDarkenBlueTable[64] = {
     0x6000, 0x6400, 0x6800, 0x6C00, 0x7000, 0x7400, 0x7800, 0x7C00,
 };
 
-void (*const gPaletteEffectCallbacks[5])(struct PaletteEffect *) = {
+static void (*const sPaletteEffectCallbacks[5])(struct PaletteEffect *) = {
     ApplyPaletteDarkening, ApplyPaletteBrightening, ApplyPaletteTableDarkening, ApplyPaletteRedTint, ApplyPaletteWhiteFill,
 };

@@ -1,4 +1,4 @@
-#include "pause_transition.h"
+#include "screen_transition.h"
 #include "shard.h"
 #include "constants/kirby.h"
 #include "object.h"
@@ -500,9 +500,9 @@ static void sub_0801C50C(struct Shard *shard)
 
 static void sub_0801C52C(struct Shard *shard)
 {
-    if (CanStartPauseScreenTransition())
+    if (CanStartScreenTransition())
     {
-        StartPauseScreenTransition(shard->unkD4 + 1);
+        StartScreenTransition(shard->unkD4 + 1);
         shard->obj.unk78 = sub_0801C558;
     }
 }

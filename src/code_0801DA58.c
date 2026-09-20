@@ -1,4 +1,4 @@
-#include "pause_transition.h"
+#include "screen_transition.h"
 #include "palette_effects.h"
 #include "code_0801DA58.h"
 #include "task.h"
@@ -329,6 +329,6 @@ static void sub_0801E28C(struct Unk_0801DA58 *var)
 
 static void sub_0801E2B4(struct Unk_0801DA58 *var)
 {
-    FinishPauseScreen();
+    FinishTransitionScreen();
     TaskDestroy(gCurTask);
 }

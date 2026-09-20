@@ -1,5 +1,5 @@
 #include "hud.h"
-#include "pause_transition.h"
+#include "screen_transition.h"
 #include "palette_effects.h"
 #include "pause_help.h"
 #include "constants/languages.h"
@@ -258,7 +258,7 @@ static inline u32 GetPlayerRoomFlags(void) {
 }
 
 // Selects which menu to show when pressing START
-// Called in OpenPauseTransitionScreen with function table gPauseTransitionScreens
+// Called in OpenTransitionScreen with function table sTransitionScreens
 void CreatePauseMenu(void) {
     struct Task* task = CreatePauseMenuTask();
     u32 playerRoomFlags;
@@ -376,7 +376,7 @@ void CreateHelpMenu(void) {
         HelpMenuBGInit(&helpmenu->frame, sHelpMenuUnkTiledBGsIndices[language][0], 0, 7);
     }
     HelpMenuBGInit(&helpmenu->abilityText, sHelpMenuUnkTiledBGsIndices[language][2 + gKirbys[gLocalPlayerId].ability], 1, 15);
-    LoadAbilityIconGraphicsAndPalette((u32)BG_CHAR_ADDR(2), 1, helpmenu->abilityText.unk1C - sHelpMenuUnkTiledBGsIndices[language][2]);
+    LoadAbilityIconGraphicsAndPalette((uintptr_t)BG_CHAR_ADDR(2), 1, helpmenu->abilityText.unk1C - sHelpMenuUnkTiledBGsIndices[language][2]);
     HelpMenuAbilityImageInit();
 
     SpriteInitNoFunc(&helpmenu->buttonB, (u32)OBJ_VRAM0 + 0x2000, 0x480, sHelpMenuButtonAnimInfos[language][1].animId,
@@ -495,7 +495,7 @@ static void HelpMenuToGame(void) {
 
     if (helpmenu->toGameCounter++ > 18) {
         TaskDestroy(gPauseMenus[gLocalPlayerId].mainTask);
-        FinishPauseScreen();
+        FinishTransitionScreen();
         TaskDestroy(gCurTask);
     }
     else if (!(gUnk_0203AD10 & 4)) {

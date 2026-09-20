@@ -6073,7 +6073,7 @@ _0802E352:
 	bl BackupBasePalettes
 	bl m4aMPlayAllStop
 	bl m4aSoundVSyncOff
-	bl FinishPauseScreen
+	bl FinishTransitionScreen
 	ldr r0, _0802E38C @ =gCurTask
 	ldr r0, [r0]
 	bl TaskDestroy

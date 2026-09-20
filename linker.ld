@@ -16,9 +16,8 @@ SECTIONS {
         . = 0x00020EE0; gKirbys = .;
         . = 0x00021580; gUnk_02021580 = .;
         . = 0x00021590; gUnk_02021590 = .;
-        . = 0x00022120; gUnk_02022120 = .;
-        . = 0x00022320; gUnk_02022320 = .;
-        . = 0x00022520; gUnk_02022520 = .;
+        . = 0x00022120; gBasePalettes = .;
+        . = 0x00022520; gBasePalettesBackup = .;
         . = 0x00022920; gPaletteEffectsTask = .;
         . = 0x00022930; gPaletteEffectManager = .;
         . = 0x000229D0; gShadowKirbyEncounters = .;
@@ -260,7 +259,7 @@ SECTIONS {
         src/code_080332BC.o(.text);
         src/hud.o(.text);
         src/object_collision.o(.text);
-        src/pause_transition.o(.text);
+        src/screen_transition.o(.text);
         src/palette_effects.o(.text);
         src/kirby.o(.text);
         src/code_0806F780.o(.text);
@@ -441,8 +440,7 @@ SECTIONS {
         data/data_6.o(.rodata);
         src/hud.o(.rodata);
         src/object_collision.o(.rodata);
-        src/pause_transition.o(.rodata);
-        data/pause_transition.o(.rodata);
+        src/screen_transition.o(.rodata);
         src/palette_effects.o(.rodata);
         src/kirby.o(.rodata);
         src/code_0806F780.o(.rodata);
@@ -1016,7 +1014,7 @@ SECTIONS {
         *libc.a:s_rint.o(.rodata);
         data/data_3.o(.rodata); /* very likely to be unused .rodata section in some library */
         *libc.a:impure.o(.rodata);
-        data/data_08D60980.o(.rodata);
+        data/data_08D60980.o(.data);
         src/hud.o(.data);
         /* TODO: extract the multiboot programs from ROM. */
         data/data_2.o(.rodata);

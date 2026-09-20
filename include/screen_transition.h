@@ -1,12 +1,12 @@
-#ifndef GUARD_PAUSE_TRANSITION_H
-#define GUARD_PAUSE_TRANSITION_H
+#ifndef GUARD_SCREEN_TRANSITION_H
+#define GUARD_SCREEN_TRANSITION_H
 
 #include "global.h"
 
-void ResetPauseScreenTransition(void);
-bool32 CanStartPauseScreenTransition(void);
-void StartPauseScreenTransition(u16 screen);
-void FinishPauseScreen(void);
+void ResetScreenTransition(void);
+bool32 CanStartScreenTransition(void);
+void StartScreenTransition(u16 screen);
+void FinishTransitionScreen(void);
 void sub_080396BC(void);
 void StartWorldMapUnlockMoonlightMansion(void);
 void StartWorldMapUnlockRainbowRouteEast(void);

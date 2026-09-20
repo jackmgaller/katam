@@ -1,4 +1,4 @@
-#include "pause_transition.h"
+#include "screen_transition.h"
 #include "palette_effects.h"
 #include "data.h"
 #include "code_0814A828.h"
@@ -268,7 +268,7 @@ void sub_0814A828(void) {
     struct Unk_0814A828 *var;
 
     if (gUnk_0203AD10 & 0x10)
-        FinishPauseScreen();
+        FinishTransitionScreen();
     else if (gAIKirbyState < AI_KIRBY_STATE_NORMAL) {
         color = RGB_WHITE;
         LoadBgPaletteAndBase(&color, 0, 1);
@@ -474,7 +474,7 @@ static void sub_0814AF04(struct Unk_0814A828 *a1) {
             UpdateSaveBufferByOffset(SAVE_BUFFER_TYPE_WORLD_PROPS, gSaveID > 2 ? 0 : gSaveID);
         }
     }
-    FinishPauseScreen();
+    FinishTransitionScreen();
     for (i = 0; i < 2; ++i) {
         if (a1->unkA8[i]) {
             TaskDestroy(a1->unkA8[i]);

@@ -203,12 +203,12 @@ static void sub_080DF5A4(struct CrazyHand *ch)
     ObjectSetFunc(ch, 0, sub_080E36C4);
     if (ch->obj.type == OBJ_CRAZY_HAND_1)
     {
-        struct GameplayHud *obj5;
+        struct GameplayHud *hud;
         ch->obj.base.x = 0x11800;
         ch->obj.base.xspeed = -0xC0;
-        obj5 = TryTrackHudEnemy(&ch->obj);
-        if (obj5)
-            obj5->unk9 = 0;
+        hud = TryTrackHudEnemy(&ch->obj);
+        if (hud)
+            hud->unk9 = 0;
     }
     else
     {

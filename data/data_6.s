@@ -9,11 +9,13 @@ gUnk_082EC790:: @ 082EC790
 gUnk_082EC794:: @ 082EC794
 	.incbin "baserom.gba", 0x2EC794, 0x000000C
 
+	.balign 2
 gUnk_082EC7A0:: @ 082EC7A0
-	.incbin "baserom.gba", 0x2EC7A0, 0x0000400
+	.incbin "baserom.gba", 0x2EC7A0, 0x0000800
 
-gUnk_082ECBA0:: @ 082ECBA0
-	.incbin "baserom.gba", 0x2ECBA0, 0x0000400
+	@ Health-bar graphics within the complete HUD graphics array.
+	.global gUnk_082ECBA0
+	.set gUnk_082ECBA0, gUnk_082EC7A0 + 0x400
 
 gUnk_082ECFA0:: @ 082ECFA0
 	.incbin "baserom.gba", 0x2ECFA0, 0x0001A3E
