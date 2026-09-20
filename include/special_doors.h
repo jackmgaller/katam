@@ -6,14 +6,14 @@
 
 struct DoorToHub
 {
-    struct Object obj2;
-    struct EffectObject *obj4[2];
+    struct Object obj;
+    struct EffectObject *effectObjects[2];
 }; /* size = 0xBC */
 
 struct AreaDoor
 {
-    struct Object obj2;
-    struct EffectObject *obj4;
+    struct Object obj;
+    struct EffectObject *effectObject;
 }; /* size = 0xB8 */
 
 void *CreateDoorToHub(struct ObjectTemplate *, u8);
