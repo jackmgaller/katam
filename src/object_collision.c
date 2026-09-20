@@ -600,13 +600,11 @@ static void ProcessObjectCollisionLists(void)
                 otherCount = gUnk_02022EB0.flat[group * 2];
                 if (otherCount != 0) {
                     listedObject = *otherSlot;
+                    entry = *slot;
                     other = listedObject;
-                    // TODO(match): Keep both pointer copies at entry (ldr r3; adds r4, r3),
-                    // while the back edge loads r4 first. The tied operands emit no instructions.
-                    asm("" : "+r"(listedObject), "+r"(other));
                     if (other == NULL)
                         goto nextObject;
-                    attackFlags = (*slot)->flags;
+                    attackFlags = entry->flags;
                     mask = 0x200;
                     if (attackFlags & mask)
                         goto endObjectLoop;
@@ -708,15 +706,13 @@ static void ProcessObjectCollisionLists(void)
                 otherCount = gUnk_02022EB0.flat[group * 2 + 1];
                 if (otherCount != 0) {
                     listedObject = *otherSlot;
+                    entry = *slot;
                     other = listedObject;
-                    // TODO(match): Keep both pointer copies at entry (ldr r3; adds r4, r3),
-                    // while the back edge loads r4 first. The tied operands emit no instructions.
-                    asm("" : "+r"(listedObject), "+r"(other));
                     if (other == NULL)
                         goto nextAttack;
                     if (other == *slot)
                         goto nextAttack;
-                    attackFlags = (*slot)->flags;
+                    attackFlags = entry->flags;
                     mask = 0x200;
                     if (attackFlags & mask)
                         goto endAttackLoop;
