@@ -717,7 +717,7 @@ static void sub_081003EC(struct DarkMindForm1 *r5)
     r5->unk0.base.flags |= 4;
     if (!(r5->unk0.kirby3->base.unkC & 0x8000)
         && r5->unk0.base.roomId == r5->unk0.kirby3->base.roomId
-        && Macro_08039430_1(&r5->unk0.kirby3->base, &r5->unk0))
+        && ObjectOriginOverlapsRectAtObject(&r5->unk0.kirby3->base, &r5->unk0))
     {
         r8 = r5;
         Macro_081003EC(&r5->unk0, &r5->unk0.kirby3->base);
@@ -6016,7 +6016,7 @@ static void sub_0810BD28(struct DarkMindForm2 *r5)
     r5->unk0.base.flags |= 4;
     if (!(r5->unk0.kirby3->base.unkC & 0x8000)
         && r5->unk0.base.roomId == r5->unk0.kirby3->base.roomId
-        && Macro_08039430_1(&r5->unk0.kirby3->base, &r5->unk0))
+        && ObjectOriginOverlapsRectAtObject(&r5->unk0.kirby3->base, &r5->unk0))
     {
         Macro_081003EC(&r5->unk0, &r5->unk0.kirby3->base);
         sub_0810F13C(r5);
@@ -10531,7 +10531,7 @@ static void sub_08114B28(struct DarkMindTrigger *r5)
     r5->unk0.kirby3 = FindTargetKirby(&r5->unk0.base);
     r5->unk0.base.flags |= 4;
     if (!(r5->unk0.kirby3->base.unkC & 0x8000) && r5->unk0.base.roomId == r5->unk0.kirby3->base.roomId
-        && Macro_08039430_1(&r5->unk0.kirby3->base, &r5->unk0))
+        && ObjectOriginOverlapsRectAtObject(&r5->unk0.kirby3->base, &r5->unk0))
     {
         r5->unk0.base.flags &= ~0x200;
         sub_08114BA0(r5);

@@ -190,7 +190,7 @@ static void sub_080DF4C0(struct CrazyHand *ch)
     ch->obj.base.flags |= 4;
     if (!(ch->obj.kirby3->base.unkC & 0x8000)
         && ch->obj.base.roomId == ch->obj.kirby3->base.roomId
-        && Macro_08039430_1(&ch->obj.kirby3->base, &ch->obj))
+        && ObjectOriginOverlapsRectAtObject(&ch->obj.kirby3->base, &ch->obj))
     {
         Macro_081003EC(&ch->obj, &ch->obj.kirby3->base);
         ch->obj.unk85 = 0;

@@ -169,7 +169,7 @@ static void sub_080CB7E8(struct Object *mf)
             mf->base.flags |= 1;
         else
             mf->base.flags &= ~1;
-        if (Macro_08039430_2(&mf->kirby3->base, mf))
+        if (ObjectOriginOverlapsRectAtTemplate(&mf->kirby3->base, mf))
         {
             Macro_081003EC(mf, &mf->kirby3->base);
             mf->base.flags &= ~0x200;

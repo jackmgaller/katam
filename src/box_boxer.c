@@ -196,7 +196,7 @@ static void sub_080C72CC(struct Object *boxBoxer)
             boxBoxer->base.flags |= 1;
         else
             boxBoxer->base.flags &= ~1;
-        if (Macro_08039430_2(&boxBoxer->kirby3->base, boxBoxer))
+        if (ObjectOriginOverlapsRectAtTemplate(&boxBoxer->kirby3->base, boxBoxer))
         {
             Macro_081003EC(boxBoxer, &boxBoxer->kirby3->base);
             boxBoxer->unk85 = 0;

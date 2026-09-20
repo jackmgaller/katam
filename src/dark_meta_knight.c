@@ -210,7 +210,7 @@ static void sub_080F5974(struct DarkMetaKnight *dmk)
     dmk->obj.base.flags |= 4;
     if (!(dmk->obj.kirby3->base.unkC & 0x8000)
         && dmk->obj.base.roomId == dmk->obj.kirby3->base.roomId
-        && Macro_08039430_1(&dmk->obj.kirby3->base, &dmk->obj))
+        && ObjectOriginOverlapsRectAtObject(&dmk->obj.kirby3->base, &dmk->obj))
     {
         Macro_081003EC(&dmk->obj, &dmk->obj.kirby3->base);
         if (dmk->obj.objTemplate->subtype1)

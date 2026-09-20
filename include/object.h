@@ -368,12 +368,12 @@
         (obj)->unk9F = 0xFF; \
 })
 
-#define Macro_08039430_1(objBase, obj) ObjectOriginOverlapsRect(objBase, \
+#define ObjectOriginOverlapsRectAtObject(objBase, obj) ObjectOriginOverlapsRect(objBase, \
     (obj)->base.x, (obj)->base.y, \
     (obj)->objTemplate->unk1A, (obj)->objTemplate->unk1C, \
     (obj)->objTemplate->unk1E, (obj)->objTemplate->unk20)
 
-#define Macro_08039430_2(objBase, obj) ObjectOriginOverlapsRect(objBase, \
+#define ObjectOriginOverlapsRectAtTemplate(objBase, obj) ObjectOriginOverlapsRect(objBase, \
     (obj)->objTemplate->x * 0x100, (obj)->objTemplate->y * 0x100, \
     (obj)->objTemplate->unk1A, (obj)->objTemplate->unk1C, \
     (obj)->objTemplate->unk1E, (obj)->objTemplate->unk20)

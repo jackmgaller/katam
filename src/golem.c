@@ -274,7 +274,7 @@ static void sub_080C57D8(struct Object *golem)
                 || golem->objTemplate->unk1E
                 || golem->objTemplate->unk20)
             {
-                if (Macro_08039430_1(&golem->kirby3->base, golem))
+                if (ObjectOriginOverlapsRectAtObject(&golem->kirby3->base, golem))
                     golem->base.flags &= ~8;
             }
             else
