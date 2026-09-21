@@ -154,23 +154,17 @@ void CreateGameplayHud(void)
     }
 }
 
-void UpdateGameplayHud(void)
+static inline bool32 UpdateHudCall(struct GameplayHud *hud, struct Kirby *kirby)
 {
-    void *taskData = TaskGetStructPtr(gCurTask);
-    struct GameplayHud *hud = taskData;
-    struct Kirby *kirby = &gKirbys[gLocalPlayerId];
     bool32 showCall;
     u8 i;
-    if (hud->unk6 != kirby->hp)
-        DrawKirbyHealthBar(kirby);
-    if (hud->unk7 != kirby->lives)
-        DrawHudLivesCount(kirby);
+    u32 dead;
     if (gUnk_02021580 >= gNumKirbys)
-        goto noCall;
+        return FALSE;
     if (!(gKirbys[gUnk_02021580].base.unkC & 0x10000) && gKirbys[gUnk_02021580].base.roomId == kirby->base.roomId)
-        goto noCall;
+        return FALSE;
     if (!(gRoomProps[kirby->base.roomId].priorityFlags & 0x10))
-        goto noCall;
+        return FALSE;
     showCall = TRUE;
     for (i = 1; i <= 8; i++) {
         if (gUnk_0835105C[i] == kirby->base.roomId && *GetStateSlot(STATE_SLOT_SESSION, i, 0)) {
@@ -184,48 +178,58 @@ void UpdateGameplayHud(void)
             break;
         }
     }
-
-    if (showCall) {
-        u32 dead;
-        PlaySfxAlt(&kirby->base, SE_08D5AF5C);
-        dead = gKirbys[gUnk_02021580].base.unkC & 0x10000;
-        if (!dead || kirby->lives != 0) {
-            switch (hud->unkE) {
-            case 0:
-                if (dead)
-                    DrawLifeSharingHudMessage(1);
-                else
-                    DrawCallHudMessage(1);
-                break;
-            case 0x60:
-            case 0xE0:
-                if (gKirbys[gUnk_02021580].base.unkC & 0x10000)
-                    DrawLifeSharingHudMessage(0);
-                else
-                    DrawCallHudMessage(0);
-                DrawHudPhoneIcon();
-                DrawPhoneBattery(kirby);
-                hud->unkD = 0;
-                break;
-            case 0x80:
-                if (dead)
-                    DrawLifeSharingHudMessage(2);
-                else
-                    DrawCallHudMessage(2);
-                break;
-            }
-            if (hud->unkE <= 0x5F || (hud->unkE >= 0x80 && hud->unkE <= 0xDF))
-                DisplayCallingKirby(hud);
-        } else {
-            DrawLifeSharingHudMessage(0);
+    if (!showCall)
+        return FALSE;
+    PlaySfxAlt(&kirby->base, SE_08D5AF5C);
+    dead = gKirbys[gUnk_02021580].base.unkC & 0x10000;
+    if (!dead || kirby->lives != 0) {
+        switch (hud->unkE) {
+        case 0:
+            if (dead)
+                DrawLifeSharingHudMessage(1);
+            else
+                DrawCallHudMessage(1);
+            break;
+        case 0x60:
+        case 0xE0:
+            if (gKirbys[gUnk_02021580].base.unkC & 0x10000)
+                DrawLifeSharingHudMessage(0);
+            else
+                DrawCallHudMessage(0);
             DrawHudPhoneIcon();
             DrawPhoneBattery(kirby);
             hud->unkD = 0;
+            break;
+        case 0x80:
+            if (dead)
+                DrawLifeSharingHudMessage(2);
+            else
+                DrawCallHudMessage(2);
+            break;
         }
-        hud->unkE++;
-        hud->unk10 |= 1;
+        if (hud->unkE <= 0x5F || (hud->unkE >= 0x80 && hud->unkE <= 0xDF))
+            DisplayCallingKirby(hud);
     } else {
-    noCall:
+        DrawLifeSharingHudMessage(0);
+        DrawHudPhoneIcon();
+        DrawPhoneBattery(kirby);
+        hud->unkD = 0;
+    }
+    hud->unkE++;
+    hud->unk10 |= 1;
+    return TRUE;
+}
+
+void UpdateGameplayHud(void)
+{
+    void *taskData = TaskGetStructPtr(gCurTask);
+    struct GameplayHud *hud = taskData;
+    struct Kirby *kirby = &gKirbys[gLocalPlayerId];
+    if (hud->unk6 != kirby->hp)
+        DrawKirbyHealthBar(kirby);
+    if (hud->unk7 != kirby->lives)
+        DrawHudLivesCount(kirby);
+    if (!UpdateHudCall(hud, kirby)) {
         if (hud->unk10 & 1) {
             if (kirby->base.unk56 == gLocalPlayerId)
                 m4aSongNumStop(SE_08D5AF5C);
@@ -734,7 +738,7 @@ struct GameplayHud *TryTrackHudEnemy(struct Object *object)
         return NULL;
     if (gCurTask->main == UpdateBorrowLifeHud)
         return NULL;
-    // TODO: The original dereferences object before its null check; preserve that ordering.
+    // TODO: Original UB: object is dereferenced before its null check; preserve that ordering.
     if (object->type > OBJ_EMPTY_5D)
         return NULL;
     if (gKirbys[gLocalPlayerId].base.roomId != object->base.roomId)
@@ -763,7 +767,7 @@ struct GameplayHud *TryTrackHudEnemy(struct Object *object)
         if (scaledHp & 0xFF)
             hud->unkA++;
     } else {
-        // TODO: Types 0x53-0x5D can index beyond the original 56-entry scale table.
+        // TODO: Original UB: types 0x53-0x5D can index beyond the 56-entry scale table.
         scaledHp = tracked->unk80 * gUnk_083513E8[tracked->type];
         hud->unkA = scaledHp >> 8;
         if (scaledHp & 0xFF)
@@ -899,7 +903,7 @@ static void UpdateTrackedHudEnemy(struct GameplayHud *hud)
             if (scaledHp & 0xFF)
                 hud->unkA++;
         } else {
-            // TODO: Types 0x53-0x5D can index beyond the original 56-entry scale table.
+            // TODO: Original UB: types 0x53-0x5D can index beyond the 56-entry scale table.
             scaledHp = object->unk80 * gUnk_083513E8[object->type];
             hud->unkA = scaledHp >> 8;
             if (scaledHp & 0xFF)

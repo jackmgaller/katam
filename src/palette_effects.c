@@ -590,7 +590,7 @@ struct PaletteEffect *CreatePaletteFadeFromWhite(u8 slot)
     } else if (gKirbys[gLocalPlayerId].base.roomId == gKirbys[slotId].base.roomId) {
         effect->unk8 = 6;
     }
-    // TODO: Slots 4-7 still read beyond the four Kirbys, as in the original.
+    // TODO: Original UB: slots 4-7 read beyond the four-element gKirbys array.
     effect->unkE = gKirbys[slotId].base.roomId;
     effect->unkA = -0x200;
     effect->unkC = 0x1F00;
@@ -626,7 +626,7 @@ struct PaletteEffect *CreatePaletteFadeToWhite(u8 slot)
     } else if (gKirbys[gLocalPlayerId].base.roomId == gKirbys[slotId].base.roomId) {
         effect->unk8 = 0x4E;
     }
-    // TODO: Slots 4-7 still read beyond the four Kirbys, as in the original.
+    // TODO: Original UB: slots 4-7 read beyond the four-element gKirbys array.
     effect->unkE = gKirbys[slotId].base.roomId;
     effect->unkA = 0x200;
     effect->unkC = 0;
@@ -657,7 +657,7 @@ struct PaletteEffect *CreateHiddenPaletteFadeToWhite(u8 slot)
         }
     }
     effect->unk8 = 0x14;
-    // TODO: Slots 4-7 still read beyond the four Kirbys, as in the original.
+    // TODO: Original UB: slots 4-7 read beyond the four-element gKirbys array.
     effect->unkE = gKirbys[slotId].base.roomId;
     effect->unkA = 0x200;
     effect->unkC = 0;
@@ -712,7 +712,7 @@ struct PaletteEffect *CreatePaletteDim(u8 slot)
     } else if (gKirbys[gLocalPlayerId].base.roomId == gKirbys[slotId].base.roomId) {
         effect->unk8 = 0x4E;
     }
-    // TODO: Slots 4-7 still read beyond the four Kirbys, as in the original.
+    // TODO: Original UB: slots 4-7 read beyond the four-element gKirbys array.
     effect->unkE = gKirbys[slotId].base.roomId;
     effect->unkA = 0x100;
     effect->unkC = 0;
@@ -748,7 +748,7 @@ struct PaletteEffect *CreatePaletteUndim(u8 slot)
     } else if (gKirbys[gLocalPlayerId].base.roomId == gKirbys[slotId].base.roomId) {
         effect->unk8 = 6;
     }
-    // TODO: Slots 4-7 still read beyond the four Kirbys, as in the original.
+    // TODO: Original UB: slots 4-7 read beyond the four-element gKirbys array.
     effect->unkE = gKirbys[slotId].base.roomId;
     effect->unkA = -0x200;
     effect->unkC = 0xA00;
@@ -984,9 +984,9 @@ void OffsetSpriteAnimationPalette(u8 paletteId, u16 anim, u8 variant, s8 red, s8
         u8 low;
         u16 color;
         s32 mask = 31;
-        // TODO(match): The do-while(0) around the red byte load, with the red sum taken through
-        // a local below, is what masks the red byte into a fresh copy of the mask register as
-        // the original does; a plain load and expression mask it in place instead.
+        // TODO(match): The do-while(0) keeps the load and red arithmetic in separate
+        // first-CSE blocks. Without it, CSE substitutes the load temporary for low,
+        // changing the mask destination and subsequent register allocation.
         do low = colors[i]; while (0);
         {
             s32 delta = (red * amount) >> 8;
