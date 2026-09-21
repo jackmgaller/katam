@@ -1889,7 +1889,7 @@ static void sub_080D3C58(struct Object *mh)
         sub_080D5574(mh);
 }
 
-bool8 sub_080D4004(struct Object *mh, struct Kirby *kirby)
+bool32 sub_080D4004(struct Object *mh, struct Kirby *kirby)
 {
     if (mh->unk83 != 0xD
         || kirby->base.header.kind

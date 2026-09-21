@@ -73,7 +73,7 @@ static void UpdateObjectCollisions(void)
     gUnk_0203AD40++;
 }
 
-bool32 HandleKirbyCollision(struct ObjectBase *attack, struct ObjectBase *other)
+bool16 HandleKirbyCollision(struct ObjectBase *attack, struct ObjectBase *other)
 {
     u32 flags = other->flags;
     if (!(flags & 0x200)) {
@@ -87,7 +87,7 @@ bool32 HandleKirbyCollision(struct ObjectBase *attack, struct ObjectBase *other)
                     u32 vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
                     if ((vulnerableTypes & attackFlags)
                         && (attackFlags & 7) >= (defense & 7) && !(flags & 0x8000)
-                        && (parent == NULL || parent->header.kind != 1 || ((struct Object *)parent)->type != OBJ_DROPPY || ((struct Kirby *)other)->ability != 0)) {
+                        && (parent == NULL || parent->header.kind != 1 || ((struct Object *)parent)->type != OBJ_DROPPY || ((struct Kirby *)other)->ability != KIRBY_ABILITY_NORMAL)) {
                         other->unk6C = parent;
                         if (parent == NULL)
                             other->unk6C = attack;
@@ -112,7 +112,7 @@ bool32 HandleKirbyCollision(struct ObjectBase *attack, struct ObjectBase *other)
     return FALSE;
 }
 
-bool32 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
+bool16 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other)
 {
     struct ObjectBase *parent;
     u32 attackFlags, loadedAttackFlags;
@@ -263,12 +263,10 @@ contactEffects:
     return FALSE;
 }
 
-bool32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *attack)
+bool16 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *attack)
 {
     struct ObjectBase *parent;
-    // TODO(match): A bool8 result adds an LSR after the shared byte test.
-    // Keep the shift until the switch control flow can reproduce the original test.
-    u32 handled;
+    bool32 handled;
     u32 attackFlags, initialFlags;
     u32 grab;
     u32 flags, defense, vulnerableTypes;
@@ -298,68 +296,68 @@ bool32 HandleAttackObjectCollision(struct ObjectBase *other, struct ObjectBase *
                     case OBJ_DROPPY:
                         if (other->flags & 0x8000)
                             return FALSE;
-                        handled = (u32)sub_080A049C((struct Object *)parent, (struct Kirby *)other) << 24;
+                        handled = sub_080A049C((struct Object *)parent, (struct Kirby *)other);
                         break;
                     case OBJ_PRANK:
                         if (other->flags & 0x8000)
                             return FALSE;
-                        handled = (u32)sub_080A1804((struct Object *)parent, (struct Kirby *)other) << 24;
+                        handled = sub_080A1804((struct Object *)parent, (struct Kirby *)other);
                         break;
                     case OBJ_MR_FROSTY:
                         if (other->flags & 0x8000)
                             return FALSE;
-                        handled = (u32)sub_080CC6F0((struct Object *)parent, (struct Kirby *)other) << 24;
+                        handled = sub_080CC6F0((struct Object *)parent, (struct Kirby *)other);
                         break;
                     case OBJ_COOKIN_PAN:
                     case OBJ_PRANK_PAN:
                         if (other->flags & 0x8000)
                             return FALSE;
-                        handled = (u32)sub_080B6368(object, (struct Kirby *)other) << 24;
+                        handled = sub_080B6368(object, (struct Kirby *)other);
                         break;
                     case OBJ_PHAN_PHAN:
                         if (other->flags & 0x8000)
                             return FALSE;
-                        handled = (u32)sub_080CE94C((struct Object *)parent, (struct Kirby *)other) << 24;
+                        handled = sub_080CE94C((struct Object *)parent, (struct Kirby *)other);
                         break;
                     case OBJ_LEAP:
                         if (other->flags & 0x8000)
                             return FALSE;
-                        handled = (u32)sub_080B0758((struct Object *)parent, (struct Kirby *)other) << 24;
+                        handled = sub_080B0758((struct Object *)parent, (struct Kirby *)other);
                         break;
                     case OBJ_GOBBLER:
                         if (other->flags & 0x8000)
                             return FALSE;
-                        handled = (u32)sub_080E588C((struct Gobbler *)parent, (struct Kirby *)other) << 24;
+                        handled = sub_080E588C((struct Gobbler *)parent, (struct Kirby *)other);
                         break;
                     case OBJ_GOBBLER_BABY:
                         if (other->flags & 0x8000)
                             return FALSE;
-                        handled = (u32)sub_080E74E4((struct Object *)parent, (struct Kirby *)other) << 24;
+                        handled = sub_080E74E4((struct Object *)parent, (struct Kirby *)other);
                         break;
                     case OBJ_MASTER_HAND:
                         if (other->flags & 0x8000)
                             return FALSE;
-                        handled = (u32)sub_080D4004((struct Object *)parent, (struct Kirby *)other) << 24;
+                        handled = sub_080D4004((struct Object *)parent, (struct Kirby *)other);
                         break;
                     case OBJ_CRAZY_HAND_1:
                     case OBJ_CRAZY_HAND_2:
                         if (other->flags & 0x8000)
                             return FALSE;
-                        handled = (u32)sub_080E1B8C((struct CrazyHand *)object, (struct Kirby *)other) << 24;
+                        handled = sub_080E1B8C((struct CrazyHand *)object, (struct Kirby *)other);
                         break;
                     case OBJ_BOX_BOXER:
                         if (other->flags & 0x8000)
                             return FALSE;
-                        handled = (u32)sub_080C8548((struct Object *)parent, (struct Kirby *)other) << 24;
+                        handled = sub_080C8548((struct Object *)parent, (struct Kirby *)other);
                         break;
                     case OBJ_SNOOTER_1:
                     case OBJ_SNOOTER_2:
-                        handled = (u32)sub_080AC5E0(object, &other->header) << 24;
+                        handled = sub_080AC5E0(object, &other->header);
                         break;
                     default:
                         return FALSE;
                     }
-                    if (handled)
+                    if ((bool8)handled)
                         return TRUE;
                     return FALSE;
                 }
@@ -549,7 +547,7 @@ void ProcessAttackTileCollisions(struct ObjectBase *attack)
     }
 }
 
-static bool32 (*const sObjectCollisionCallbacks[3])(struct ObjectBase *, struct ObjectBase *);
+static bool16 (*const sObjectCollisionCallbacks[3])(struct ObjectBase *, struct ObjectBase *);
 
 static inline void CommitAttackContact(struct ObjectBase *attack)
 {
@@ -629,7 +627,7 @@ static void ProcessObjectCollisionLists(void)
                                 && COLLISION_AXIS_OVERLAP(((*slot)->y >> 8) + (*slot)->sprite.unk20[0].unk5,
                                     (*slot)->sprite.unk20[0].unk7 - (*slot)->sprite.unk20[0].unk5, by, other->unk3B * 2))) {
                             bool8 consumed = sObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
-                            if ((u16)sObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot))
+                            if (sObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot))
                                 *otherSlot = NULL;
                             if (consumed) {
                                 CommitAttackContact(*slot);
@@ -676,7 +674,7 @@ static void ProcessObjectCollisionLists(void)
                         && COLLISION_AXIS_OVERLAP(ax, (*slot)->unk3A * 2, bx, other->unk3A * 2)
                         && COLLISION_AXIS_OVERLAP(ay, (*slot)->unk3B * 2, by, other->unk3B * 2)) {
                         bool8 consumed = sObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
-                        if ((u16)sObjectCollisionCallbacks[other->header.kind](*slot, other))
+                        if (sObjectCollisionCallbacks[other->header.kind](*slot, other))
                             other = NULL;
                         if (consumed) {
                             CommitAttackContact(*slot);
@@ -689,7 +687,7 @@ static void ProcessObjectCollisionLists(void)
                             s32 top = ((*slot)->y >> 8) + (*slot)->sprite.unk20[0].unk5;
                             if (COLLISION_AXIS_OVERLAP(top, (*slot)->sprite.unk20[0].unk7 - (*slot)->sprite.unk20[0].unk5, by, other->unk3B * 2)) {
                                 bool8 consumed = sObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
-                                if ((u16)sObjectCollisionCallbacks[other->header.kind](*slot, other))
+                                if (sObjectCollisionCallbacks[other->header.kind](*slot, other))
                                     other = NULL;
                                 if (consumed) {
                                     CommitAttackContact(*slot);
@@ -731,7 +729,7 @@ static void ProcessObjectCollisionLists(void)
                         if (COLLISION_AXIS_OVERLAP(ax, (*slot)->unk3A * 2, bx, other->unk3A * 2)
                             && COLLISION_AXIS_OVERLAP(ay, (*slot)->unk3B * 2, by, other->unk3B * 2)) {
                             bool8 consumed = sObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
-                            if ((u16)sObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot)) {
+                            if (sObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot)) {
                                 *otherSlot = NULL;
                                 break;
                             }
@@ -745,7 +743,7 @@ static void ProcessObjectCollisionLists(void)
                                 s32 top = ((*slot)->y >> 8) + (*slot)->sprite.unk20[0].unk5;
                                 if (COLLISION_AXIS_OVERLAP(top, (*slot)->sprite.unk20[0].unk7 - (*slot)->sprite.unk20[0].unk5, by, other->unk3B * 2)) {
                                     bool8 consumed = sObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
-                                    if ((u16)sObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot)) {
+                                    if (sObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot)) {
                                         *otherSlot = NULL;
                                         break;
                                     }
@@ -814,7 +812,7 @@ static void ProcessObjectCollisionLists(void)
                     if (COLLISION_AXIS_OVERLAP(ax, (*slot)->unk3A * 2, bx, entry->unk3A * 2)
                         && COLLISION_AXIS_OVERLAP(ay, (*slot)->unk3B * 2, by, entry->unk3B * 2)) {
                         bool8 consumed = sObjectCollisionCallbacks[(*slot)->header.kind](entry, *slot);
-                        if ((u16)sObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot)) {
+                        if (sObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot)) {
                             *otherSlot = NULL;
                             break;
                         }
@@ -828,7 +826,7 @@ static void ProcessObjectCollisionLists(void)
                             s32 top = ((*slot)->y >> 8) + (*slot)->sprite.unk20[0].unk5;
                             if (COLLISION_AXIS_OVERLAP(top, (*slot)->sprite.unk20[0].unk7 - (*slot)->sprite.unk20[0].unk5, by, entry->unk3B * 2)) {
                                 bool8 consumed = sObjectCollisionCallbacks[(*slot)->header.kind](entry, *slot);
-                                if ((u16)sObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot)) {
+                                if (sObjectCollisionCallbacks[(*otherSlot)->header.kind](*slot, *otherSlot)) {
                                     *otherSlot = NULL;
                                     break;
                                 }
@@ -858,7 +856,7 @@ static void ProcessObjectCollisionLists(void)
                             if (COLLISION_AXIS_OVERLAP(ax, (*slot)->unk3A * 2, bx, other->unk3A * 2)
                                 && COLLISION_AXIS_OVERLAP(ay, (*slot)->unk3B * 2, by, other->unk3B * 2)) {
                                 bool8 consumed = sObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
-                                if ((u16)sObjectCollisionCallbacks[other->header.kind](*slot, other))
+                                if (sObjectCollisionCallbacks[other->header.kind](*slot, other))
                                     break;
                                 if (consumed) {
                                     *slot = NULL;
@@ -870,7 +868,7 @@ static void ProcessObjectCollisionLists(void)
                                     s32 top = ((*slot)->y >> 8) + (*slot)->sprite.unk20[0].unk5;
                                     if (COLLISION_AXIS_OVERLAP(top, (*slot)->sprite.unk20[0].unk7 - (*slot)->sprite.unk20[0].unk5, by, other->unk3B * 2)) {
                                         bool8 consumed = sObjectCollisionCallbacks[(*slot)->header.kind](other, *slot);
-                                        if ((u16)sObjectCollisionCallbacks[other->header.kind](*slot, other))
+                                        if (sObjectCollisionCallbacks[other->header.kind](*slot, other))
                                             break;
                                         if (consumed) {
                                             *slot = NULL;
@@ -1431,6 +1429,6 @@ static void ObjectCollisionTaskDestructor(struct Task *task UNUSED)
 {
 }
 
-static bool32 (*const sObjectCollisionCallbacks[3])(struct ObjectBase *, struct ObjectBase *) = {
+static bool16 (*const sObjectCollisionCallbacks[3])(struct ObjectBase *, struct ObjectBase *) = {
     HandleKirbyCollision, HandleObjectCollision, HandleAttackObjectCollision,
 };

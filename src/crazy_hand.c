@@ -1904,7 +1904,7 @@ static void sub_080E1868(struct CrazyHand *ch)
         sub_080E3C6C(ch);
 }
 
-bool8 sub_080E1B8C(struct CrazyHand *ch, struct Kirby *kirby)
+bool32 sub_080E1B8C(struct CrazyHand *ch, struct Kirby *kirby)
 {
     if (ch->obj.unk83 != 0xD
         || kirby->base.header.kind

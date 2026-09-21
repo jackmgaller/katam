@@ -20,12 +20,6 @@ inline void DrawDemoHud(void);
 inline void DrawHudPhoneIcon(void);
 inline void ClearHudPhoneIcon(void);
 inline void DrawHudNameTiles(void);
-inline void ShowGameOverHud(void);
-inline void ShowBorrowLifeHud(void);
-inline void RestoreHudAfterLifeBorrow(void);
-inline void ClearBorrowLifeHud(struct ObjectBase *object);
-inline void ExpireHudEnemyHealthDelay(void);
-inline void DrawGameOverMessage(void);
 
 #include "data.h"
 #include "kirby.h"
@@ -56,25 +50,21 @@ static const u8 *sHudConnectingMessageGraphics[6];
 static const u8 *sHudAnswerMessageGraphics[6];
 static const u8 *sHudBorrowLifePromptGraphics[6];
 static const u8 *sHudBorrowLifeChoiceGraphics[6];
-// Includes the health-bar graphics at gUnk_082ECBA0, an interior alias at +0x400.
-extern const u16 gUnk_082EC7A0[0x400];
-
-extern const u16 gUnk_082ECBA0[0x200];
+extern const u16 gUnk_082EC7A0[2][0x200];
 extern const u16 gUnk_083513E8[56];
 extern const u16 gUnk_08351458[27][4];
 extern const u16 gUnk_08351628[4][4];
 static void DrawBorrowLifeNoCursor(void);
 static void DrawBorrowLifeYesCursor(void);
 
+inline void DrawGameOverMessage(void);
 void DrawCallHudMessage(u8);
 void DrawLifeSharingHudMessage(u8);
 static void UpdateTrackedHudEnemy(struct GameplayHud *);
 static void AnimateHudEnemyHealth(struct GameplayHud *);
 void UpdateGameplayHud(void);
 void HideKirbySpritesInOtherRooms(void);
-void UpdateBorrowLifeHud(void);
 static void DrawOtherKirbyIndicators(struct GameplayHud *);
-void DrawBorrowLifePrompt(void);
 void DrawPhoneBattery(struct Kirby *);
 void DrawKirbyHealthBar(struct Kirby *);
 
@@ -805,7 +795,7 @@ void DrawEnemyHealthOrAreaName(struct GameplayHud *hud)
     } else {
         s16 hp;
         u16 cells;
-        CpuCopy16(gUnk_082ECBA0, (void *)(BG_VRAM + 0x74A0), 0x100);
+        CpuCopy16(gUnk_082EC7A0[1], (void *)(BG_VRAM + 0x74A0), 0x100);
         *tiles++ = 0xF1A5;
         hp = hud->unk9;
         cells = 8;

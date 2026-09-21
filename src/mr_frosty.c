@@ -530,7 +530,7 @@ static void sub_080CC5A4(struct Object *mf)
     }
 }
 
-bool8 sub_080CC6F0(struct Object *mf, struct Kirby *kirby)
+bool32 sub_080CC6F0(struct Object *mf, struct Kirby *kirby)
 {
     if (mf->unk83 != 2
         || kirby->base.header.kind

@@ -160,7 +160,7 @@ void sub_0815898C(void);
 void sub_081589E8(void);
 void Timer3Intr(void);
 void nullsub_2(void);
-bool8 sub_080B0758(struct Object *, struct Kirby *);
-bool8 sub_080B6368(struct Object *, struct Kirby *);
+bool32 sub_080B0758(struct Object *, struct Kirby *);
+bool32 sub_080B6368(struct Object *, struct Kirby *);
 
 #endif

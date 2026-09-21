@@ -35,17 +35,8 @@ struct BasePalettes {
 extern struct BasePalettes gBasePalettes ALIGNED(4);
 extern struct BasePalettes gBasePalettesBackup ALIGNED(4);
 
-static void QueuePaletteEffect(struct PaletteEffect *);
-void CompactPaletteEffectQueue(void);
 static void UpdatePaletteEffects(void);
-void PaletteEffectsTaskDestructor(struct Task *);
-void InsertPaletteEffectByPriority(struct PaletteEffect *, u8);
 
-void ApplyPaletteDarkening(struct PaletteEffect *);
-void ApplyPaletteBrightening(struct PaletteEffect *);
-void ApplyPaletteTableDarkening(struct PaletteEffect *);
-void ApplyPaletteRedTint(struct PaletteEffect *);
-void ApplyPaletteWhiteFill(struct PaletteEffect *);
 static void (*const sPaletteEffectCallbacks[5])(struct PaletteEffect *);
 static const u16 sBrightenRedTable[64];
 static const u16 sBrightenGreenTable[64];
@@ -221,11 +212,11 @@ static inline void DarkenColor(u16 *palette, struct PaletteEffect *effect)
 
 // The colour accumulates in a function-scope variable: as an inline-function local it
 // takes r2 ahead of the adjustment and each colour's final OR lands in r0.
-#define BRIGHTEN_COLOR(palette, effect)                                            \
-    (amount = (effect)->unk1,                                                       \
-     color = sBrightenRedTable[(*(palette) & 31) + amount],                         \
-     color |= sBrightenGreenTable[((*(palette) >> 5) & 31) + amount],               \
-     color |= sBrightenBlueTable[((*(palette) >> 10) & 31) + amount],               \
+#define BRIGHTEN_COLOR(palette, effect)                                         \
+    (amount = (effect)->unk1,                                                   \
+     color = sBrightenRedTable[(*(palette) & 31) + amount],                     \
+     color |= sBrightenGreenTable[((*(palette) >> 5) & 31) + amount],           \
+     color |= sBrightenBlueTable[((*(palette) >> 10) & 31) + amount],           \
      *(palette) = color)
 
 static inline void DarkenColorWithTable(u16 *palette, struct PaletteEffect *effect)
@@ -258,9 +249,9 @@ static inline void AdvancePaletteEffect(struct PaletteEffect *effect, u32 flags)
 {
     s32 current;
     s32 tgt;
-    u8 target;
+    s8 target;
     effect->unkC += effect->unkA;
-    current = effect->unk1 = (s16)effect->unkC >> 8;
+    current = effect->unk1 = effect->unkC >> 8;
     tgt = effect->unk2;
     target = effect->unk2;
     if ((current <= tgt && effect->unkA < 0) || (current >= tgt && effect->unkA > 0)) {
@@ -289,23 +280,23 @@ static inline void AdvancePaletteEffect(struct PaletteEffect *effect, u32 flags)
 }
 
 // Each bank has fifteen visible colors after its transparent entry.
-#define TRANSFORM_VISIBLE_COLORS(transform) \
-    ({ \
-        ++palette; transform(palette, effect); \
-        ++palette; transform(palette, effect); \
-        ++palette; transform(palette, effect); \
-        ++palette; transform(palette, effect); \
-        ++palette; transform(palette, effect); \
-        ++palette; transform(palette, effect); \
-        ++palette; transform(palette, effect); \
-        ++palette; transform(palette, effect); \
-        ++palette; transform(palette, effect); \
-        ++palette; transform(palette, effect); \
-        ++palette; transform(palette, effect); \
-        ++palette; transform(palette, effect); \
-        ++palette; transform(palette, effect); \
-        ++palette; transform(palette, effect); \
-        ++palette; transform(palette, effect); \
+#define TRANSFORM_VISIBLE_COLORS(transform)                                     \
+    ({                                                                          \
+        ++palette; transform(palette, effect);                                  \
+        ++palette; transform(palette, effect);                                  \
+        ++palette; transform(palette, effect);                                  \
+        ++palette; transform(palette, effect);                                  \
+        ++palette; transform(palette, effect);                                  \
+        ++palette; transform(palette, effect);                                  \
+        ++palette; transform(palette, effect);                                  \
+        ++palette; transform(palette, effect);                                  \
+        ++palette; transform(palette, effect);                                  \
+        ++palette; transform(palette, effect);                                  \
+        ++palette; transform(palette, effect);                                  \
+        ++palette; transform(palette, effect);                                  \
+        ++palette; transform(palette, effect);                                  \
+        ++palette; transform(palette, effect);                                  \
+        ++palette; transform(palette, effect);                                  \
     })
 
 void ApplyPaletteDarkening(struct PaletteEffect *effect)
@@ -506,10 +497,8 @@ struct PaletteEffect *CreateRoomPaletteEffect(u8 slot, u16 room)
 {
     struct PaletteEffectManager *state;
     struct PaletteEffect *effect;
-    u16 roomId;
     u8 queueIndex;
 
-    roomId = room;
     state = &gPaletteEffectManager;
     effect = &state->unk0[slot];
     for (queueIndex = 0; queueIndex < 8; queueIndex++) {
@@ -519,10 +508,10 @@ struct PaletteEffect *CreateRoomPaletteEffect(u8 slot, u16 room)
         }
     }
     effect->unk8 = 0xC;
-    if (gKirbys[gLocalPlayerId].base.roomId == roomId) {
+    if (gKirbys[gLocalPlayerId].base.roomId == room) {
         effect->unk8 = 0xE;
     }
-    effect->unkE = roomId;
+    effect->unkE = room;
     effect->unkA = 0x200;
     effect->unkC = 0;
     effect->unk1 = 0;
@@ -539,10 +528,8 @@ struct PaletteEffect *CreateLowPriorityRoomPaletteEffect(u8 slot, u16 room)
 {
     struct PaletteEffectManager *state;
     struct PaletteEffect *effect;
-    u16 roomId;
     u8 queueIndex;
 
-    roomId = room;
     state = &gPaletteEffectManager;
     effect = &state->unk0[slot];
     for (queueIndex = 0; queueIndex < 8; queueIndex++) {
@@ -552,10 +539,10 @@ struct PaletteEffect *CreateLowPriorityRoomPaletteEffect(u8 slot, u16 room)
         }
     }
     effect->unk8 = 0xC;
-    if (gKirbys[gLocalPlayerId].base.roomId == roomId) {
+    if (gKirbys[gLocalPlayerId].base.roomId == room) {
         effect->unk8 = 0xE;
     }
-    effect->unkE = roomId;
+    effect->unkE = room;
     effect->unkA = 0x200;
     effect->unkC = 0;
     effect->unk1 = 0;
@@ -572,12 +559,10 @@ struct PaletteEffect *CreatePaletteFadeFromWhite(u8 slot)
 {
     struct PaletteEffectManager *state;
     struct PaletteEffect *effect;
-    u8 slotId;
     u8 queueIndex;
 
-    slotId = slot;
     state = &gPaletteEffectManager;
-    effect = &state->unk0[slotId];
+    effect = &state->unk0[slot];
     for (queueIndex = 0; queueIndex < 8; queueIndex++) {
         if (state->unk80[queueIndex] == effect) {
             state->unk80[queueIndex] = NULL;
@@ -585,13 +570,13 @@ struct PaletteEffect *CreatePaletteFadeFromWhite(u8 slot)
         }
     }
     effect->unk8 = 4;
-    if (slotId >= gNumKirbys) {
+    if (slot >= gNumKirbys) {
         effect->unk8 = 6;
-    } else if (gKirbys[gLocalPlayerId].base.roomId == gKirbys[slotId].base.roomId) {
+    } else if (gKirbys[gLocalPlayerId].base.roomId == gKirbys[slot].base.roomId) {
         effect->unk8 = 6;
     }
     // TODO: Original UB: slots 4-7 read beyond the four-element gKirbys array.
-    effect->unkE = gKirbys[slotId].base.roomId;
+    effect->unkE = gKirbys[slot].base.roomId;
     effect->unkA = -0x200;
     effect->unkC = 0x1F00;
     effect->unk1 = 0x1F;
@@ -608,12 +593,10 @@ struct PaletteEffect *CreatePaletteFadeToWhite(u8 slot)
 {
     struct PaletteEffectManager *state;
     struct PaletteEffect *effect;
-    u8 slotId;
     u8 queueIndex;
 
-    slotId = slot;
     state = &gPaletteEffectManager;
-    effect = &state->unk0[slotId];
+    effect = &state->unk0[slot];
     for (queueIndex = 0; queueIndex < 8; queueIndex++) {
         if (state->unk80[queueIndex] == effect) {
             state->unk80[queueIndex] = NULL;
@@ -621,13 +604,13 @@ struct PaletteEffect *CreatePaletteFadeToWhite(u8 slot)
         }
     }
     effect->unk8 = 0x4C;
-    if (slotId >= gNumKirbys) {
+    if (slot >= gNumKirbys) {
         effect->unk8 = 0x4E;
-    } else if (gKirbys[gLocalPlayerId].base.roomId == gKirbys[slotId].base.roomId) {
+    } else if (gKirbys[gLocalPlayerId].base.roomId == gKirbys[slot].base.roomId) {
         effect->unk8 = 0x4E;
     }
     // TODO: Original UB: slots 4-7 read beyond the four-element gKirbys array.
-    effect->unkE = gKirbys[slotId].base.roomId;
+    effect->unkE = gKirbys[slot].base.roomId;
     effect->unkA = 0x200;
     effect->unkC = 0;
     effect->unk1 = 0;
@@ -644,12 +627,10 @@ struct PaletteEffect *CreateHiddenPaletteFadeToWhite(u8 slot)
 {
     struct PaletteEffectManager *state;
     struct PaletteEffect *effect;
-    u8 slotId;
     u8 queueIndex;
 
-    slotId = slot;
     state = &gPaletteEffectManager;
-    effect = &state->unk0[slotId];
+    effect = &state->unk0[slot];
     for (queueIndex = 0; queueIndex < 8; queueIndex++) {
         if (state->unk80[queueIndex] == effect) {
             state->unk80[queueIndex] = NULL;
@@ -658,7 +639,7 @@ struct PaletteEffect *CreateHiddenPaletteFadeToWhite(u8 slot)
     }
     effect->unk8 = 0x14;
     // TODO: Original UB: slots 4-7 read beyond the four-element gKirbys array.
-    effect->unkE = gKirbys[slotId].base.roomId;
+    effect->unkE = gKirbys[slot].base.roomId;
     effect->unkA = 0x200;
     effect->unkC = 0;
     effect->unk1 = 0;
@@ -674,15 +655,13 @@ struct PaletteEffect *CreateHiddenPaletteFadeToWhite(u8 slot)
 static struct PaletteEffect *HoldPaletteEffect(u8 slot)
 {
     struct PaletteEffect *effect;
-    u8 slotId;
 
     struct PaletteEffectManager *state;
 
-    slotId = slot;
     state = &gPaletteEffectManager;
-    effect = &state->unk0[slotId];
+    effect = &state->unk0[slot];
     effect->unk8 = 4;
-    if ((slotId >= gNumKirbys) || (gKirbys[gLocalPlayerId].base.roomId == gKirbys[slotId].base.roomId)) {
+    if ((slot >= gNumKirbys) || (gKirbys[gLocalPlayerId].base.roomId == gKirbys[slot].base.roomId)) {
         effect->unk8 = 6;
     }
     effect->unkA = 0;
@@ -694,12 +673,10 @@ struct PaletteEffect *CreatePaletteDim(u8 slot)
 {
     struct PaletteEffectManager *state;
     struct PaletteEffect *effect;
-    u8 slotId;
     u8 queueIndex;
 
-    slotId = slot;
     state = &gPaletteEffectManager;
-    effect = &state->unk0[slotId];
+    effect = &state->unk0[slot];
     for (queueIndex = 0; queueIndex < 8; queueIndex++) {
         if (state->unk80[queueIndex] == effect) {
             state->unk80[queueIndex] = NULL;
@@ -707,13 +684,13 @@ struct PaletteEffect *CreatePaletteDim(u8 slot)
         }
     }
     effect->unk8 = 0x4C;
-    if (slotId >= gNumKirbys) {
+    if (slot >= gNumKirbys) {
         effect->unk8 = 0x4E;
-    } else if (gKirbys[gLocalPlayerId].base.roomId == gKirbys[slotId].base.roomId) {
+    } else if (gKirbys[gLocalPlayerId].base.roomId == gKirbys[slot].base.roomId) {
         effect->unk8 = 0x4E;
     }
     // TODO: Original UB: slots 4-7 read beyond the four-element gKirbys array.
-    effect->unkE = gKirbys[slotId].base.roomId;
+    effect->unkE = gKirbys[slot].base.roomId;
     effect->unkA = 0x100;
     effect->unkC = 0;
     effect->unk1 = 0;
@@ -730,12 +707,10 @@ struct PaletteEffect *CreatePaletteUndim(u8 slot)
 {
     struct PaletteEffectManager *state;
     struct PaletteEffect *effect;
-    u8 slotId;
     u8 queueIndex;
 
-    slotId = slot;
     state = &gPaletteEffectManager;
-    effect = &state->unk0[slotId];
+    effect = &state->unk0[slot];
     for (queueIndex = 0; queueIndex < 8; queueIndex++) {
         if (state->unk80[queueIndex] == effect) {
             state->unk80[queueIndex] = NULL;
@@ -743,13 +718,13 @@ struct PaletteEffect *CreatePaletteUndim(u8 slot)
         }
     }
     effect->unk8 = 4;
-    if (slotId >= gNumKirbys) {
+    if (slot >= gNumKirbys) {
         effect->unk8 = 6;
-    } else if (gKirbys[gLocalPlayerId].base.roomId == gKirbys[slotId].base.roomId) {
+    } else if (gKirbys[gLocalPlayerId].base.roomId == gKirbys[slot].base.roomId) {
         effect->unk8 = 6;
     }
     // TODO: Original UB: slots 4-7 read beyond the four-element gKirbys array.
-    effect->unkE = gKirbys[slotId].base.roomId;
+    effect->unkE = gKirbys[slot].base.roomId;
     effect->unkA = -0x200;
     effect->unkC = 0xA00;
     effect->unk1 = 0xA;
@@ -772,7 +747,7 @@ void EnablePaletteEffectsForCurrentRoom(void)
     for (queueIndex = 0; queueIndex < 8; queueIndex++) {
         effect = &state->unk0[queueIndex];
         flags = effect->unk8;
-        if ((4 & flags) && (gKirbys[gLocalPlayerId].base.roomId == (s16) effect->unkE) && !(0x10 & flags)) {
+        if ((4 & flags) && (gKirbys[gLocalPlayerId].base.roomId == effect->unkE) && !(0x10 & flags)) {
             u32 enabledFlags = 2;
             enabledFlags |= flags;
             effect->unk8 = enabledFlags;
@@ -852,38 +827,27 @@ inline void PaletteEffectsTaskDestructor(struct Task *task UNUSED)
 
 inline void InsertPaletteEffectByPriority(struct PaletteEffect *effect, u8 index)
 {
-    struct PaletteEffectManager *state;
-    struct PaletteEffect **queue;
-    struct PaletteEffect **slot;
-    struct PaletteEffect *existing;
-    u8 queueIndex;
-    u32 offset;
+    u8 queueIndex = index;
+    struct PaletteEffect *existing = gPaletteEffectManager.unk80[queueIndex];
 
-    queueIndex = index;
-    state = &gPaletteEffectManager;
-    offset = queueIndex * sizeof(*slot);
-    queue = state->unk80;
-    slot = (struct PaletteEffect **)((u8 *)queue + offset);
-    existing = *slot;
-    if (existing != NULL) {
-        if (existing->unk3 <= effect->unk3) {
-            InsertPaletteEffectByPriority(effect, queueIndex + 1);
-            return;
-        }
-        InsertPaletteEffectByPriority(existing, queueIndex + 1);
-        *slot = effect;
+    if (existing == NULL) {
+        gPaletteEffectManager.unk80[queueIndex] = effect;
         return;
     }
-    *slot = effect;
+    if (existing->unk3 <= effect->unk3) {
+        InsertPaletteEffectByPriority(effect, queueIndex + 1);
+        return;
+    }
+    InsertPaletteEffectByPriority(existing, queueIndex + 1);
+    gPaletteEffectManager.unk80[queueIndex] = effect;
 }
 
 static inline s8 ClampPaletteChannel(s32 value)
 {
-    u8 result = value;
-    s8 channel = value;
+    s8 result = value;
 
-    if (channel & 0xE0) {
-        if (channel & 0x80)
+    if (result & 0xE0) {
+        if (result & 0x80)
             result = 0;
         else
             result = 31;

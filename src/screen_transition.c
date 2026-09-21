@@ -26,7 +26,6 @@ struct ScreenTransition {
 extern struct Task *gUnk_0203AD4C;
 static void (*const sTransitionScreens[27])(void);
 
-static void UnpauseGameplay(struct ScreenTransition *);
 static void UpdateScreenTransition(void);
 static void ScreenTransitionDestructor(struct Task *);
 static void BeginScreenTransition(struct ScreenTransition *);

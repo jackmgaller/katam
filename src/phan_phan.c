@@ -560,7 +560,7 @@ static void sub_080CE800(struct Object *phanPhan)
     }
 }
 
-bool8 sub_080CE94C(struct Object *phanPhan, struct Kirby *kirby)
+bool32 sub_080CE94C(struct Object *phanPhan, struct Kirby *kirby)
 {
     if (phanPhan->unk83 == 0x15
         || kirby->base.header.kind

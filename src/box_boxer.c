@@ -599,7 +599,7 @@ static void sub_080C8488(struct Object *boxBoxer)
         Macro_080C7C18(boxBoxer);
 }
 
-bool8 sub_080C8548(struct Object *boxBoxer, struct Kirby *kirby)
+bool32 sub_080C8548(struct Object *boxBoxer, struct Kirby *kirby)
 {
     if (boxBoxer->unk83 > 1
         || kirby->base.header.kind

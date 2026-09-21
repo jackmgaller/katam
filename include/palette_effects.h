@@ -14,8 +14,8 @@ struct PaletteEffect {
     /* 0x06 */ u16 unk6;
     /* 0x08 */ u16 unk8;
     /* 0x0A */ s16 unkA;
-    /* 0x0C */ u16 unkC;
-    /* 0x0E */ u16 unkE;
+    /* 0x0C */ s16 unkC;
+    /* 0x0E */ s16 unkE;
 }; /* size = 0x10 */
 
 struct PaletteEffectManager {

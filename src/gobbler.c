@@ -1203,7 +1203,7 @@ static void sub_080E5760(struct Gobbler *gobbler)
     }
 }
 
-bool8 sub_080E588C(struct Gobbler *gobbler, struct Kirby *kirby)
+bool32 sub_080E588C(struct Gobbler *gobbler, struct Kirby *kirby)
 {
     if (gobbler->obj.unk83 != 3
         || kirby->base.header.kind
@@ -2280,7 +2280,7 @@ static void sub_080E72C0(struct Object *baby)
     }
 }
 
-bool8 sub_080E74E4(struct Object *baby, struct Kirby *kirby)
+bool32 sub_080E74E4(struct Object *baby, struct Kirby *kirby)
 {
     if (baby->unk83 != 3
         || kirby->base.header.kind
