@@ -1162,14 +1162,6 @@ static inline bool32 CanKirbyShareIndexLoaded(struct Kirby *kirbys, s32 index, u
     return FALSE;
 }
 
-// TODO: Typed indexing reverses the operands of one ADD (adds r4, r3, r4
-// instead of adds r4, r4, r3). Preserve the original instructions in the matching build.
-#ifndef NONMATCHING
-NAKED static void ProcessKirbyContacts(void)
-{
-    asm(".include \"asm/nonmatching/ProcessKirbyContacts.inc\"");
-}
-#else
 static void ProcessKirbyContacts(void)
 {
     u8 firstId, secondId;
@@ -1219,7 +1211,16 @@ static void ProcessKirbyContacts(void)
                         if (CanKirbyShare(first)) {
                             if (CanKirbyShareIndex(kirbys, secondId)
                                 && (first->base.unk56 < gNumHumanPlayers || kirbys[secondId].base.unk56 < gNumHumanPlayers)) {
+#ifndef NONMATCHING
+                                u32 offset = secondId * sizeof(struct Kirby);
+                                struct Kirby *sharingKirby;
+
+                                // TODO(match): Typed indexing emits adds r4, r3, r4 instead of
+                                // adds r4, r4, r3. Keep only this pointer calculation in assembly.
+                                asm("add %0, %1, %2" : "=l"(sharingKirby) : "l"(offset), "l"(kirbys) : "cc");
+#else
                                 struct Kirby *sharingKirby = &kirbys[secondId];
+#endif
                                 sub_08053DAC(sharingKirby, firstId);
                                 sub_08054414(first, secondId);
                                 sharingKirby->unkE1 |= 1 << firstId;
@@ -1316,8 +1317,6 @@ static void ProcessKirbyContacts(void)
         }
     }
 }
-
-#endif
 
 bool8 KirbyCanContactOther(struct Kirby *first, struct Kirby *second)
 {
