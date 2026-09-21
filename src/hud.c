@@ -729,7 +729,7 @@ struct GameplayHud *TryTrackHudEnemy(struct Object *object)
     if (gCurTask->main == UpdateBorrowLifeHud)
         return NULL;
     // TODO: Original UB: object is dereferenced before its null check; preserve that ordering.
-    if (object->type > OBJ_EMPTY_5D)
+    if (!(ObjType0To37(object) || ObjType38To52(object) || ObjType53To5C(object) || object->type == OBJ_EMPTY_5D))
         return NULL;
     if (gKirbys[gLocalPlayerId].base.roomId != object->base.roomId)
         return NULL;

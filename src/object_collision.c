@@ -148,7 +148,7 @@ bool16 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other
             u8 type = ((struct Object *)parent)->type;
             if (type != OBJ_SNOOTER_1 && type != OBJ_SNOOTER_2)
                 return FALSE;
-            if (((struct Object *)other)->type < OBJ_SMALL_FOOD || ((struct Object *)other)->type > OBJ_EMPTY_6C)
+            if (!ObjType5ETo6C((struct Object *)other))
                 return FALSE;
             if (!(attack->flags & 0x10000)) {
                 other->flags |= 0x40000;
@@ -158,7 +158,7 @@ bool16 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other
             return TRUE;
         }
         if (attack->unk56 >= gNumHumanPlayers) {
-            if ((((struct Object *)other)->type >= OBJ_SMALL_FOOD && ((struct Object *)other)->type <= OBJ_EMPTY_6C) || ((struct Object *)other)->type == OBJ_ABILITY_STAR_2
+            if (ObjType5ETo6C((struct Object *)other) || ((struct Object *)other)->type == OBJ_ABILITY_STAR_2
                 || (((struct Object *)other)->type == OBJ_ABILITY_STAR_1 && other->unk56 < gNumHumanPlayers))
                 return FALSE;
         }
@@ -189,10 +189,12 @@ bool16 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other
         resistant = loadedDefense & 0x20;
         defense = loadedDefense;
         if (resistant) {
-            if (object->type <= OBJ_UNKNOWN_D4 || !(attackFlags & 0x200000))
+            if ((ObjType0To37(object) || ObjType38To52(object) || ObjType53To5C(object)
+                || object->type == OBJ_EMPTY_5D || ObjType5ETo6C(object) || ObjType6Dto9A(object)
+                || ObjType9BToD4(object)) || !(attackFlags & 0x200000))
                 return FALSE;
         }
-        if ((attackFlags & 0x200000) && (object->type >= OBJ_SMALL_FOOD && object->type <= OBJ_EMPTY_6C)) {
+        if ((attackFlags & 0x200000) && ObjType5ETo6C(object)) {
             attack->flags = flags & ~0x40000;
         } else {
             u32 vulnerableTypes = 0x3FFFF8 & ~(defense & ~7);
@@ -247,7 +249,7 @@ contactEffects:
     if (flags & 0x40000) {
         struct Object *object = (struct Object *)other;
         if (attackFlags & 0x800000) return FALSE;
-        if (object->type < OBJ_MR_FROSTY || object->type > OBJ_DARK_META_KNIGHT_W8) {
+        if (!ObjType38To52(object)) {
             if (object->type != OBJ_SMALL_BUTTON || !(attackFlags & 0x80))
                 sub_0808845C(object, 10);
             if (!(other->flags & 0x8000))
