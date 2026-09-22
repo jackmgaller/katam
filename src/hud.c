@@ -4,8 +4,9 @@ struct ObjectBase;
 struct Kirby;
 struct Task;
 
-// The matching compiler emits these inline bodies in declaration order.
-// Declare them before headers that expose only part of this sequence.
+// agbcc emits the out-of-line copies of non-static inline functions in
+// first-declaration order, and only inlines a call that follows the definition.
+// Declare the whole sequence here, in ROM order, before hud.h exposes part of it.
 inline void LoadHudAbilityIcon(u8 ability);
 inline void StartHudAbilityIconExpansion(struct ObjectBase *object);
 inline void HoldExpandedHudAbilityIcon(struct ObjectBase *object);
@@ -1046,7 +1047,7 @@ inline void LoadGameplayHudGraphics(void)
 {
     u8 color = gKirbys[gLocalPlayerId].color;
     u8 *tiles = (u8 *)(BG_VRAM + 0x70A0);
-    LoadBgPaletteAndBase(sHudPalettes[color], 0xF0, 16);
+    LoadBgPaletteAndBase(sHudPalettes[color], 0xF0, ARRAY_COUNT(sHudPalettes[color]));
     CpuCopy16(gUnk_082EC7A0, tiles, 0x700);
     tiles += 0x700;
     CpuCopy16(sHudEnemyAndAreaNameGraphics[gLanguage], tiles, 0x100);
@@ -1091,7 +1092,7 @@ inline void DrawDemoHud(void)
     u8 color = gKirbys[gLocalPlayerId].color;
     u16 *tiles = (u16 *)(BG_VRAM + 0xE198);
     u8 i;
-    LoadBgPaletteAndBase(sHudPalettes[color], 0xF0, 16);
+    LoadBgPaletteAndBase(sHudPalettes[color], 0xF0, ARRAY_COUNT(sHudPalettes[color]));
     CpuCopy16(sHudGameOverAndDemoGraphics[gLanguage], (void *)(BG_VRAM + 0x70A0), 0x800);
     for (i = 0; i < 6; i++)
         *tiles++ = (i + 0x1B5) | 0xF000;
@@ -1187,7 +1188,7 @@ void RefreshGameplayHud(struct Kirby *kirby)
         DrawDemoHud();
         return;
     }
-    LoadBgPaletteAndBase(sHudPalettes[color], 0xF0, 16);
+    LoadBgPaletteAndBase(sHudPalettes[color], 0xF0, ARRAY_COUNT(sHudPalettes[color]));
     if (gGameplayHudTask->main == UpdateGameOverHudIndicators) {
         DrawGameOverMessage();
         return;

@@ -33,16 +33,21 @@ static void ObjectCollisionTaskDestructor(struct Task *);
 #define COLLISION_AXIS_OVERLAP(a, aSize, b, bSize) \
     (((a) <= (b) && (a) + (aSize) >= (b)) || ((a) >= (b) && (b) + (bSize) >= (a)))
 
+static inline u8 GetObjectCollisionCount(u8 group, u8 kind)
+{
+    return gUnk_02022EB0[group][kind];
+}
+
 static inline void ClearCollisionCounts(void)
 {
-    gUnk_02022EB0.byGroup[0][0] = 0;
-    gUnk_02022EB0.byGroup[0][1] = 0;
-    gUnk_02022EB0.byGroup[1][0] = 0;
-    gUnk_02022EB0.byGroup[1][1] = 0;
-    gUnk_02022EB0.byGroup[2][0] = 0;
-    gUnk_02022EB0.byGroup[2][1] = 0;
-    gUnk_02022EB0.byGroup[3][0] = 0;
-    gUnk_02022EB0.byGroup[3][1] = 0;
+    gUnk_02022EB0[0][0] = 0;
+    gUnk_02022EB0[0][1] = 0;
+    gUnk_02022EB0[1][0] = 0;
+    gUnk_02022EB0[1][1] = 0;
+    gUnk_02022EB0[2][0] = 0;
+    gUnk_02022EB0[2][1] = 0;
+    gUnk_02022EB0[3][0] = 0;
+    gUnk_02022EB0[3][1] = 0;
     gUnk_02022F40[0] = 0;
     gUnk_02022F40[1] = 0;
     gUnk_02022F40[2] = 0;
@@ -51,7 +56,7 @@ static inline void ClearCollisionCounts(void)
 
 void CreateObjectCollisionTask(void)
 {
-    TaskCreate(UpdateObjectCollisions, sizeof(u32), 0xFFFD, 0, ObjectCollisionTaskDestructor);
+    TaskCreate(UpdateObjectCollisions, 4, 0xFFFD, TASK_USE_IWRAM, ObjectCollisionTaskDestructor);
     gUnk_0203AD40 = 0;
     ClearCollisionCounts();
 }
@@ -63,9 +68,9 @@ static void UpdateObjectCollisions(void)
     sub_0808838C();
     ClearCollisionCounts();
     gUnk_02022F50[0] = NULL;
-    gUnk_02022F50[64] = NULL;
-    gUnk_02022F50[128] = NULL;
-    gUnk_02022F50[192] = NULL;
+    gUnk_02022F50[0x40] = NULL;
+    gUnk_02022F50[0x80] = NULL;
+    gUnk_02022F50[0xC0] = NULL;
     gUnk_02022EC0[0][0] = NULL;
     gUnk_02022EC0[1][0] = NULL;
     gUnk_02022EC0[2][0] = NULL;
@@ -202,7 +207,7 @@ bool16 HandleObjectCollision(struct ObjectBase *attack, struct ObjectBase *other
                 attack->flags = flags | 0x40000;
                 object->base.unk6C = parent;
                 sub_0809C380(object);
-            } else if (!(gUnk_03000510.unk4 & ((1 << other->unk56) | 0x10))) {
+            } else if (!Macro_0810B1F4(other)) {
                 other->objBase54 += (gUnk_0203AD40 & 2) * 2;
             }
         }
@@ -444,12 +449,14 @@ void ProcessAttackTileCollisions(struct ObjectBase *attack)
             if (tileY <= maxY && tileY >= minY) {
                 tileX = attack->x >> 12;
                 for (column = width; column != 0; ) {
+                    u32 attributes;
                     --column;
                     if (tileX > maxX)
                         break;
                     if (tileX < minX)
                         break;
-                    if ((gCollisionAttributes[GetCollisionTile(attack->unk56, tileX, tileY)] & 0xF01000) == 0x1000) {
+                    attributes = gCollisionAttributes[GetCollisionTile(attack->unk56, tileX, tileY)];
+                    if ((attributes & 0x1000) && !(attributes & 0xF00000)) {
                         sub_08001408(attack->unk56, sub_080025AC(attack->unk56, tileX, tileY), NULL, NULL);
                         sub_08088F84(attack->parent, tileX, tileY);
                         attack->flags |= 0x80000;
@@ -465,7 +472,6 @@ void ProcessAttackTileCollisions(struct ObjectBase *attack)
         }
     } else {
         s16 clip;
-        // TODO(match): clip < 0 drops the original sign-mask operations and changes register allocation.
         if (attack->flags & 1) {
             bounds[2] = -attack->unk3C;
             bounds[0] = -attack->unk3E;
@@ -480,6 +486,7 @@ void ProcessAttackTileCollisions(struct ObjectBase *attack)
         tileX = ((attack->x >> 8) + bounds[0]) >> 4;
         tileY = ((attack->y >> 8) + bounds[1]) >> 4;
         clip = (gCurLevelInfo[attack->unk56].levelMaxPosition.x >> 12) - (width + tileX);
+        // TODO(match): clip < 0 drops the original sign-mask operations and changes register allocation.
         if (clip & 0x8000) {
             width += clip;
             if (width & 0x80)
@@ -582,15 +589,15 @@ static void ProcessObjectCollisionLists(void)
                         ResolveSolidObjectCollision(other, (struct Object *)*slot);
                 }
                 otherSlot = &gUnk_02022F50[group << 6];
-                for (otherCount = gUnk_02022EB0.flat[group * 2]; otherCount != 0; --otherCount, ++otherSlot) {
+                for (otherCount = GetObjectCollisionCount(group, 0); otherCount != 0; --otherCount, ++otherSlot) {
                     struct ObjectBase *object = *otherSlot;
                     if ((object->unkC & 0x1000) && (*slot)->roomId == object->roomId && !(object->flags & 0x100))
                         ResolveSolidObjectCollision(object, (struct Object *)*slot);
                 }
             }
         }
-        slot = &gUnk_02022F50[(group * 64) | 32];
-        for (count = gUnk_02022EB0.flat[group * 2 + 1]; count != 0; --count, ++slot) {
+        slot = &gUnk_02022F50[(group * 0x40) | 0x20];
+        for (count = GetObjectCollisionCount(group, 1); count != 0; --count, ++slot) {
             if (*slot == NULL)
                 continue;
             if ((*slot)->flags & 1)
@@ -599,8 +606,8 @@ static void ProcessObjectCollisionLists(void)
                 ax = ((*slot)->x >> 8) + (*slot)->unk38;
             ay = ((*slot)->y >> 8) + (*slot)->unk39;
             if ((*slot)->flags & 0x20000000) {
-                otherSlot = &gUnk_02022F50[group * 64];
-                otherCount = gUnk_02022EB0.flat[group * 2];
+                otherSlot = &gUnk_02022F50[group * 0x40];
+                otherCount = GetObjectCollisionCount(group, 0);
                 if (otherCount != 0) {
                     listedObject = *otherSlot;
                     entry = *slot;
@@ -705,8 +712,8 @@ static void ProcessObjectCollisionLists(void)
                 CommitAttackContact(*slot);
             }
             if ((*slot)->flags & 0x40000000) {
-                otherSlot = &gUnk_02022F50[(group * 64) | 32];
-                otherCount = gUnk_02022EB0.flat[group * 2 + 1];
+                otherSlot = &gUnk_02022F50[(group * 0x40) | 0x20];
+                otherCount = GetObjectCollisionCount(group, 1);
                 if (otherCount != 0) {
                     listedObject = *otherSlot;
                     entry = *slot;
@@ -782,8 +789,8 @@ static void ProcessObjectCollisionLists(void)
             if ((*slot)->flags >> 31)
                 ProcessAttackTileCollisions(*slot);
         }
-        slot = &gUnk_02022F50[group * 64];
-        for (count = gUnk_02022EB0.flat[group * 2]; count != 0; --count, ++slot) {
+        slot = &gUnk_02022F50[group * 0x40];
+        for (count = GetObjectCollisionCount(group, 0); count != 0; --count, ++slot) {
             if (*slot == NULL)
                 continue;
             if ((*slot)->flags & 1)
@@ -792,8 +799,8 @@ static void ProcessObjectCollisionLists(void)
                 ax = ((*slot)->x >> 8) + (*slot)->unk38;
             ay = ((*slot)->y >> 8) + (*slot)->unk39;
             if ((*slot)->flags & 0x20000000) {
-                otherSlot = &gUnk_02022F50[group * 64];
-                for (otherCount = gUnk_02022EB0.flat[group * 2]; otherCount != 0; --otherCount, ++otherSlot) {
+                otherSlot = &gUnk_02022F50[group * 0x40];
+                for (otherCount = GetObjectCollisionCount(group, 0); otherCount != 0; --otherCount, ++otherSlot) {
                     other2 = *otherSlot;
                     entry = other2;
                     if (other2 == NULL)
@@ -1162,6 +1169,13 @@ static inline bool32 CanKirbyShareIndexLoaded(struct Kirby *kirbys, s32 index, u
     return FALSE;
 }
 
+static inline void StartKirbyShare(struct Kirby *sharing, u8 sharingId, struct Kirby *other, u8 otherId)
+{
+    sub_08053DAC(sharing, otherId);
+    sub_08054414(other, sharingId);
+    sharing->unkE1 |= 1 << otherId;
+}
+
 static void ProcessKirbyContacts(void)
 {
     u8 firstId, secondId;
@@ -1211,19 +1225,7 @@ static void ProcessKirbyContacts(void)
                         if (CanKirbyShare(first)) {
                             if (CanKirbyShareIndex(kirbys, secondId)
                                 && (first->base.unk56 < gNumHumanPlayers || kirbys[secondId].base.unk56 < gNumHumanPlayers)) {
-#ifndef NONMATCHING
-                                u32 offset = secondId * sizeof(struct Kirby);
-                                struct Kirby *sharingKirby;
-
-                                // TODO(match): Typed indexing emits adds r4, r3, r4 instead of
-                                // adds r4, r4, r3. Keep only this pointer calculation in assembly.
-                                asm("add %0, %1, %2" : "=l"(sharingKirby) : "l"(offset), "l"(kirbys) : "cc");
-#else
-                                struct Kirby *sharingKirby = &kirbys[secondId];
-#endif
-                                sub_08053DAC(sharingKirby, firstId);
-                                sub_08054414(first, secondId);
-                                sharingKirby->unkE1 |= 1 << firstId;
+                                StartKirbyShare(&kirbys[secondId], secondId, first, firstId);
                                 ++secondId;
                                 continue;
                             }
@@ -1413,7 +1415,7 @@ struct ObjectBase **GetRoomObjectCollisionList(struct ObjectBase *object)
     else
         // TODO: Original UB: the 0xFF sentinel produces an out-of-bounds array pointer.
         group = 0xFF;
-    return &gUnk_02022F50[group * 64];
+    return &gUnk_02022F50[group * 0x40];
 }
 
 struct Object **GetRoomSolidCollisionList(struct ObjectBase *object)

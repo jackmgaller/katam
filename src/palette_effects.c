@@ -3,8 +3,9 @@
 struct PaletteEffect;
 struct Task;
 
-// The matching compiler emits these inline bodies in declaration order.
-// Declare them before headers that expose only part of this sequence.
+// agbcc emits the out-of-line copies of non-static inline functions in
+// first-declaration order, and only inlines a call that follows the definition.
+// Declare the whole sequence here, in ROM order, before palette_effects.h exposes part of it.
 inline bool8 IsPaletteEffectFinished(u8 arg0);
 inline bool32 AreKirbyPaletteEffectsInactive(void);
 inline void DestroyPaletteEffectsTask(u32 arg0 UNUSED);

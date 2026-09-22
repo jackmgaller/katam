@@ -754,7 +754,7 @@ bool16 ObjectPreUpdate(struct ObjectBase *a1) {
                 u32 temp2 = temp * 0x40 + (a1->header.kind - 1) * 0x20;
 
                 ++a1; --a1;
-                idx = gUnk_02022EB0.byGroup[temp][a1->header.kind - 1]++ + temp2;
+                idx = gUnk_02022EB0[temp][a1->header.kind - 1]++ + temp2;
                 gUnk_02022F50[idx] = a1;
                 gUnk_02022F50[idx + 1] = NULL;
             }
@@ -7933,7 +7933,7 @@ void sub_08083494(void) {
                         u32 temp2 = temp * 0x40 + (objBase->header.kind - 1) * 0x20;
 
                         ++objBase; --objBase;
-                        idx = gUnk_02022EB0.byGroup[temp][objBase->header.kind - 1]++ + temp2;
+                        idx = gUnk_02022EB0[temp][objBase->header.kind - 1]++ + temp2;
                         gUnk_02022F50[idx] = objBase;
                         gUnk_02022F50[idx + 1] = NULL;
                     }
