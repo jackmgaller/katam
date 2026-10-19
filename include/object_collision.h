@@ -6,7 +6,7 @@
 struct ObjectBase;
 struct Object;
 
-void CreateObjectCollisionTask(void);
+void CreateObjectCollisionManager(void);
 bool8 ObjectHitboxesOverlap(struct ObjectBase *first, struct ObjectBase *second);
 // Uses a one-pixel box at the object origin and inclusive edges.
 bool8 ObjectOriginOverlapsRect(struct ObjectBase *object, s32 x, s32 y, s16 xOffset, s16 yOffset, u16 width, u16 height);

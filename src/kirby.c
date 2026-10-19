@@ -6784,7 +6784,7 @@ void sub_0803F790(struct Kirby *kirby)
 void sub_0803FBB4(struct Kirby *kirby)
 {
     u32 r6;
-    struct Kirby *kirby2;
+    struct ObjectBase *support;
 
     if (!Macro_0810B1F4(&kirby->base))
     {
@@ -6840,12 +6840,12 @@ void sub_0803FBB4(struct Kirby *kirby)
         else
             kirby->base.flags &= ~0x20;
     }
-    if ((kirby2 = kirby->base.kirby2))
+    if ((support = kirby->base.unk74))
     {
         if (!kirby->base.xspeed)
-            kirby->base.x += kirby2->base.xspeed;
-        kirby->base.y -= kirby2->base.yspeed;
-        kirby->base.kirby2 = NULL;
+            kirby->base.x += support->xspeed;
+        kirby->base.y -= support->yspeed;
+        kirby->base.unk74 = NULL;
     }
     if (!(kirby->base.flags & 0x100))
     {

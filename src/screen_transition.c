@@ -24,7 +24,35 @@ struct ScreenTransition {
 }; /* size = 0xC */
 
 extern struct Task *gUnk_0203AD4C;
-static void (*const sTransitionScreens[27])(void);
+static void (*const sTransitionScreens[27])(void) = {
+    CreatePauseMenu,
+    sub_0801D618,
+    sub_0801D624,
+    sub_0801D630,
+    sub_0801D63C,
+    sub_0801D648,
+    sub_0801D654,
+    sub_0801D660,
+    sub_0801D66C,
+    sub_0801DFE8,
+    WorldMapUnlockMoonlightMansion,
+    WorldMapUnlockRainbowRouteEast,
+    WorldMapUnlockRainbowRouteSouth,
+    WorldMapUnlockCabbageCavernCenter,
+    WorldMapUnlockRainbowRouteWest,
+    WorldMapUnlockCarrotCastle,
+    WorldMapUnlockRainbowRouteNorth,
+    WorldMapUnlockMustardMountain,
+    WorldMapUnlockCabbageCavernWest,
+    WorldMapUnlockRadishRuins,
+    WorldMapUnlockPeppermintPalaceEast,
+    WorldMapUnlockPeppermintPalaceWest,
+    WorldMapUnlockCabbageCavernEast,
+    WorldMapUnlockOliveOcean,
+    WorldMapUnlockCandyConstellation,
+    sub_0802E16C,
+    sub_0814A828,
+};
 
 static void UpdateScreenTransition(void);
 static void ScreenTransitionDestructor(struct Task *);
@@ -291,36 +319,6 @@ static void DestroyScreenTransition(struct ScreenTransition *transition UNUSED)
 {
     TaskDestroy(gCurTask);
 }
-
-static void (*const sTransitionScreens[27])(void) = {
-    CreatePauseMenu,
-    sub_0801D618,
-    sub_0801D624,
-    sub_0801D630,
-    sub_0801D63C,
-    sub_0801D648,
-    sub_0801D654,
-    sub_0801D660,
-    sub_0801D66C,
-    sub_0801DFE8,
-    WorldMapUnlockMoonlightMansion,
-    WorldMapUnlockRainbowRouteEast,
-    WorldMapUnlockRainbowRouteSouth,
-    WorldMapUnlockCabbageCavernCenter,
-    WorldMapUnlockRainbowRouteWest,
-    WorldMapUnlockCarrotCastle,
-    WorldMapUnlockRainbowRouteNorth,
-    WorldMapUnlockMustardMountain,
-    WorldMapUnlockCabbageCavernWest,
-    WorldMapUnlockRadishRuins,
-    WorldMapUnlockPeppermintPalaceEast,
-    WorldMapUnlockPeppermintPalaceWest,
-    WorldMapUnlockCabbageCavernEast,
-    WorldMapUnlockOliveOcean,
-    WorldMapUnlockCandyConstellation,
-    sub_0802E16C,
-    sub_0814A828,
-};
 
 static const u16 sUnk_0834BE00[16] UNUSED = {
     RGB(0, 0, 1), RGB(0, 1, 1), RGB(1, 1, 1), RGB(1, 1, 3),

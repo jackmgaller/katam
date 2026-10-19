@@ -340,7 +340,7 @@ struct ObjectBase {
     s32 unk68;
     void *unk6C; // can be ObjectBase */Kirby */?
     void *parent;
-    struct Kirby *kirby2;
+    void *unk74; // Collision support or Magic ability target.
 }; /* size = 0x78 */
 
 struct ThrowAbilityObject {

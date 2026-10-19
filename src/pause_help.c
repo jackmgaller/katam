@@ -376,7 +376,7 @@ void CreateHelpMenu(void) {
         HelpMenuBGInit(&helpmenu->frame, sHelpMenuUnkTiledBGsIndices[language][0], 0, 7);
     }
     HelpMenuBGInit(&helpmenu->abilityText, sHelpMenuUnkTiledBGsIndices[language][2 + gKirbys[gLocalPlayerId].ability], 1, 15);
-    LoadAbilityIconGraphicsAndPalette((uintptr_t)BG_CHAR_ADDR(2), 1, helpmenu->abilityText.unk1C - sHelpMenuUnkTiledBGsIndices[language][2]);
+    LoadAbilityIconGraphicsAndPalette(BG_CHAR_ADDR(2), 1, helpmenu->abilityText.unk1C - sHelpMenuUnkTiledBGsIndices[language][2]);
     HelpMenuAbilityImageInit();
 
     SpriteInitNoFunc(&helpmenu->buttonB, (u32)OBJ_VRAM0 + 0x2000, 0x480, sHelpMenuButtonAnimInfos[language][1].animId,

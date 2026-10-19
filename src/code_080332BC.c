@@ -64,7 +64,7 @@ void sub_080332BC(u8 arg0, u8 arg1, const u16* arg2, const s32* arg3, const bool
     sub_080027A8();
     sub_08002848();
     sub_0803E050(gKirbys[gLocalPlayerId].base.roomId);
-    CreateObjectCollisionTask();
+    CreateObjectCollisionManager();
     CreateGameplayHud();
 
     for (idx = 0; idx < gNumKirbys; idx++) {
